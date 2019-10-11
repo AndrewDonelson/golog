@@ -1,6 +1,6 @@
 ## Golang logging library
 
-[![godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/AndrewDonelson/golog) [![build](https://img.shields.io/travis/AndrewDonelson/golog.svg?style=flat)](https://travis-ci.org/AndrewDonelson/golog)
+[![godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/AndrewDonelson/golog) [![build](https://img.shields.io/travis/AndrewDonelson/golog.svg?style=flat)](https://travis-ci.org/AndrewDonelson/golog) [![Coverage Status](https://coveralls.io/repos/github/AndrewDonelson/golog/badge.svg?branch=develop)](https://coveralls.io/github/AndrewDonelson/golog?branch=develop)
 
 Package logging implements a logging infrastructure for Go. Its output format
 is customizable and supports different logging backends like syslog, file and
