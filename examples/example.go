@@ -1,20 +1,3 @@
-## Golang logging library
-
-[![godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/AndrewDonelson/golog) [![build](https://img.shields.io/travis/AndrewDonelson/golog.svg?style=flat)](https://travis-ci.org/AndrewDonelson/golog)
-
-Package logging implements a logging infrastructure for Go. Its output format
-is customizable and supports different logging backends like syslog, file and
-memory. Multiple backends can be utilized with different log levels per backend
-and logger.
-
-## Example
-
-Let's have a look at an [example](examples/example.go) which demonstrates most
-of the features found in this library.
-
-[![Example Output](examples/example.png)](examples/example.go)
-
-```go
 package main
 
 import (
@@ -64,26 +47,3 @@ func main() {
 	log.Error("err")
 	log.Critical("crit")
 }
-```
-
-## Installing
-
-### Using *go get*
-
-    $ go get github.com/AndrewDonelson/golog
-
-After this command *go-logging* is ready to use. Its source will be in:
-
-    $GOPATH/src/pkg/github.com/AndrewDonelson/golog
-
-You can use `go get -u` to update the package.
-
-## Documentation
-
-For docs, see http://godoc.org/github.com/AndrewDonelson/golog or run:
-
-    $ godoc github.com/AndrewDonelson/golog
-
-## Additional resources
-
-* [wslog](https://godoc.org/github.com/cryptix/exp/wslog) -- exposes log messages through a WebSocket.
