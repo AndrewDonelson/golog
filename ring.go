@@ -1,21 +1,16 @@
-/*
-Package ring provides a simple implementation of a ring buffer.
-*/
+// Package golog implements a golog infrastructure for Go. It supports
+// different golog backends like syslog, file and memory. Multiple backends
+// can be utilized with different log levels per backend and logger.
 package golog
 
 import "sync"
 
-/*
-The DefaultCapacity of an uninitialized Ring buffer.
-
-Changing this value only affects ring buffers created after it is changed.
-*/
+// DefaultCapacity of an uninitialized Ring buffer.
+// Changing this value only affects ring buffers created after it is changed.
 var DefaultCapacity int = 10
 
-/*
-Type Ring implements a Circular Buffer.
-The default value of the Ring struct is a valid (empty) Ring buffer with capacity DefaultCapacify.
-*/
+// Ring Type implements a Circular Buffer.
+//The default value of the Ring struct is a valid (empty) Ring buffer with capacity DefaultCapacify.
 type Ring struct {
 	sync.Mutex
 	head int // the most recent value written
@@ -23,9 +18,7 @@ type Ring struct {
 	buff []interface{}
 }
 
-/*
-Set the maximum size of the ring buffer.
-*/
+// SetCapacity is used to Set the maximum size of the ring buffer.
 func (r *Ring) SetCapacity(size int) {
 	r.Lock()
 	defer r.Unlock()
@@ -34,9 +27,7 @@ func (r *Ring) SetCapacity(size int) {
 	r.extend(size)
 }
 
-/*
-Capacity returns the current capacity of the ring buffer.
-*/
+// Capacity returns the current capacity of the ring buffer.
 func (r *Ring) Capacity() int {
 	r.Lock()
 	defer r.Unlock()
@@ -44,27 +35,24 @@ func (r *Ring) Capacity() int {
 	return r.capacity()
 }
 
-/*
-ContentSize returns the current number of elements inside the ring buffer.
-*/
+// ContentSize returns the current number of elements inside the ring buffer.
 func (r *Ring) ContentSize() int {
 	r.Lock()
 	defer r.Unlock()
 
 	if r.head == -1 {
 		return 0
-	} else {
-		difference := (r.head - r.tail)
-		if difference < 0 {
-			difference += r.capacity()
-		}
-		return difference + 1
 	}
+
+	difference := (r.head - r.tail)
+	if difference < 0 {
+		difference += r.capacity()
+	}
+	return difference + 1
+
 }
 
-/*
-Enqueue a value into the Ring buffer.
-*/
+// Enqueue a value into the Ring buffer.
 func (r *Ring) Enqueue(i interface{}) {
 	r.Lock()
 	defer r.Unlock()
@@ -78,11 +66,8 @@ func (r *Ring) Enqueue(i interface{}) {
 	}
 }
 
-/*
-Dequeue a value from the Ring buffer.
-
-Returns nil if the ring buffer is empty.
-*/
+// Dequeue a value from the Ring buffer.
+// Returns nil if the ring buffer is empty.
 func (r *Ring) Dequeue() interface{} {
 	r.Lock()
 	defer r.Unlock()
@@ -101,11 +86,8 @@ func (r *Ring) Dequeue() interface{} {
 	return v
 }
 
-/*
-Read the value that Dequeue would have dequeued without actually dequeuing it.
-
-Returns nil if the ring buffer is empty.
-*/
+// Peek will Read the value that Dequeue would have dequeued without actually dequeuing it.
+//Returns nil if the ring buffer is empty.
 func (r *Ring) Peek() interface{} {
 	r.Lock()
 	defer r.Unlock()
@@ -117,11 +99,9 @@ func (r *Ring) Peek() interface{} {
 	return r.get(r.tail)
 }
 
-/*
-Values returns a slice of all the values in the circular buffer without modifying them at all.
-The returned slice can be modified independently of the circular buffer. However, the values inside the slice
-are shared between the slice and circular buffer.
-*/
+// Values returns a slice of all the values in the circular buffer without modifying them at all.
+// The returned slice can be modified independently of the circular buffer. However, the values inside the slice
+// are shared between the slice and circular buffer.
 func (r *Ring) Values() []interface{} {
 	r.Lock()
 	defer r.Unlock()
