@@ -19,16 +19,15 @@ package main
 
 import (
 	"os"
-
 	"github.com/AndrewDonelson/golog"
 )
 
-var log = logging.MustGetLogger("example")
+var log = golog.MustGetLogger("example")
 
 // Example format string. Everything except the message has a custom color
 // which is dependent on the log level. Many fields have a custom output
 // formatting too, eg. the time returns the hour down to the milli second.
-var format = logging.MustStringFormatter(
+var format = golog.MustStringFormatter(
 	`%{color}%{time:15:04:05.000} %{shortfunc} ▶ %{level:.4s} %{id:03x}%{color:reset} %{message}`,
 )
 
@@ -37,27 +36,28 @@ var format = logging.MustStringFormatter(
 type Password string
 
 func (p Password) Redacted() interface{} {
-	return logging.Redact(string(p))
+	return golog.Redact(string(p))
 }
 
 func main() {
 	// For demo purposes, create two backend for os.Stderr.
-	backend1 := logging.NewLogBackend(os.Stderr, "", 0)
-	backend2 := logging.NewLogBackend(os.Stderr, "", 0)
+	backend1 := golog.NewLogBackend(os.Stderr, "", 0)
+	backend2 := golog.NewLogBackend(os.Stderr, "", 0)
 
 	// For messages written to backend2 we want to add some additional
 	// information to the output, including the used log level and the name of
 	// the function.
-	backend2Formatter := logging.NewBackendFormatter(backend2, format)
+	backend2Formatter := golog.NewBackendFormatter(backend2, format)
 
 	// Only errors and more severe messages should be sent to backend1
-	backend1Leveled := logging.AddModuleLevel(backend1)
-	backend1Leveled.SetLevel(logging.ERROR, "")
+	backend1Leveled := golog.AddModuleLevel(backend1)
+	backend1Leveled.SetLevel(golog.ERROR, "")
 
 	// Set the backends to be used.
-	logging.SetBackend(backend1Leveled, backend2Formatter)
+	golog.SetBackend(backend1Leveled, backend2Formatter)
 
 	log.Debugf("debug %s", Password("secret"))
+	log.Success("success")
 	log.Info("info")
 	log.Notice("notice")
 	log.Warning("warning")

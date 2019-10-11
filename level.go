@@ -20,20 +20,20 @@ const (
 	CRITICAL Level = iota
 	ERROR
 	WARNING
+	SUCCESS
 	NOTICE
 	INFO
 	DEBUG
-	SUCCESS
 )
 
 var levelNames = []string{
 	"CRITICAL",
 	"ERROR",
 	"WARNING",
+	"SUCCESS",
 	"NOTICE",
 	"INFO",
 	"DEBUG",
-	"SUCCESS",
 }
 
 // String returns the string representation of a logging level.

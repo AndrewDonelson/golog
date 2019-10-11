@@ -363,6 +363,16 @@ func (l *Logger) Debugf(format string, args ...interface{}) {
 	l.log(DEBUG, &format, args...)
 }
 
+// Success logs a message using SUCCESS as log level.
+func (l *Logger) Success(args ...interface{}) {
+	l.log(SUCCESS, nil, args...)
+}
+
+// Successf logs a message using SUCCESS as log level.
+func (l *Logger) Successf(format string, args ...interface{}) {
+	l.log(SUCCESS, &format, args...)
+}
+
 func init() {
 	Reset()
 }

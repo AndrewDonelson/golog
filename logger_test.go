@@ -17,6 +17,7 @@ const (
 	msgDebug    = "debug"
 	msgInfo     = "info"
 	msgNotice   = "notice"
+	msgSuccess  = "success"
 	msgWarning  = "warning"
 	msgError    = "error"
 	msgCritical = "critical"
@@ -36,20 +37,22 @@ func TestLogger_Debug_SimpleMethods(t *testing.T) {
 	l.Debug(msgDebug)
 	l.Info(msgInfo)
 	l.Notice(msgNotice)
+	l.Success(msgSuccess)
 	l.Warning(msgWarning)
 	l.Error(msgError)
 	l.Critical(msgCritical)
 
 	// Check records that were received by backend
 	backend := l.backend.(*memoryBackend)
-	assert.Len(t, backend.records, 6)
+	assert.Len(t, backend.records, 7)
 	assert.Len(t, backend.msgs, 0)
 	assert.Equal(t, msgDebug, backend.records[0].Args[0])
 	assert.Equal(t, msgInfo, backend.records[1].Args[0])
 	assert.Equal(t, msgNotice, backend.records[2].Args[0])
-	assert.Equal(t, msgWarning, backend.records[3].Args[0])
-	assert.Equal(t, msgError, backend.records[4].Args[0])
-	assert.Equal(t, msgCritical, backend.records[5].Args[0])
+	assert.Equal(t, msgSuccess, backend.records[3].Args[0])
+	assert.Equal(t, msgWarning, backend.records[4].Args[0])
+	assert.Equal(t, msgError, backend.records[5].Args[0])
+	assert.Equal(t, msgCritical, backend.records[6].Args[0])
 
 	// Ring buffer should be empty, because we're in debug
 	assert.Nil(t, l.records.Dequeue())
@@ -62,20 +65,22 @@ func TestLogger_Debug_FormattingMethods(t *testing.T) {
 	l.Debugf(msgTemplate, msgDebug)
 	l.Infof(msgTemplate, msgInfo)
 	l.Noticef(msgTemplate, msgNotice)
+	l.Successf(msgTemplate, msgSuccess)
 	l.Warningf(msgTemplate, msgWarning)
 	l.Errorf(msgTemplate, msgError)
 	l.Criticalf(msgTemplate, msgCritical)
 
 	// Check records that were received by backend
 	backend := l.backend.(*memoryBackend)
-	assert.Len(t, backend.records, 6)
+	assert.Len(t, backend.records, 7)
 	assert.Len(t, backend.msgs, 0)
 	assert.Equal(t, msgDebug, backend.records[0].Args[0])
 	assert.Equal(t, msgInfo, backend.records[1].Args[0])
 	assert.Equal(t, msgNotice, backend.records[2].Args[0])
-	assert.Equal(t, msgWarning, backend.records[3].Args[0])
-	assert.Equal(t, msgError, backend.records[4].Args[0])
-	assert.Equal(t, msgCritical, backend.records[5].Args[0])
+	assert.Equal(t, msgSuccess, backend.records[3].Args[0])
+	assert.Equal(t, msgWarning, backend.records[4].Args[0])
+	assert.Equal(t, msgError, backend.records[5].Args[0])
+	assert.Equal(t, msgCritical, backend.records[6].Args[0])
 
 	// Ring buffer should be empty, because we're in debug
 	assert.Nil(t, l.records.Dequeue())
@@ -90,6 +95,7 @@ func TestLogger_Dumping(t *testing.T) {
 	l.Debug(msgDebug)
 	l.Info(msgInfo)
 	l.Notice(msgNotice)
+	l.Success(msgSuccess)
 	l.Warningf(msgTemplate, msgWarning)
 
 	// They must not exist in backend yet
@@ -101,12 +107,13 @@ func TestLogger_Dumping(t *testing.T) {
 
 	// Now we suppose to have 1 error record and 4 previous messages in backend
 	assert.Len(t, backend.records, 1)
-	assert.Len(t, backend.msgs, 4)
+	assert.Len(t, backend.msgs, 5)
 	assert.Equal(t, msgError, backend.records[0].Args[0])
 	assert.Equal(t, msgDebug, backend.msgs[0])
 	assert.Equal(t, msgInfo, backend.msgs[1])
 	assert.Equal(t, msgNotice, backend.msgs[2])
-	assert.Equal(t, msgWarning, backend.msgs[3])
+	assert.Equal(t, msgSuccess, backend.msgs[3])
+	assert.Equal(t, msgWarning, backend.msgs[4])
 
 	// Ring buffer is empty now
 	assert.Nil(t, l.records.Dequeue())
