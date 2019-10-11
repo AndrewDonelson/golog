@@ -33,7 +33,7 @@ var levelNames = []string{
 	"NOTICE",
 	"INFO",
 	"DEBUG",
-	"SUCCESS"
+	"SUCCESS",
 }
 
 // String returns the string representation of a logging level.

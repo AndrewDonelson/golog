@@ -15,8 +15,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"github.com/zfjagann/golang-ring"
 )
 
 // Redactor is an interface for types that may contain sensitive information
@@ -97,8 +95,8 @@ func (r *Record) Message() string {
 }
 
 // A ring buffer is used in the every logger instance to store several last records
-func newRingBuffer(capacity int) *ring.Ring {
-	r := &ring.Ring{}
+func newRingBuffer(capacity int) *Ring {
+	r := &Ring{}
 	r.SetCapacity(capacity)
 	return r
 }
@@ -118,7 +116,7 @@ type Logger struct {
 	//for dumping
 	enableDumping bool
 	triggerLevel  Level
-	records       *ring.Ring
+	records       *Ring
 	capacity      int
 	mutex         *sync.Mutex
 	formatter     Formatter
@@ -212,11 +210,12 @@ func (l *Logger) checkAndDumpRecords(level Level) {
 				break
 			}
 			if l.haveBackend {
-				if msg, ok := val.(string); !ok {
-					panic(fmt.Sprintf("Severe implementation error: cannot cast %+v to string", val))
-				} else {
-					l.backend.LogStr(level, 3+l.ExtraCalldepth, msg)
-				}
+				l.backend.LogStr(level, 3+l.ExtraCalldepth, fmt.Sprintf("%v", val))
+				// if msg, ok := Str; !ok {
+				// 	panic(fmt.Sprintf("Severe implementation error: cannot cast %+v to string", val))
+				// } else {
+				// 	l.backend.LogStr(level, 3+l.ExtraCalldepth, msg)
+				// }
 			}
 		}
 	}
