@@ -16,13 +16,21 @@ import (
 type color int
 
 const (
+	// ColorBlack ...
 	ColorBlack = iota + 30
+	// ColorRed ...
 	ColorRed
+	// ColorGreen ...
 	ColorGreen
+	// ColorYellow ...
 	ColorYellow
+	// ColorBlue ...
 	ColorBlue
+	// ColorMagenta ...
 	ColorMagenta
+	// ColorCyan ...
 	ColorCyan
+	// ColorWhite ...
 	ColorWhite
 )
 
@@ -62,11 +70,12 @@ func (b *LogBackend) Log(level Level, calldepth int, rec *Record) error {
 	return b.LogStr(level, calldepth+1, rec.Formatted(calldepth+1))
 }
 
+// GetFormatter just returns none
 func (b *LogBackend) GetFormatter() Formatter {
 	return nil
 }
 
-// Log implements the Backend interface.
+// LogStr implements the Backend interface.
 func (b *LogBackend) LogStr(level Level, calldepth int, str string) error {
 	if b.Color {
 		col := colors[level]
@@ -101,10 +110,12 @@ func ConvertColors(colors []int, bold bool) []string {
 	return converted
 }
 
+// ColorSeq formats the color into a string
 func ColorSeq(color color) string {
 	return fmt.Sprintf("\033[%dm", int(color))
 }
 
+// ColorSeqBold formats the bold color into a string
 func ColorSeqBold(color color) string {
 	return fmt.Sprintf("\033[%d;1m", int(color))
 }
