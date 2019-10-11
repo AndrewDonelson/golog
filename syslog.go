@@ -52,11 +52,12 @@ func (b *SyslogBackend) Log(level Level, calldepth int, rec *Record) error {
 	panic("unhandled log level")
 }
 
+// GetFormatter just returns none
 func (b *SyslogBackend) GetFormatter() Formatter {
 	return nil
 }
 
-// Log implements the Backend interface.
+// LogStr implements the Backend interface.
 func (b *SyslogBackend) LogStr(level Level, calldepth int, str string) error {
 	_, err := b.Writer.Write([]byte(str))
 	return err
