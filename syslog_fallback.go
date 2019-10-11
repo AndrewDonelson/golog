@@ -4,7 +4,7 @@
 
 //+build windows plan9
 
-package logging
+package golog
 
 import (
 	"fmt"

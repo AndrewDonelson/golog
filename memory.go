@@ -1,4 +1,4 @@
-package logging
+package golog
 
 // memoryBackend should be used only in unit tests
 var _ Backend = (*memoryBackend)(nil)

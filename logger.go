@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package logging implements a logging infrastructure for Go. It supports
-// different logging backends like syslog, file and memory. Multiple backends
+// Package golog implements a golog infrastructure for Go. It supports
+// different golog backends like syslog, file and memory. Multiple backends
 // can be utilized with different log levels per backend and logger.
-package logging
+package golog
 
 import (
 	"bytes"
@@ -102,7 +102,7 @@ func newRingBuffer(capacity int) *Ring {
 }
 
 // Logger is the actual logger which creates log records based on the functions
-// called and passes them to the underlying logging backend.
+// called and passes them to the underlying golog backend.
 type Logger struct {
 	Module      string
 	backend     Backend
@@ -186,7 +186,7 @@ func MustGetLogger(module, contextSeparator string, capacity int) *Logger {
 	return logger
 }
 
-// Reset restores the internal state of the logging library.
+// Reset restores the internal state of the golog library.
 func Reset() {
 	// TODO make a global Init() method to be less magic? or make it such that
 	// if there's no backends at all configured, we could use some tricks to
@@ -223,7 +223,7 @@ func (l *Logger) checkAndDumpRecords(level Level) {
 
 func (l *Logger) log(lvl Level, format *string, args ...interface{}) {
 
-	// Create the logging record and pass it in to the backend
+	// Create the golog record and pass it in to the backend
 	record := &Record{
 		ID:         atomic.AddUint64(&sequenceNo, 1),
 		Time:       timeNow(),
