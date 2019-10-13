@@ -309,7 +309,10 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 		Line:     line,
 		//format:   formatString,
 	}
-	l.worker.Log(lvl, 2, info)
+	err := l.worker.Log(lvl, 2, info)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // Fatal is just like func l.Critical logger except that it is followed by exit to program
