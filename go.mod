@@ -1,3 +1,3 @@
-module AndrewDonelson/golog
+module github.com/AndrewDonelson/golog
 
 go 1.13
