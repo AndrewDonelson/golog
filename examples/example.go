@@ -6,44 +6,32 @@ import (
 	"github.com/AndrewDonelson/golog"
 )
 
-var log = golog.MustGetLogger("example", " ", 10)
-
-// Example format string. Everything except the message has a custom color
-// which is dependent on the log level. Many fields have a custom output
-// formatting too, eg. the time returns the hour down to the milli second.
-var format = golog.MustStringFormatter(
-	`%{color}%{time:15:04:05.000} %{shortfunc} ▶ %{level:.4s} %{id:03x}%{color:reset} %{message}`,
-)
-
-// Password is just an example type implementing the Redactor interface. Any
-// time this is logged, the Redacted() function will be called.
-type Password string
-
-func (p Password) Redacted() interface{} {
-	return golog.Redact(string(p))
-}
-
 func main() {
-	// For demo purposes, create two backend for os.Stderr.
-	backend1 := golog.NewLogBackend(os.Stderr, "", 0)
-	backend2 := golog.NewLogBackend(os.Stderr, "", 0)
+	// Get the instance for logger class
+	// Third option is optional and is instance of type io.Writer, defaults to os.Stderr
+	log, err := golog.New("test", 1, os.Stdout)
+	if err != nil {
+		panic(err) // Check for error
+	}
 
-	// For messages written to backend2 we want to add some additional
-	// information to the output, including the used log level and the name of
-	// the function.
-	backend2Formatter := golog.NewBackendFormatter(backend2, format)
+	// Critically log critical
+	log.Critical("This is Critical!")
+	// Debug
+	log.Debug("This is Debug!")
+	// Give the Warning
+	log.Warning("This is Warning!")
+	// Show the error
+	log.Error("This is Error!")
+	// Notice
+	log.Notice("This is Notice!")
+	// Show the info
+	log.Info("This is Info!")
 
-	// Only errors and more severe messages should be sent to backend1
-	backend1Leveled := golog.AddModuleLevel(backend1)
-	backend1Leveled.SetLevel(golog.ERROR, "")
-
-	// Set the backends to be used.
-	golog.SetBackend(backend1Leveled, backend2Formatter)
-
-	log.Debugf("debug %s", Password("secret"))
-	log.Info("info")
-	log.Notice("notice")
-	log.Warning("warning")
-	log.Error("err")
-	log.Critical("crit")
+	// Show warning with format message
+	log.SetFormat("[%{module}] [%{level}] %{message}")
+	log.Warning("This is Warning!")
+	// Also you can set your format as default format for all new loggers
+	golog.SetDefaultFormat("%{message}")
+	log2, _ := golog.New("pkg", 1, os.Stdout)
+	log2.Error("This is Error!")
 }

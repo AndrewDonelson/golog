@@ -1,3 +1,3 @@
 test:
-	overalls -project=github.com/vitalyisaev2/go-logging -covermode=count
+	overalls -project=github.com/AndrewDonelson/golog -covermode=count
 	go tool cover -func=./overalls.coverprofile
