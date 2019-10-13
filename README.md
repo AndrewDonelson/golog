@@ -8,23 +8,23 @@ A simple go logger for easy logging in your programs. Allows setting custom form
 
 # Preview
 
-[![Example Output](examples/example.png)](examples/example.go)
+[![Example Output](example/example.png)](example/example.go)
 
 # Install
 
-`go get github.com/apsdehal/go-logger`
+`go get github.com/AndrewDonelson/golog`
 
 Use `go get -u` to update the package.
 
 # Example
 
-Example [program](examples/example.go) demonstrates how to use the logger. See below for __formatting__ instructions.
+Example [program](example/example.go) demonstrates how to use the logger. See below for __formatting__ instructions.
 
 ```go
 package main
 
 import (
- "github.com/apsdehal/go-logger"
+ "github.com/AndrewDonelson/golog"
  "os"
 )
 
