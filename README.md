@@ -2,6 +2,7 @@
 # golog
 
 [![Build Status](https://travis-ci.org/AndrewDonelson/golog.svg?branch=develop)](https://travis-ci.org/AndrewDonelson/golog)
+[![Coverage Status](https://coveralls.io/repos/github/AndrewDonelson/golog/badge.svg)](https://coveralls.io/github/AndrewDonelson/golog)
 [![GoDoc](https://godoc.org/github.com/AndrewDonelson/golog?status.svg)](http://godoc.org/github.com/AndrewDonelson/golog)
 
 A simple go logger for easy logging in your programs. Allows setting custom format for messages.
