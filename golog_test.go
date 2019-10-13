@@ -1,4 +1,4 @@
-package logger
+package golog
 
 import (
 	"bytes"
@@ -155,7 +155,7 @@ func TestLogger_SetFormat(t *testing.T) {
 	log.SetLogLevel(InfoLevel)
 
 	want := time.Now().Format("2006-01-02 15:04:05")
-	want = fmt.Sprintf("#1 %s logger_test.go:154 ▶ DEB Test\n", want)
+	want = fmt.Sprintf("#1 %s golog_test.go:154 ▶ DEB Test\n", want)
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)
@@ -178,8 +178,8 @@ func TestLogger_SetFormat(t *testing.T) {
 		"text123 2 "+
 			"!@#$%% %s "+
 			"a{b pkgname "+
-			"a}b logger_test.go "+
-			"%%%% logger_test.go "+ // it's printf, escaping %, don't forget
+			"a}b golog_test.go "+
+			"%%%% golog_test.go "+ // it's printf, escaping %, don't forget
 			"%%{175 "+
 			" ERR "+
 			"%%{incorr_verb ERROR "+
@@ -189,11 +189,11 @@ func TestLogger_SetFormat(t *testing.T) {
 	have = buf.String()
 	if want != have {
 		t.Errorf("\nWant: %sHave: %s", want, have)
-		want_len := len(want)
-		have_len := len(have)
-		min := int(math.Min(float64(want_len), float64(have_len)))
-		if want_len != have_len {
-			t.Errorf("Diff lens: Want: %d, Have: %d.\n", want_len, have_len)
+		wantLen := len(want)
+		haveLen := len(have)
+		min := int(math.Min(float64(wantLen), float64(haveLen)))
+		if wantLen != haveLen {
+			t.Errorf("Diff lens: Want: %d, Have: %d.\n", wantLen, haveLen)
 		}
 		for i := 0; i < min; i++ {
 			if want[i] != have[i] {
