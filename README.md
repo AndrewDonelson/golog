@@ -1,8 +1,8 @@
 
 # golog
 
-[![Build Status](https://travis-ci.org/apsdehal/go-logger.svg?branch=master)](https://travis-ci.org/apsdehal/go-logger)
-[![GoDoc](https://godoc.org/github.com/apsdehal/go-logger?status.svg)](http://godoc.org/github.com/apsdehal/go-logger)
+[![Build Status](https://travis-ci.org/AndrewDonelson/golog.svg?branch=develop)](https://travis-ci.org/AndrewDonelson/golog)
+[![GoDoc](https://godoc.org/github.com/AndrewDonelson/golog?status.svg)](http://godoc.org/github.com/AndrewDonelson/golog)
 
 A simple go logger for easy logging in your programs. Allows setting custom format for messages.
 
