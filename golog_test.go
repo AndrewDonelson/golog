@@ -68,6 +68,15 @@ func BenchmarkLoggerNew(b *testing.B) {
 	}
 }
 
+func BenchmarkLoggerNewLogger(b *testing.B) {
+	for n := 0; n <= b.N; n++ {
+		log, err := NewLogger("bench-production", 2)
+		if err != nil && log == nil {
+			panic(err)
+		}
+	}
+}
+
 func TestLoggerNew(t *testing.T) {
 	log, err := New("test", 1)
 	if err != nil {

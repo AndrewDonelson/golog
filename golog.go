@@ -3,14 +3,11 @@ package golog
 
 // Import packages
 import (
-	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path"
 	"runtime"
-	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -73,133 +70,11 @@ const (
 	DebugLevel                        // Blue 		34
 )
 
-// Worker class, Worker is a log object used to log messages and Color specifies
-// if colored output is to be produced
-type Worker struct {
-	Minion     *log.Logger
-	Color      int
-	format     string
-	timeFormat string
-	level      LogLevel
-	function   string
-}
-
-// Info class, Contains all the info on what has to logged, time is the current time, Module is the specific module
-// For which we are logging, level is the state, importance and type of message logged,
-// Message contains the string to be logged, format is the format of string to be passed to sprintf
-type Info struct {
-	ID       uint64
-	Time     string
-	Module   string
-	Function string
-	Level    LogLevel
-	Line     int
-	Filename string
-	Message  string
-	//format   string
-}
-
 // Logger class that is an interface to user to log messages, Module is the module for which we are testing
 // worker is variable of Worker class that is used in bottom layers to log the message
 type Logger struct {
 	Module string
 	worker *Worker
-}
-
-// init pkg
-func init() {
-	initColors()
-	initFormatPlaceholders()
-}
-
-// Output Returns a proper string to be outputted for a particular info
-func (r *Info) Output(format string) string {
-	msg := fmt.Sprintf(format,
-		r.ID,               // %[1] // %{id}
-		r.Time,             // %[2] // %{time[:fmt]}
-		r.Module,           // %[3] // %{module}
-		r.Function,         // %[4] // %{function}
-		r.Filename,         // %[5] // %{filename}
-		r.Line,             // %[6] // %{line}
-		r.logLevelString(), // %[7] // %{level}
-		r.Message,          // %[8] // %{message}
-	)
-	// Ignore printf errors if len(args) > len(verbs)
-	if i := strings.LastIndex(msg, "%!(EXTRA"); i != -1 {
-		return msg[:i]
-	}
-	return msg
-}
-
-// Analyze and represent format string as printf format string and time format
-func parseFormat(format string) (msgfmt, timefmt string) {
-	if len(format) < 10 /* (len of "%{message} */ {
-		return defFmt, defTimeFmt
-	}
-	timefmt = defTimeFmt
-	idx := strings.IndexRune(format, '%')
-	for idx != -1 {
-		msgfmt += format[:idx]
-		format = format[idx:]
-		if len(format) > 2 {
-			if format[1] == '{' {
-				// end of curr verb pos
-				if jdx := strings.IndexRune(format, '}'); jdx != -1 {
-					// next verb pos
-					idx = strings.Index(format[1:], "%{")
-					// incorrect verb found ("...%{wefwef ...") but after
-					// this, new verb (maybe) exists ("...%{inv %{verb}...")
-					if idx != -1 && idx < jdx {
-						msgfmt += "%%"
-						format = format[1:]
-						continue
-					}
-					// get verb and arg
-					verb, arg := ph2verb(format[:jdx+1])
-					msgfmt += verb
-					// check if verb is time
-					// here you can handle args for other verbs
-					if verb == `%[2]s` && arg != "" /* %{time} */ {
-						timefmt = arg
-					}
-					format = format[jdx+1:]
-				} else {
-					format = format[1:]
-				}
-			} else {
-				msgfmt += "%%"
-				format = format[1:]
-			}
-		}
-		idx = strings.IndexRune(format, '%')
-	}
-	msgfmt += format
-	return
-}
-
-// translate format placeholder to printf verb and some argument of placeholder
-// (now used only as time format)
-func ph2verb(ph string) (verb string, arg string) {
-	n := len(ph)
-	if n < 4 {
-		return ``, ``
-	}
-	if ph[0] != '%' || ph[1] != '{' || ph[n-1] != '}' {
-		return ``, ``
-	}
-	idx := strings.IndexRune(ph, ':')
-	if idx == -1 {
-		return phfs[ph], ``
-	}
-	verb = phfs[ph[:idx]+"}"]
-	arg = ph[idx+1 : n-1]
-	return
-}
-
-// NewWorker Returns an instance of worker class, prefix is the string attached to every log,
-// flag determine the log params, color parameters verifies whether we need colored outputs or not
-func NewWorker(prefix string, flag int, color int, out io.Writer) *Worker {
-	return &Worker{Minion: log.New(out, prefix, flag), Color: color, format: defFmt, timeFormat: defTimeFmt}
 }
 
 // SetDefaultFormat ...
@@ -208,18 +83,8 @@ func SetDefaultFormat(format string) {
 }
 
 // SetFormat ...
-func (w *Worker) SetFormat(format string) {
-	w.format, w.timeFormat = parseFormat(format)
-}
-
-// SetFormat ...
 func (l *Logger) SetFormat(format string) {
 	l.worker.SetFormat(format)
-}
-
-// SetLogLevel ...
-func (w *Worker) SetLogLevel(level LogLevel) {
-	w.level = level
 }
 
 // SetLogLevel ...
@@ -227,66 +92,9 @@ func (l *Logger) SetLogLevel(level LogLevel) {
 	l.worker.level = level
 }
 
-// SetFunction sets the function name ofr the worker
-func (w *Worker) SetFunction(name string) {
-	w.function = name
-}
-
 // SetFunction sets the function name of the logger
 func (l *Logger) SetFunction(name string) {
 	l.worker.function = name
-}
-
-// Log Function of Worker class to log a string based on level
-func (w *Worker) Log(level LogLevel, calldepth int, info *Info) error {
-
-	if w.level < level {
-		return nil
-	}
-
-	if w.Color != 0 {
-		buf := &bytes.Buffer{}
-		buf.Write([]byte(colors[level]))
-		buf.Write([]byte(info.Output(w.format)))
-		buf.Write([]byte("\033[0m"))
-		return w.Minion.Output(calldepth+1, buf.String())
-	}
-
-	return w.Minion.Output(calldepth+1, info.Output(w.format))
-}
-
-// colorString Returns a proper string to output for colored logging
-func colorString(color int) string {
-	return fmt.Sprintf("\033[%dm", int(color))
-}
-
-// initColors Initializes the map of colors
-func initColors() {
-	colors = map[LogLevel]string{
-		CriticalLevel: colorString(Magenta),
-		ErrorLevel:    colorString(Red),
-		SuccessLevel:  colorString(Green),
-		WarningLevel:  colorString(Yellow),
-		NoticeLevel:   colorString(Cyan),
-		InfoLevel:     colorString(White),
-		DebugLevel:    colorString(Blue),
-	}
-}
-
-// initFormatPlaceholders Initializes the map of placeholders
-func initFormatPlaceholders() {
-	phfs = map[string]string{
-		"%{id}":       "%[1]d",
-		"%{time}":     "%[2]s",
-		"%{module}":   "%[3]s",
-		"%{function}": "%[4]s",
-		"%{filename}": "%[5]s",
-		"%{file}":     "%[5]s",
-		"%{line}":     "%[6]d",
-		"%{level}":    "%[7]s",
-		"%{lvl}":      "%.3[7]s",
-		"%{message}":  "%[8]s",
-	}
 }
 
 // NewLogger creates a new logger for the given model & environment
@@ -495,18 +303,4 @@ func Stack() string {
 	buf := make([]byte, 1000000)
 	runtime.Stack(buf, false)
 	return string(buf)
-}
-
-// logLevelString Returns the loglevel as string
-func (r *Info) logLevelString() string {
-	logLevels := [...]string{
-		"CRITICAL",
-		"ERROR",
-		"SUCCESS",
-		"WARNING",
-		"NOTICE",
-		"INFO",
-		"DEBUG",
-	}
-	return logLevels[r.Level-1]
 }
