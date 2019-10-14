@@ -77,6 +77,23 @@ func BenchmarkLoggerNewLogger(b *testing.B) {
 	}
 }
 
+func TestParseFormat(t *testing.T) {
+	msgFmt, tmeFmt := parseFormat("foobar")
+	want := fmt.Sprintf("%s, %s", defFmt, defTimeFmt)
+	have := fmt.Sprintf("%s, %s", msgFmt, tmeFmt)
+	if have != want {
+		t.Errorf("\nWant: %s\nHave: %s", want, have)
+	}
+
+	msgFmt, tmeFmt = parseFormat("{%.10s} - Foobar")
+	want = "{%%.10s} - Foobar, 2006-01-02 15:04:05"
+	have = fmt.Sprintf("%s, %s", msgFmt, tmeFmt)
+	if have != want {
+		t.Errorf("\nWant: %s\nHave: %s", want, have)
+	}
+	
+} 
+
 func TestLoggerNew(t *testing.T) {
 	log, err := New("test", 1)
 	if err != nil {
@@ -181,7 +198,7 @@ func TestLogger_SetFormat(t *testing.T) {
 	log.SetLogLevel(InfoLevel)
 
 	//want := time.Now().Format("2006-01-02 15:04:05")
-	want := fmt.Sprintf("#1 %s golog_test.go:180 ▶ DEB Test\n", time.Now().Format("2006-01-02 15:04:05"))
+	want := fmt.Sprintf("#1 %s golog_test.go:197 ▶ DEB Test\n", time.Now().Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)
@@ -206,7 +223,7 @@ func TestLogger_SetFormat(t *testing.T) {
 			"a{b pkgname "+
 			"a}b golog_test.go "+
 			"%%%% golog_test.go "+ // it's printf, escaping %, don't forget
-			"%%{201 "+
+			"%%{218 "+
 			" ERR "+
 			"%%{incorr_verb ERROR "+
 			" [This is Error!]\n",
