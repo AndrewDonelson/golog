@@ -43,4 +43,5 @@ script:
   - go test -v -race ./...  # Run all the tests with the race detector enabled
 
   after_success:
-  - coveralls
+#  - coveralls
+  - go test -v -covermode=count -coverprofile=coverage.out
