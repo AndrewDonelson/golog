@@ -118,7 +118,7 @@ func TestNewLogger(t *testing.T) {
 
 	// Test for module name less than 4 characters in length
 	log, err = NewLogger("tst", 1, nil)
-	if err == nil {
+	if err == nil || log != nil {
 		t.Error("Expected an error")
 	} 
 
