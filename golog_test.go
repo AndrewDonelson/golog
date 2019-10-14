@@ -111,9 +111,13 @@ func TestNewLogger(t *testing.T) {
 
 	// Test for no user defined out
 	log, err := NewLogger("test", 1, nil)
+	log.SetLogLevel(InfoLevel)
 
 	// Test for module name less than 4 characters in length
 	log, err = NewLogger("tst", 1, nil)
+	if err == nil {
+		t.Error("Expected an error")
+	} 
 
 	// test with standard out
 	log, err = NewLogger("test", 1, &buf)
@@ -234,7 +238,7 @@ func TestLogger_SetFormat(t *testing.T) {
 	log.SetLogLevel(InfoLevel)
 
 	//want := time.Now().Format("2006-01-02 15:04:05")
-	want := fmt.Sprintf("#1 %s golog_test.go:197 ▶ DEB Test\n", time.Now().Format("2006-01-02 15:04:05"))
+	want := fmt.Sprintf("#10 %s golog_test.go:237 ▶ DEB Test\n", time.Now().Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)
@@ -254,12 +258,12 @@ func TestLogger_SetFormat(t *testing.T) {
 	log.Error("This is Error!")
 	now := time.Now()
 	want = fmt.Sprintf(
-		"text123 2 "+
+		"text123 11 "+
 			"!@#$%% %s "+
 			"a{b pkgname "+
 			"a}b golog_test.go "+
 			"%%%% golog_test.go "+ // it's printf, escaping %, don't forget
-			"%%{218 "+
+			"%%{258 "+
 			" ERR "+
 			"%%{incorr_verb ERROR "+
 			" [This is Error!]\n",

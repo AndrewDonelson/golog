@@ -91,12 +91,12 @@ func (l *Logger) SetFormat(format string) {
 
 // SetLogLevel ...
 func (l *Logger) SetLogLevel(level LogLevel) {
-	l.worker.level = level
+	l.worker.SetLogLevel(level)
 }
 
 // SetFunction sets the function name of the logger
 func (l *Logger) SetFunction(name string) {
-	l.worker.function = name
+	l.worker.SetFunction(name)
 }
 
 // SetEnvironment is used to manually set the log environment to either development, testing or production
