@@ -102,10 +102,10 @@ func (l *Logger) SetFunction(name string) {
 // NewLogger creates a new logger for the given model & environment
 func NewLogger(module string, environment int) (*Logger, error) {
 	var (
-		color  int       = 1
+		color            = 1
 		out    io.Writer = os.Stderr
-		level  LogLevel  = ErrorLevel
-		format string    = defProductionFmt
+		level            = ErrorLevel
+		format           = defProductionFmt
 	)
 
 	if len(module) <= 3 {
@@ -135,10 +135,10 @@ func New(args ...interface{}) (*Logger, error) {
 	//initColors()
 
 	var (
-		module string    = "DEFAULT"
-		color  int       = 1
+		module           = "DEFAULT"
+		color            = 1
 		out    io.Writer = os.Stderr
-		level  LogLevel  = InfoLevel
+		level            = InfoLevel
 	)
 
 	for _, arg := range args {
