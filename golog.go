@@ -289,6 +289,7 @@ func initFormatPlaceholders() {
 	}
 }
 
+// NewLogger creates a new logger for the given model & environment
 func NewLogger(module string, environment int) (*Logger, error) {
 	var (
 		color  int       = 1
@@ -506,20 +507,6 @@ func (r *Info) logLevelString() string {
 		"NOTICE",
 		"INFO",
 		"DEBUG",
-	}
-	return logLevels[r.Level-1]
-}
-
-// logLvlString Returns the short loglevel as string
-func (r *Info) logLvlString() string {
-	logLevels := [...]string{
-		"CRI",
-		"ERR",
-		"SUC",
-		"WAR",
-		"NOT",
-		"INF",
-		"DBG",
 	}
 	return logLevels[r.Level-1]
 }
