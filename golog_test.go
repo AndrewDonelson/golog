@@ -30,6 +30,10 @@ func BenchmarkLoggerLog(b *testing.B) {
 			"Error logging",
 		},
 		{
+			SuccessLevel,
+			"Success logging",
+		},
+		{
 			WarningLevel,
 			"Warning logging",
 		},
@@ -81,6 +85,14 @@ func TestColorString(t *testing.T) {
 	}
 }
 
+// CriticalLevel LogLevel = iota + 1 // Magneta 	35
+// ErrorLevel                        // Red 		31
+// SuccessLevel                      // Green 		32
+// WarningLevel                      // Yellow 		33
+// NoticeLevel                       // Cyan 		36
+// InfoLevel                         // White 		37
+// DebugLevel                        // Blue 		34
+
 func TestInitColors(t *testing.T) {
 	//initColors()
 	var tests = []struct {
@@ -99,14 +111,19 @@ func TestInitColors(t *testing.T) {
 			"\033[31m",
 		},
 		{
+			SuccessLevel,
+			Green,
+			"\033[32m",
+		},
+		{
 			WarningLevel,
 			Yellow,
 			"\033[33m",
 		},
 		{
 			NoticeLevel,
-			Green,
-			"\033[32m",
+			Cyan,
+			"\033[36m",
 		},
 		{
 			InfoLevel,
@@ -115,8 +132,8 @@ func TestInitColors(t *testing.T) {
 		},
 		{
 			DebugLevel,
-			Cyan,
-			"\033[36m",
+			Blue,
+			"\033[34m",
 		},
 	}
 
@@ -154,8 +171,8 @@ func TestLogger_SetFormat(t *testing.T) {
 	log.Debug("Test")
 	log.SetLogLevel(InfoLevel)
 
-	want := time.Now().Format("2006-01-02 15:04:05")
-	want = fmt.Sprintf("#1 %s golog_test.go:154 ▶ DEB Test\n", want)
+	//want := time.Now().Format("2006-01-02 15:04:05")
+	want := fmt.Sprintf("#1 %s golog_test.go:171 ▶ DEB Test\n", time.Now().Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)
@@ -180,7 +197,7 @@ func TestLogger_SetFormat(t *testing.T) {
 			"a{b pkgname "+
 			"a}b golog_test.go "+
 			"%%%% golog_test.go "+ // it's printf, escaping %, don't forget
-			"%%{175 "+
+			"%%{192 "+
 			" ERR "+
 			"%%{incorr_verb ERROR "+
 			" [This is Error!]\n",
@@ -234,7 +251,10 @@ func TestLogLevel(t *testing.T) {
 			ErrorLevel,
 			"Error logging",
 		},
-
+		{
+			SuccessLevel,
+			"Success logging",
+		},
 		{
 			WarningLevel,
 			"Warning logging",
@@ -264,6 +284,7 @@ func TestLogLevel(t *testing.T) {
 
 		log.Critical("Log Critical")
 		log.Error("Log Error")
+		log.Success("Log Success")
 		log.Warning("Log Warning")
 		log.Notice("Log Notice")
 		log.Info("Log Info")
