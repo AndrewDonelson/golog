@@ -1,37 +1,47 @@
 package main
 
 import (
-	"os"
-
 	"github.com/AndrewDonelson/golog"
 )
 
-func main() {
-	// Get the instance for logger class
-	// Third option is optional and is instance of type io.Writer, defaults to os.Stderr
-	log, err := golog.New("test", 1, os.Stdout)
-	if err != nil {
-		panic(err) // Check for error
-	}
-
+func doLogs(log *golog.Logger) {
 	// Critically log critical
 	log.Critical("This is Critical!")
-	// Debug
-	log.Debug("This is Debug!")
-	// Give the Warning
-	log.Warning("This is Warning!")
 	// Show the error
 	log.Error("This is Error!")
+	// Show the success
+	log.Success("This is Success!")
+	// Give the Warning
+	log.Warning("This is Warning!")
 	// Notice
 	log.Notice("This is Notice!")
 	// Show the info
 	log.Info("This is Info!")
+	// Debug
+	log.Debug("This is Debug!")
+}
 
-	// Show warning with format message
-	log.SetFormat("[%{module}] [%{level}] %{message}")
-	log.Warning("This is Warning!")
-	// Also you can set your format as default format for all new loggers
-	golog.SetDefaultFormat("%{message}")
-	log2, _ := golog.New("pkg", 1, os.Stdout)
-	log2.Error("This is Error!")
+func main() {
+	// Get the instance for logger class
+	// Third option is optional and is instance of type io.Writer, defaults to os.Stderr
+	println("\nProduction Output:")
+	log, err := golog.NewLogger("production", 0)
+	if err != nil {
+		panic(err) // Check for error
+	}
+	doLogs(log)
+
+	println("\nTest/QA Output:")
+	log, err = golog.NewLogger("test-qa", 1)
+	if err != nil {
+		panic(err) // Check for error
+	}
+	doLogs(log)
+
+	println("\nDevelopment Output:")
+	log, err = golog.NewLogger("development", 2)
+	if err != nil {
+		panic(err) // Check for error
+	}
+	doLogs(log)
 }

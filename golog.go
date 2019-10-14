@@ -1,18 +1,33 @@
 // Package golog Simple flexible go logging
+// This file contains all the code for the main logger
 package golog
 
 // Import packages
 import (
-	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path"
 	"runtime"
-	"strings"
 	"sync/atomic"
 	"time"
+)
+
+const (
+	// Default format of log message
+	// %[1] // %{id}
+	// %[2] // %{time[:fmt]}
+	// %[3] // %{module}
+	// %[4] // %{function}
+	// %[5] // %{filename}
+	// %[6] // %{line}
+	// %[7] // %{level}
+	// %[8] // %{message}
+	defProductionFmt  = "%.16[3]s %.19[2]s %.3[7]s ▶ %[8]s"
+	defDevelopmentFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[4]s ▶ %[8]s"
+
+	// Error, Fatal, Critical Format
+	//defErrorFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[8]s\n▶ %[5]s:%[6]d-%[4]s"
 )
 
 var (
@@ -25,8 +40,7 @@ var (
 	// Contains color strings for stdout
 	logNo uint64
 
-	// Default format of log message
-	defFmt = "#%[1]d %[2]s %[4]s:%[5]d ▶ %.3[6]s %[7]s"
+	defFmt = "#%[1]d %.19[2]s %[5]s:%[6]d ▶ %.3[7]s %[8]s"
 
 	// Default format of time
 	defTimeFmt = "2006-01-02 15:04:05"
@@ -49,37 +63,14 @@ const (
 
 // Log Level
 const (
-	CriticalLevel LogLevel = iota + 1
-	ErrorLevel
-	WarningLevel
-	NoticeLevel
-	InfoLevel
-	DebugLevel
+	CriticalLevel LogLevel = iota + 1 // Magneta 	35
+	ErrorLevel                        // Red 		31
+	SuccessLevel                      // Green 		32
+	WarningLevel                      // Yellow 	33
+	NoticeLevel                       // Cyan 		36
+	InfoLevel                         // White 		37
+	DebugLevel                        // Blue 		34
 )
-
-// Worker class, Worker is a log object used to log messages and Color specifies
-// if colored output is to be produced
-type Worker struct {
-	Minion     *log.Logger
-	Color      int
-	format     string
-	timeFormat string
-	level      LogLevel
-}
-
-// Info class, Contains all the info on what has to logged, time is the current time, Module is the specific module
-// For which we are logging, level is the state, importance and type of message logged,
-// Message contains the string to be logged, format is the format of string to be passed to sprintf
-type Info struct {
-	ID       uint64
-	Time     string
-	Module   string
-	Level    LogLevel
-	Line     int
-	Filename string
-	Message  string
-	//format   string
-}
 
 // Logger class that is an interface to user to log messages, Module is the module for which we are testing
 // worker is variable of Worker class that is used in bottom layers to log the message
@@ -88,109 +79,9 @@ type Logger struct {
 	worker *Worker
 }
 
-// init pkg
-func init() {
-	initColors()
-	initFormatPlaceholders()
-}
-
-// Output Returns a proper string to be outputted for a particular info
-func (r *Info) Output(format string) string {
-	msg := fmt.Sprintf(format,
-		r.ID,               // %[1] // %{id}
-		r.Time,             // %[2] // %{time[:fmt]}
-		r.Module,           // %[3] // %{module}
-		r.Filename,         // %[4] // %{filename}
-		r.Line,             // %[5] // %{line}
-		r.logLevelString(), // %[6] // %{level}
-		r.Message,          // %[7] // %{message}
-	)
-	// Ignore printf errors if len(args) > len(verbs)
-	if i := strings.LastIndex(msg, "%!(EXTRA"); i != -1 {
-		return msg[:i]
-	}
-	return msg
-}
-
-// Analyze and represent format string as printf format string and time format
-func parseFormat(format string) (msgfmt, timefmt string) {
-	if len(format) < 10 /* (len of "%{message} */ {
-		return defFmt, defTimeFmt
-	}
-	timefmt = defTimeFmt
-	idx := strings.IndexRune(format, '%')
-	for idx != -1 {
-		msgfmt += format[:idx]
-		format = format[idx:]
-		if len(format) > 2 {
-			if format[1] == '{' {
-				// end of curr verb pos
-				if jdx := strings.IndexRune(format, '}'); jdx != -1 {
-					// next verb pos
-					idx = strings.Index(format[1:], "%{")
-					// incorrect verb found ("...%{wefwef ...") but after
-					// this, new verb (maybe) exists ("...%{inv %{verb}...")
-					if idx != -1 && idx < jdx {
-						msgfmt += "%%"
-						format = format[1:]
-						continue
-					}
-					// get verb and arg
-					verb, arg := ph2verb(format[:jdx+1])
-					msgfmt += verb
-					// check if verb is time
-					// here you can handle args for other verbs
-					if verb == `%[2]s` && arg != "" /* %{time} */ {
-						timefmt = arg
-					}
-					format = format[jdx+1:]
-				} else {
-					format = format[1:]
-				}
-			} else {
-				msgfmt += "%%"
-				format = format[1:]
-			}
-		}
-		idx = strings.IndexRune(format, '%')
-	}
-	msgfmt += format
-	return
-}
-
-// translate format placeholder to printf verb and some argument of placeholder
-// (now used only as time format)
-func ph2verb(ph string) (verb string, arg string) {
-	n := len(ph)
-	if n < 4 {
-		return ``, ``
-	}
-	if ph[0] != '%' || ph[1] != '{' || ph[n-1] != '}' {
-		return ``, ``
-	}
-	idx := strings.IndexRune(ph, ':')
-	if idx == -1 {
-		return phfs[ph], ``
-	}
-	verb = phfs[ph[:idx]+"}"]
-	arg = ph[idx+1 : n-1]
-	return
-}
-
-// NewWorker Returns an instance of worker class, prefix is the string attached to every log,
-// flag determine the log params, color parameters verifies whether we need colored outputs or not
-func NewWorker(prefix string, flag int, color int, out io.Writer) *Worker {
-	return &Worker{Minion: log.New(out, prefix, flag), Color: color, format: defFmt, timeFormat: defTimeFmt}
-}
-
 // SetDefaultFormat ...
 func SetDefaultFormat(format string) {
 	defFmt, defTimeFmt = parseFormat(format)
-}
-
-// SetFormat ...
-func (w *Worker) SetFormat(format string) {
-	w.format, w.timeFormat = parseFormat(format)
 }
 
 // SetFormat ...
@@ -199,63 +90,42 @@ func (l *Logger) SetFormat(format string) {
 }
 
 // SetLogLevel ...
-func (w *Worker) SetLogLevel(level LogLevel) {
-	w.level = level
-}
-
-// SetLogLevel ...
 func (l *Logger) SetLogLevel(level LogLevel) {
 	l.worker.level = level
 }
 
-// Log Function of Worker class to log a string based on level
-func (w *Worker) Log(level LogLevel, calldepth int, info *Info) error {
-
-	if w.level < level {
-		return nil
-	}
-
-	if w.Color != 0 {
-		buf := &bytes.Buffer{}
-		buf.Write([]byte(colors[level]))
-		buf.Write([]byte(info.Output(w.format)))
-		buf.Write([]byte("\033[0m"))
-		return w.Minion.Output(calldepth+1, buf.String())
-	}
-
-	return w.Minion.Output(calldepth+1, info.Output(w.format))
+// SetFunction sets the function name of the logger
+func (l *Logger) SetFunction(name string) {
+	l.worker.function = name
 }
 
-// colorString Returns a proper string to output for colored logging
-func colorString(color int) string {
-	return fmt.Sprintf("\033[%dm", int(color))
-}
+// NewLogger creates a new logger for the given model & environment
+func NewLogger(module string, environment int) (*Logger, error) {
+	var (
+		color  int       = 1
+		out    io.Writer = os.Stderr
+		level  LogLevel  = ErrorLevel
+		format string    = defProductionFmt
+	)
 
-// initColors Initializes the map of colors
-func initColors() {
-	colors = map[LogLevel]string{
-		CriticalLevel: colorString(Magenta),
-		ErrorLevel:    colorString(Red),
-		WarningLevel:  colorString(Yellow),
-		NoticeLevel:   colorString(Green),
-		DebugLevel:    colorString(Cyan),
-		InfoLevel:     colorString(White),
+	if len(module) <= 3 {
+		panic("You must provide a name for the module (app, rpc, etc)")
 	}
-}
 
-// initFormatPlaceholders Initializes the map of placeholders
-func initFormatPlaceholders() {
-	phfs = map[string]string{
-		"%{id}":       "%[1]d",
-		"%{time}":     "%[2]s",
-		"%{module}":   "%[3]s",
-		"%{filename}": "%[4]s",
-		"%{file}":     "%[4]s",
-		"%{line}":     "%[5]d",
-		"%{level}":    "%[6]s",
-		"%{lvl}":      "%.3[6]s",
-		"%{message}":  "%[7]s",
+	if environment == 1 {
+		// set for test (qa)
+		level = InfoLevel
+		format = defFmt
+	} else if environment == 2 {
+		// set for developer
+		level = DebugLevel
+		format = defDevelopmentFmt
 	}
+
+	newWorker := NewWorker("", 0, color, out)
+	newWorker.SetLogLevel(level)
+	newWorker.SetFormat(format)
+	return &Logger{Module: module, worker: newWorker}, nil
 }
 
 // New Returns a new instance of logger class, module is the specific module for which we are logging
@@ -264,10 +134,12 @@ func initFormatPlaceholders() {
 func New(args ...interface{}) (*Logger, error) {
 	//initColors()
 
-	var module string = "DEFAULT"
-	var color int = 1
-	var out io.Writer = os.Stderr
-	var level LogLevel = InfoLevel
+	var (
+		module string    = "DEFAULT"
+		color  int       = 1
+		out    io.Writer = os.Stderr
+		level  LogLevel  = InfoLevel
+	)
 
 	for _, arg := range args {
 		switch t := arg.(type) {
@@ -288,8 +160,9 @@ func New(args ...interface{}) (*Logger, error) {
 	return &Logger{Module: module, worker: newWorker}, nil
 }
 
-// Log The log commnand is the function available to user to log message, lvl specifies
-// the degree of the messagethe user wants to log, message is the info user wants to log
+// Log The log command is the function available to user to log message,
+// lvl specifies the degree of the message the user wants to log, message
+// is the info user wants to log
 func (l *Logger) Log(lvl LogLevel, message string) {
 	l.logInternal(lvl, message, 2)
 }
@@ -321,12 +194,6 @@ func (l *Logger) Fatal(message string) {
 	os.Exit(1)
 }
 
-// FatalF is just like func l.CriticalF logger except that it is followed by exit to program
-func (l *Logger) FatalF(format string, a ...interface{}) {
-	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
-	os.Exit(1)
-}
-
 // Fatalf is just like func l.CriticalF logger except that it is followed by exit to program
 func (l *Logger) Fatalf(format string, a ...interface{}) {
 	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
@@ -337,12 +204,6 @@ func (l *Logger) Fatalf(format string, a ...interface{}) {
 func (l *Logger) Panic(message string) {
 	l.logInternal(CriticalLevel, message, 2)
 	panic(message)
-}
-
-// PanicF is just like func l.CriticalF except that it is followed by a call to panic
-func (l *Logger) PanicF(format string, a ...interface{}) {
-	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
-	panic(fmt.Sprintf(format, a...))
 }
 
 // Panicf is just like func l.CriticalF except that it is followed by a call to panic
@@ -356,11 +217,6 @@ func (l *Logger) Critical(message string) {
 	l.logInternal(CriticalLevel, message, 2)
 }
 
-// CriticalF logs a message at Critical level using the same syntax and options as fmt.Printf
-func (l *Logger) CriticalF(format string, a ...interface{}) {
-	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
-}
-
 // Criticalf logs a message at Critical level using the same syntax and options as fmt.Printf
 func (l *Logger) Criticalf(format string, a ...interface{}) {
 	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
@@ -371,24 +227,24 @@ func (l *Logger) Error(message string) {
 	l.logInternal(ErrorLevel, message, 2)
 }
 
-// ErrorF logs a message at Error level using the same syntax and options as fmt.Printf
-func (l *Logger) ErrorF(format string, a ...interface{}) {
-	l.logInternal(ErrorLevel, fmt.Sprintf(format, a...), 2)
-}
-
 // Errorf logs a message at Error level using the same syntax and options as fmt.Printf
 func (l *Logger) Errorf(format string, a ...interface{}) {
 	l.logInternal(ErrorLevel, fmt.Sprintf(format, a...), 2)
 }
 
+// Success logs a message at Success level
+func (l *Logger) Success(message string) {
+	l.logInternal(SuccessLevel, message, 2)
+}
+
+// Successf logs a message at Success level using the same syntax and options as fmt.Printf
+func (l *Logger) Successf(format string, a ...interface{}) {
+	l.logInternal(SuccessLevel, fmt.Sprintf(format, a...), 2)
+}
+
 // Warning logs a message at Warning level
 func (l *Logger) Warning(message string) {
 	l.logInternal(WarningLevel, message, 2)
-}
-
-// WarningF logs a message at Warning level using the same syntax and options as fmt.Printf
-func (l *Logger) WarningF(format string, a ...interface{}) {
-	l.logInternal(WarningLevel, fmt.Sprintf(format, a...), 2)
 }
 
 // Warningf logs a message at Warning level using the same syntax and options as fmt.Printf
@@ -401,11 +257,6 @@ func (l *Logger) Notice(message string) {
 	l.logInternal(NoticeLevel, message, 2)
 }
 
-// NoticeF logs a message at Notice level using the same syntax and options as fmt.Printf
-func (l *Logger) NoticeF(format string, a ...interface{}) {
-	l.logInternal(NoticeLevel, fmt.Sprintf(format, a...), 2)
-}
-
 // Noticef logs a message at Notice level using the same syntax and options as fmt.Printf
 func (l *Logger) Noticef(format string, a ...interface{}) {
 	l.logInternal(NoticeLevel, fmt.Sprintf(format, a...), 2)
@@ -416,11 +267,6 @@ func (l *Logger) Info(message string) {
 	l.logInternal(InfoLevel, message, 2)
 }
 
-// InfoF logs a message at Info level using the same syntax and options as fmt.Printf
-func (l *Logger) InfoF(format string, a ...interface{}) {
-	l.logInternal(InfoLevel, fmt.Sprintf(format, a...), 2)
-}
-
 // Infof logs a message at Info level using the same syntax and options as fmt.Printf
 func (l *Logger) Infof(format string, a ...interface{}) {
 	l.logInternal(InfoLevel, fmt.Sprintf(format, a...), 2)
@@ -429,11 +275,6 @@ func (l *Logger) Infof(format string, a ...interface{}) {
 // Debug logs a message at Debug level
 func (l *Logger) Debug(message string) {
 	l.logInternal(DebugLevel, message, 2)
-}
-
-// DebugF logs a message at Debug level using the same syntax and options as fmt.Printf
-func (l *Logger) DebugF(format string, a ...interface{}) {
-	l.logInternal(DebugLevel, fmt.Sprintf(format, a...), 2)
 }
 
 // Debugf logs a message at Debug level using the same syntax and options as fmt.Printf
@@ -464,17 +305,4 @@ func Stack() string {
 	buf := make([]byte, 1000000)
 	runtime.Stack(buf, false)
 	return string(buf)
-}
-
-// logLevelString Returns the loglevel as string
-func (r *Info) logLevelString() string {
-	logLevels := [...]string{
-		"CRITICAL",
-		"ERROR",
-		"WARNING",
-		"NOTICE",
-		"INFO",
-		"DEBUG",
-	}
-	return logLevels[r.Level-1]
 }
