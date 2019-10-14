@@ -38,7 +38,7 @@ var (
 	defProductionFmt  = "%.16[3]s %.19[2]s %.3[7]s ▶ %[8]s"
 	defDevelopmentFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[4]s ▶ %[8]s"
 	// Error, Fatal, Critical Format
-	defErrorFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[8]s\n▶ %[5]s:%[6]d-%[4]s"
+	//defErrorFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[8]s\n▶ %[5]s:%[6]d-%[4]s"
 
 	// Default format of time
 	defTimeFmt = "2006-01-02 15:04:05"
