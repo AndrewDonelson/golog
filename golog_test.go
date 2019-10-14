@@ -154,7 +154,7 @@ func TestInitColors(t *testing.T) {
 }
 
 func TestNewWorker(t *testing.T) {
-	var worker *Worker = NewWorker("", 0, 1, os.Stderr)
+	var worker = NewWorker("", 0, 1, os.Stderr)
 	if worker.Minion == nil {
 		t.Errorf("Minion was not established")
 	}
