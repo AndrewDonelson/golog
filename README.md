@@ -7,6 +7,10 @@
 
 A simple go logger for easy logging in your programs. Allows setting custom format for messages.
 
+# Notice
+
+**Even though this is currently building, it IS NOT ready for use in projects.**
+
 # Preview
 
 [![Example Output](example/example.png)](example/example.go)
