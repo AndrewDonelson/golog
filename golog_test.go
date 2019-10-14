@@ -102,6 +102,42 @@ func TestLoggerNew(t *testing.T) {
 	if log.Module != "test" {
 		t.Errorf("Unexpected module: %s", log.Module)
 	}
+	log.SetFunction("TestLoggerNew")
+	log.SetEnvironment(2)
+}
+
+func TestNewLogger(t *testing.T) {
+	var buf bytes.Buffer
+
+	// Test for no user defined out
+	log, err := NewLogger("test", 1, nil)
+
+	// Test for module name less than 4 characters in length
+	log, err = NewLogger("tst", 1, nil)
+
+	// test with standard out
+	log, err = NewLogger("test", 1, &buf)
+	if err != nil {
+		panic(err)
+	}
+	if log.Module != "test" {
+		t.Errorf("Unexpected module: %s", log.Module)
+	}
+	log.SetFunction("TestLoggerNew")
+	log.SetEnvironment(2)
+	log.Log(WarningLevel,"This is only a warning")
+
+	//log.Fatal("This is a fatal message")
+	//log.Fatalf("This is %d %s message", 1, "fatal")
+	log.Errorf("This is %d %s message", 1, "error")
+	log.Successf("This is %d %s message", 1, "success")
+	log.Warningf("This is %d %s message", 1, "warning")
+	log.Noticef("This is %d %s message", 1, "notice")
+	log.Infof("This is %d %s message", 1, "info")
+	log.Debugf("This is %d %s message", 1, "debug")
+
+	log.StackAsError("Stack as Error")
+	log.StackAsCritical("Stack as Critical")
 }
 
 func TestColorString(t *testing.T) {

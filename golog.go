@@ -115,7 +115,7 @@ func NewLogger(module string, environment uint8, out io.Writer) (*Logger, error)
 	}
 
 	if len(module) <= 3 {
-		panic("You must provide a name for the module (app, rpc, etc)")
+		return nil, fmt.Errorf("You must provide a name for the module (app, rpc, etc)")
 	}
 
 	newWorker := NewWorker("", 0, color, out)
