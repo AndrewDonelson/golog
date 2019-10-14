@@ -1,8 +1,12 @@
-phony: build
+phony: test build run
 
 test:
-	overalls -project=github.com/AndrewDonelson/golog -covermode=count
-	go tool cover -func=./overalls.coverprofile
+	go test -bench .
+	# overalls -project=github.com/AndrewDonelson/golog -covermode=count
+	# go tool cover -func=./overalls.coverprofile
 
 build:
 	cd example && go build
+
+run:
+	./example/example
