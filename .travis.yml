@@ -12,18 +12,19 @@ language: go
 # You don't need to test on very old versions of the Go compiler. It's the user's
 # responsibility to keep their compiler up to date.
 go:
-  - 1.13.x
   - tip
 
 # Only clone the most recent commit.
 git:
   depth: 1
 
+before_install:
+#  - go get golang.org/x/tools/cmd/cover
+  - go get github.com/mattn/goveralls
+
 # Skip the install step. Don't `go get` dependencies. Only build with the code
 # in vendor/
-install:
-  - go get golang.org/x/tools/cmd/cover
-  - go get github.com/mattn/goveralls
+install: true
 
 # Don't email me the results of the test runs.
 notifications:
@@ -41,7 +42,7 @@ before_script:
 script:
   - golangci-lint run       # run a bunch of code checkers/linters in parallel
   - go test -v -race ./...  # Run all the tests with the race detector enabled
-  - go test -v -covermode=count -coverprofile=coverage.out
+  - $GOPATH/bin/goveralls -service=travis-ci
 #after_success:
 #  - coveralls
 #  - go test -v -covermode=count -coverprofile=coverage.out
