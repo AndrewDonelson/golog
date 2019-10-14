@@ -1,4 +1,5 @@
 // Package golog Simple flexible go logging
+// This file contains all the code for the main logger
 package golog
 
 // Import packages

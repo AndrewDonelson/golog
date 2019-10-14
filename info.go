@@ -1,4 +1,5 @@
 // Package golog Simple flexible go logging
+// this file contains all the code for Info
 package golog
 
 import (

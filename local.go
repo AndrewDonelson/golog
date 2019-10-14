@@ -1,4 +1,5 @@
 // Package golog Simple flexible go logging
+// This file contains all un-exported (local) functions
 package golog
 
 import (
