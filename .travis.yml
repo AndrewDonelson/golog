@@ -41,7 +41,7 @@ before_script:
 script:
   - golangci-lint run       # run a bunch of code checkers/linters in parallel
   - go test -v -race ./...  # Run all the tests with the race detector enabled
-
-  after_success:
-#  - coveralls
   - go test -v -covermode=count -coverprofile=coverage.out
+#after_success:
+#  - coveralls
+#  - go test -v -covermode=count -coverprofile=coverage.out
