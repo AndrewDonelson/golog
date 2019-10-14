@@ -70,7 +70,7 @@ func BenchmarkLoggerNew(b *testing.B) {
 
 func BenchmarkLoggerNewLogger(b *testing.B) {
 	for n := 0; n <= b.N; n++ {
-		log, err := NewLogger("bench-production", 2)
+		log, err := NewLogger("bench-production", 1, nil)
 		if err != nil && log == nil {
 			panic(err)
 		}
@@ -171,7 +171,7 @@ func TestInitColors(t *testing.T) {
 }
 
 func TestNewWorker(t *testing.T) {
-	var worker *Worker = NewWorker("", 0, 1, os.Stderr)
+	var worker = NewWorker("", 0, 1, os.Stderr)
 	if worker.Minion == nil {
 		t.Errorf("Minion was not established")
 	}

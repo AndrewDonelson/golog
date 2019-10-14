@@ -5,7 +5,11 @@
 [![Coverage Status](https://coveralls.io/repos/github/AndrewDonelson/golog/badge.svg)](https://coveralls.io/github/AndrewDonelson/golog)
 [![GoDoc](https://godoc.org/github.com/AndrewDonelson/golog?status.svg)](http://godoc.org/github.com/AndrewDonelson/golog)
 
-A simple go logger for easy logging in your programs. Allows setting custom format for messages.
+Versatile Go Logger with a focus on Build Environments to provide performance and information where needed. Also allows setting custom format for messages.
+
+# Notice
+
+**Even though this is currently building, it IS NOT ready for use in projects.**
 
 # Preview
 

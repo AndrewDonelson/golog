@@ -40,6 +40,25 @@ func (w *Worker) SetFunction(name string) {
 	w.function = name
 }
 
+// SetEnvironment is used to manually set the log environment to either development, testing or production
+func (w *Worker) SetEnvironment(env uint8) {
+	if env == 1 {
+		// set for test (qa)
+		w.level = InfoLevel
+		w.format = defFmt
+		return
+	} else if env == 2 {
+		// set for developer
+		w.level = DebugLevel
+		w.format = defDevelopmentFmt
+		return
+	}
+
+	// set for production
+	w.level = ErrorLevel
+	w.format = defProductionFmt
+}
+
 // Log Function of Worker class to log a string based on level
 func (w *Worker) Log(level LogLevel, calldepth int, info *Info) error {
 
