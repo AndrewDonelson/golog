@@ -111,7 +111,10 @@ func TestNewLogger(t *testing.T) {
 
 	// Test for no user defined out
 	log, err := NewLogger("test", 1, nil)
-	log.SetLogLevel(InfoLevel)
+	if err != nil {
+		t.Error("Unexpected error. Wanted valid logger")
+	}
+	log.SetLogLevel(DebugLevel)
 
 	// Test for module name less than 4 characters in length
 	log, err = NewLogger("tst", 1, nil)
