@@ -15,6 +15,22 @@ import (
 	"time"
 )
 
+const (
+	// Default format of log message
+	// %[1] // %{id}
+	// %[2] // %{time[:fmt]}
+	// %[3] // %{module}
+	// %[4] // %{function}
+	// %[5] // %{filename}
+	// %[6] // %{line}
+	// %[7] // %{level}
+	// %[8] // %{message}
+	defProductionFmt  = "%.16[3]s %.19[2]s %.3[7]s ▶ %[8]s"
+	defDevelopmentFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[4]s ▶ %[8]s"
+	// Error, Fatal, Critical Format
+	//defErrorFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[8]s\n▶ %[5]s:%[6]d-%[4]s"
+)
+
 var (
 	// Map for the various codes of colors
 	colors map[LogLevel]string
@@ -25,20 +41,7 @@ var (
 	// Contains color strings for stdout
 	logNo uint64
 
-	// Default format of log message
-	// %[1] // %{id}
-	// %[2] // %{time[:fmt]}
-	// %[3] // %{module}
-	// %[4] // %{function}
-	// %[5] // %{filename}
-	// %[6] // %{line}
-	// %[7] // %{level}
-	// %[8] // %{message}
-	defFmt            = "#%[1]d %.19[2]s %[5]s:%[6]d ▶ %.3[7]s %[8]s"
-	defProductionFmt  = "%.16[3]s %.19[2]s %.3[7]s ▶ %[8]s"
-	defDevelopmentFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[4]s ▶ %[8]s"
-	// Error, Fatal, Critical Format
-	//defErrorFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[8]s\n▶ %[5]s:%[6]d-%[4]s"
+	defFmt = "#%[1]d %.19[2]s %[5]s:%[6]d ▶ %.3[7]s %[8]s"
 
 	// Default format of time
 	defTimeFmt = "2006-01-02 15:04:05"
@@ -78,6 +81,7 @@ type Worker struct {
 	format     string
 	timeFormat string
 	level      LogLevel
+	function   string
 }
 
 // Info class, Contains all the info on what has to logged, time is the current time, Module is the specific module
@@ -223,6 +227,16 @@ func (l *Logger) SetLogLevel(level LogLevel) {
 	l.worker.level = level
 }
 
+// SetFunction sets the function name ofr the worker
+func (w *Worker) SetFunction(name string) {
+	w.function = name
+}
+
+// SetFunction sets the function name of the logger
+func (l *Logger) SetFunction(name string) {
+	l.worker.function = name
+}
+
 // Log Function of Worker class to log a string based on level
 func (w *Worker) Log(level LogLevel, calldepth int, info *Info) error {
 
@@ -254,8 +268,8 @@ func initColors() {
 		SuccessLevel:  colorString(Green),
 		WarningLevel:  colorString(Yellow),
 		NoticeLevel:   colorString(Cyan),
-		DebugLevel:    colorString(Blue),
 		InfoLevel:     colorString(White),
+		DebugLevel:    colorString(Blue),
 	}
 }
 

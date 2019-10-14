@@ -7,18 +7,18 @@ import (
 func doLogs(log *golog.Logger) {
 	// Critically log critical
 	log.Critical("This is Critical!")
-	// Debug
-	log.Debug("This is Debug!")
-	// Give the Warning
-	log.Warning("This is Warning!")
 	// Show the error
 	log.Error("This is Error!")
+	// Show the success
+	log.Success("This is Success!")
+	// Give the Warning
+	log.Warning("This is Warning!")
 	// Notice
 	log.Notice("This is Notice!")
 	// Show the info
 	log.Info("This is Info!")
-	// Show the info
-	log.Success("This is Success!")
+	// Debug
+	log.Debug("This is Debug!")
 }
 
 func main() {
