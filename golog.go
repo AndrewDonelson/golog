@@ -99,32 +99,27 @@ func (l *Logger) SetFunction(name string) {
 	l.worker.function = name
 }
 
+// SetEnvironment is used to manually set the log environment to either development, testing or production
+func (l *Logger) SetEnvironment(env uint8) {
+	l.worker.SetEnvironment(env)
+}
+
 // NewLogger creates a new logger for the given model & environment
-func NewLogger(module string, environment int) (*Logger, error) {
+func NewLogger(module string, environment uint8, out io.Writer) (*Logger, error) {
 	var (
-		color            = 1
-		out    io.Writer = os.Stderr
-		level            = ErrorLevel
-		format           = defProductionFmt
+		color = 1
 	)
+
+	if out == nil {
+		out = os.Stderr
+	}
 
 	if len(module) <= 3 {
 		panic("You must provide a name for the module (app, rpc, etc)")
 	}
 
-	if environment == 1 {
-		// set for test (qa)
-		level = InfoLevel
-		format = defFmt
-	} else if environment == 2 {
-		// set for developer
-		level = DebugLevel
-		format = defDevelopmentFmt
-	}
-
 	newWorker := NewWorker("", 0, color, out)
-	newWorker.SetLogLevel(level)
-	newWorker.SetFormat(format)
+	newWorker.SetEnvironment(environment)
 	return &Logger{Module: module, worker: newWorker}, nil
 }
 

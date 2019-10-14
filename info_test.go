@@ -13,7 +13,8 @@ import (
 func TestNewInfo(t *testing.T) {
 	var buf bytes.Buffer
 
-	log, err := New("test", 0, &buf)
+	//log, err := New("test", 0, &buf)
+	log, err := NewLogger("test", 2, &buf)
 	if err != nil {
 		panic(err) // Check for error
 	}
@@ -43,7 +44,7 @@ func TestNewInfo(t *testing.T) {
 		panic(err)
 	}
 
-	want := fmt.Sprintf("#1 %s testing.go:865 ▶ WAR Hello World!\n", time.Now().Format("2006-01-02 15:04:05"))
+	want := fmt.Sprintf("[33mtest %s WARNING ▶ testing.tRunner ▶ Hello World![0m\n", time.Now().Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)

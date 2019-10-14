@@ -70,7 +70,7 @@ func BenchmarkLoggerNew(b *testing.B) {
 
 func BenchmarkLoggerNewLogger(b *testing.B) {
 	for n := 0; n <= b.N; n++ {
-		log, err := NewLogger("bench-production", 2)
+		log, err := NewLogger("bench-production", 1, nil)
 		if err != nil && log == nil {
 			panic(err)
 		}
