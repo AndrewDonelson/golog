@@ -6,6 +6,7 @@ package golog
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"runtime"
@@ -82,7 +83,8 @@ type Logger struct {
 	worker  *Worker
 }
 
-func (l *Logger) Init() {
+// init is called by NewLogger to detect running conditions and set all defaults
+func (l *Logger) init() {
 	if flag.Lookup("test.v") != nil {
 		println("Environment: Testing")
 		detectedBuildEnv = "Testing"
@@ -125,7 +127,7 @@ func NewLogger(opts *Options) (*Logger, error) {
 	newWorker := NewWorker("", 0, opts.UseColor, opts.Out)
 	newWorker.SetEnvironment(opts.Environment)
 	l := &Logger{Module: opts.Module, worker: newWorker}
-	l.Init()
+	l.init()
 	l.Options = *opts
 	return l, nil
 
@@ -204,7 +206,14 @@ func (l *Logger) SetFunction(name string) {
 
 // SetEnvironment is used to manually set the log environment to either development, testing or production
 func (l *Logger) SetEnvironment(env int) {
+	l.Options.Environment = env
 	l.worker.SetEnvironment(env)
+}
+
+// SetOutput is used to manually set the output to send log data
+func (l *Logger) SetOutput(out io.Writer) {
+	l.Options.Out = out
+	l.worker.SetOutput(out)
 }
 
 // Log The log command is the function available to user to log message,

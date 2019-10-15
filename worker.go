@@ -59,6 +59,11 @@ func (w *Worker) SetEnvironment(env int) {
 	w.format = defProductionFmt
 }
 
+// SetOutput is used to manually set the output to send log data
+func (w *Worker) SetOutput(out io.Writer) {
+	w.Minion.SetOutput(out)
+}
+
 // Log Function of Worker class to log a string based on level
 func (w *Worker) Log(level LogLevel, calldepth int, info *Info) error {
 
