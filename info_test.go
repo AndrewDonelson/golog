@@ -14,10 +14,12 @@ func TestNewInfo(t *testing.T) {
 	var buf bytes.Buffer
 
 	//log, err := New("test", 0, &buf)
-	log, err := NewLogger("test", 2, &buf)
+	log, err := NewLogger(nil)
 	if err != nil {
-		panic(err) // Check for error
+		t.Error(err) // Check for error
+		return
 	}
+	log.Options.Out = &buf
 
 	// Get current function name
 	pc := make([]uintptr, 15)
@@ -41,7 +43,8 @@ func TestNewInfo(t *testing.T) {
 	}
 	err = log.worker.Log(WarningLevel, 2, info)
 	if err != nil {
-		panic(err)
+		t.Error(err)
+		return
 	}
 
 	want := fmt.Sprintf("[33mtest %s WARNING ▶ testing.tRunner ▶ Hello World![0m\n", time.Now().Format("2006-01-02 15:04:05"))

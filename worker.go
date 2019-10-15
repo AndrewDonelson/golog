@@ -12,7 +12,7 @@ import (
 // if colored output is to be produced
 type Worker struct {
 	Minion     *log.Logger
-	Color      int
+	Color      bool
 	format     string
 	timeFormat string
 	level      LogLevel
@@ -21,7 +21,7 @@ type Worker struct {
 
 // NewWorker Returns an instance of worker class, prefix is the string attached to every log,
 // flag determine the log params, color parameters verifies whether we need colored outputs or not
-func NewWorker(prefix string, flag int, color int, out io.Writer) *Worker {
+func NewWorker(prefix string, flag int, color bool, out io.Writer) *Worker {
 	return &Worker{Minion: log.New(out, prefix, flag), Color: color, format: defFmt, timeFormat: defTimeFmt}
 }
 
@@ -41,7 +41,7 @@ func (w *Worker) SetFunction(name string) {
 }
 
 // SetEnvironment is used to manually set the log environment to either development, testing or production
-func (w *Worker) SetEnvironment(env uint8) {
+func (w *Worker) SetEnvironment(env int) {
 	if env == 1 {
 		// set for test (qa)
 		w.level = InfoLevel
@@ -66,7 +66,7 @@ func (w *Worker) Log(level LogLevel, calldepth int, info *Info) error {
 		return nil
 	}
 
-	if w.Color != 0 {
+	if w.Color {
 		buf := &bytes.Buffer{}
 		buf.Write([]byte(colors[level]))
 		buf.Write([]byte(info.Output(w.format)))

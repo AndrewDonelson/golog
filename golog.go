@@ -4,8 +4,8 @@ package golog
 
 // Import packages
 import (
+	"flag"
 	"fmt"
-	"io"
 	"os"
 	"path"
 	"runtime"
@@ -31,6 +31,8 @@ const (
 )
 
 var (
+	detectedBuildEnv = ""
+
 	// Map for the various codes of colors
 	colors map[LogLevel]string
 
@@ -75,9 +77,110 @@ const (
 // Logger class that is an interface to user to log messages, Module is the module for which we are testing
 // worker is variable of Worker class that is used in bottom layers to log the message
 type Logger struct {
-	Module string
-	worker *Worker
+	Options Options
+	Module  string
+	worker  *Worker
 }
+
+func (l *Logger) Init() {
+	if flag.Lookup("test.v") != nil {
+		println("Environment: Testing")
+		detectedBuildEnv = "Testing"
+	} else {
+		be := os.Getenv("BUILD_ENV")
+		if be == "dev" {
+			println("Environment: Development")
+			detectedBuildEnv = "Development"
+		} else if be == "qa" {
+			println("Environment: Quality Assurance")
+			detectedBuildEnv = "Quality Assurance"
+		} else {
+			println("Environment: Production")
+			detectedBuildEnv = "Production"
+		}
+	}
+
+	//initColors()
+	//initFormatPlaceholders()
+}
+
+// NewLogger creates and returns new logger for the given model & environment
+// module is the specific module for which we are logging
+// environment overrides detected environment (if -1)
+// color defines whether the output is to be colored or not, out is instance of type io.Writer defaults
+// to os.Stderr
+func NewLogger(opts *Options) (*Logger, error) {
+	if opts == nil {
+		opts = NewDefaultOptions()
+	}
+
+	if opts.Out == nil {
+		opts.Out = os.Stderr
+	}
+
+	if len(opts.Module) <= 3 {
+		return nil, fmt.Errorf("You must provide a name for the module (app, rpc, etc)")
+	}
+
+	newWorker := NewWorker("", 0, opts.UseColor, opts.Out)
+	newWorker.SetEnvironment(opts.Environment)
+	l := &Logger{Module: opts.Module, worker: newWorker}
+	l.Init()
+	l.Options = *opts
+	return l, nil
+
+}
+
+// New creates and returns new logger for the given model & environment
+// module is the specific module for which we are logging
+// environment overrides detected environment (if -1)
+// color defines whether the output is to be colored or not, out is instance of type io.Writer defaults
+// to os.Stderr
+// func New(module string, environment int, color bool, out io.Writer) (*Logger, error) {
+
+// 	if out == nil {
+// 		out = os.Stderr
+// 	}
+
+// 	if len(module) <= 3 {
+// 		return nil, fmt.Errorf("You must provide a name for the module (app, rpc, etc)")
+// 	}
+
+// 	newWorker := NewWorker("", 0, color, out)
+// 	newWorker.SetEnvironment(environment)
+// 	return &Logger{Module: module, worker: newWorker}, nil
+// }
+
+// New Returns a new instance of logger class, module is the specific module for which we are logging
+// , color defines whether the output is to be colored or not, out is instance of type io.Writer defaults
+// to os.Stderr
+// func New(args ...interface{}) (*Logger, error) {
+
+// 	var (
+// 		module           = "DEFAULT"
+// 		color            = true
+// 		out    io.Writer = os.Stderr
+// 		level            = InfoLevel
+// 	)
+
+// 	for _, arg := range args {
+// 		switch t := arg.(type) {
+// 		case string:
+// 			module = t
+// 		case bool:
+// 			color = t
+// 		case io.Writer:
+// 			out = t
+// 		case LogLevel:
+// 			level = t
+// 		default:
+// 			return nil, fmt.Errorf("logger: Unknown argument")
+// 		}
+// 	}
+// 	newWorker := NewWorker("", 0, color, out)
+// 	newWorker.SetLogLevel(level)
+// 	return &Logger{Module: module, worker: newWorker}, nil
+// }
 
 // SetDefaultFormat ...
 func SetDefaultFormat(format string) {
@@ -100,59 +203,8 @@ func (l *Logger) SetFunction(name string) {
 }
 
 // SetEnvironment is used to manually set the log environment to either development, testing or production
-func (l *Logger) SetEnvironment(env uint8) {
+func (l *Logger) SetEnvironment(env int) {
 	l.worker.SetEnvironment(env)
-}
-
-// NewLogger creates a new logger for the given model & environment
-func NewLogger(module string, environment uint8, out io.Writer) (*Logger, error) {
-	var (
-		color = 1
-	)
-
-	if out == nil {
-		out = os.Stderr
-	}
-
-	if len(module) <= 3 {
-		return nil, fmt.Errorf("You must provide a name for the module (app, rpc, etc)")
-	}
-
-	newWorker := NewWorker("", 0, color, out)
-	newWorker.SetEnvironment(environment)
-	return &Logger{Module: module, worker: newWorker}, nil
-}
-
-// New Returns a new instance of logger class, module is the specific module for which we are logging
-// , color defines whether the output is to be colored or not, out is instance of type io.Writer defaults
-// to os.Stderr
-func New(args ...interface{}) (*Logger, error) {
-	//initColors()
-
-	var (
-		module           = "DEFAULT"
-		color            = 1
-		out    io.Writer = os.Stderr
-		level            = InfoLevel
-	)
-
-	for _, arg := range args {
-		switch t := arg.(type) {
-		case string:
-			module = t
-		case int:
-			color = t
-		case io.Writer:
-			out = t
-		case LogLevel:
-			level = t
-		default:
-			panic("logger: Unknown argument")
-		}
-	}
-	newWorker := NewWorker("", 0, color, out)
-	newWorker.SetLogLevel(level)
-	return &Logger{Module: module, worker: newWorker}, nil
 }
 
 // Log The log command is the function available to user to log message,

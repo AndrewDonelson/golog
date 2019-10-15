@@ -12,10 +12,12 @@ import (
 
 func BenchmarkLoggerLog(b *testing.B) {
 	b.StopTimer()
-	log, err := New("test", 1)
+	//log, err := New("test", 0, false, nil)
+	log, err := NewLogger(nil)
 	if err != nil {
 		panic(err)
 	}
+	log.Options.Module = "BenchLog"
 
 	var tests = []struct {
 		level   LogLevel
@@ -61,7 +63,7 @@ func BenchmarkLoggerLog(b *testing.B) {
 
 func BenchmarkLoggerNew(b *testing.B) {
 	for n := 0; n <= b.N; n++ {
-		log, err := New("test", 1)
+		log, err := NewLogger(nil)
 		if err != nil && log == nil {
 			panic(err)
 		}
@@ -70,10 +72,12 @@ func BenchmarkLoggerNew(b *testing.B) {
 
 func BenchmarkLoggerNewLogger(b *testing.B) {
 	for n := 0; n <= b.N; n++ {
-		log, err := NewLogger("bench-production", 1, nil)
+		log, err := NewLogger(nil)
 		if err != nil && log == nil {
 			panic(err)
 		}
+		log.Options.Module = "BenchNewLogger"
+		log.SetEnvironment(0)
 	}
 }
 
@@ -91,17 +95,21 @@ func TestParseFormat(t *testing.T) {
 	if have != want {
 		t.Errorf("\nWant: %s\nHave: %s", want, have)
 	}
-	
-} 
+
+}
 
 func TestLoggerNew(t *testing.T) {
-	log, err := New("test", 1)
+	//log, err := New("test", 1, true, nil)
+	log, err := NewLogger(NewDefaultOptions())
 	if err != nil {
-		panic(err)
+		t.Error(err)
+		return
 	}
-	if log.Module != "test" {
+
+	if log.Module != "unknown" {
 		t.Errorf("Unexpected module: %s", log.Module)
 	}
+
 	log.SetFunction("TestLoggerNew")
 	log.SetEnvironment(2)
 }
@@ -110,29 +118,33 @@ func TestNewLogger(t *testing.T) {
 	var buf bytes.Buffer
 
 	// Test for no user defined out
-	log, err := NewLogger("test", 1, nil)
+	log, err := NewLogger(NewDefaultOptions())
 	if err != nil {
 		t.Error("Unexpected error. Wanted valid logger")
 	}
 	log.SetLogLevel(DebugLevel)
 
-	// Test for module name less than 4 characters in length
-	log, err = NewLogger("tst", 1, nil)
-	if err == nil || log != nil {
-		t.Error("Expected an error")
-	} 
+	// // Test for module name less than 4 characters in length
+	// log, err := NewLogger(NewDefaultOptions())
+	// if err == nil || log != nil {
+	// 	t.Error("Expected an error")
+	// }
 
 	// test with standard out
-	log, err = NewLogger("test", 1, &buf)
+	log, err = NewLogger(&Options{
+		Module: "test",
+		Out:    &buf,
+	})
 	if err != nil {
-		panic(err)
+		t.Error(err)
+		return
 	}
 	if log.Module != "test" {
 		t.Errorf("Unexpected module: %s", log.Module)
 	}
 	log.SetFunction("TestLoggerNew")
 	log.SetEnvironment(2)
-	log.Log(WarningLevel,"This is only a warning")
+	log.Log(WarningLevel, "This is only a warning")
 
 	//log.Fatal("This is a fatal message")
 	//log.Fatalf("This is %d %s message", 1, "fatal")
@@ -162,59 +174,59 @@ func TestColorString(t *testing.T) {
 // InfoLevel                         // White 		37
 // DebugLevel                        // Blue 		34
 
-func TestInitColors(t *testing.T) {
-	//initColors()
-	var tests = []struct {
-		level       LogLevel
-		color       int
-		colorString string
-	}{
-		{
-			CriticalLevel,
-			Magenta,
-			"\033[35m",
-		},
-		{
-			ErrorLevel,
-			Red,
-			"\033[31m",
-		},
-		{
-			SuccessLevel,
-			Green,
-			"\033[32m",
-		},
-		{
-			WarningLevel,
-			Yellow,
-			"\033[33m",
-		},
-		{
-			NoticeLevel,
-			Cyan,
-			"\033[36m",
-		},
-		{
-			InfoLevel,
-			White,
-			"\033[37m",
-		},
-		{
-			DebugLevel,
-			Blue,
-			"\033[34m",
-		},
-	}
+// func TestInitColors(t *testing.T) {
+// 	//initColors()
+// 	var tests = []struct {
+// 		level       LogLevel
+// 		color       int
+// 		colorString string
+// 	}{
+// 		{
+// 			CriticalLevel,
+// 			Magenta,
+// 			"\033[35m",
+// 		},
+// 		{
+// 			ErrorLevel,
+// 			Red,
+// 			"\033[31m",
+// 		},
+// 		{
+// 			SuccessLevel,
+// 			Green,
+// 			"\033[32m",
+// 		},
+// 		{
+// 			WarningLevel,
+// 			Yellow,
+// 			"\033[33m",
+// 		},
+// 		{
+// 			NoticeLevel,
+// 			Cyan,
+// 			"\033[36m",
+// 		},
+// 		{
+// 			InfoLevel,
+// 			White,
+// 			"\033[37m",
+// 		},
+// 		{
+// 			DebugLevel,
+// 			Blue,
+// 			"\033[34m",
+// 		},
+// 	}
 
-	for _, test := range tests {
-		if colors[test.level] != test.colorString {
-			t.Errorf("Unexpected color string %d", test.color)
-		}
-	}
-}
+// 	for _, test := range tests {
+// 		if colors[test.level] != test.colorString {
+// 			t.Errorf("Unexpected color string %d", test.color)
+// 		}
+// 	}
+// }
 
 func TestNewWorker(t *testing.T) {
-	var worker = NewWorker("", 0, 1, os.Stderr)
+	var worker = NewWorker("", 0, true, os.Stderr)
 	if worker.Minion == nil {
 		t.Errorf("Minion was not established")
 	}
@@ -222,7 +234,7 @@ func TestNewWorker(t *testing.T) {
 
 func BenchmarkNewWorker(b *testing.B) {
 	for n := 0; n <= b.N; n++ {
-		worker := NewWorker("", 0, 1, os.Stderr)
+		worker := NewWorker("", 0, true, os.Stderr)
 		if worker == nil {
 			panic("Failed to initiate worker")
 		}
@@ -231,9 +243,15 @@ func BenchmarkNewWorker(b *testing.B) {
 
 func TestLogger_SetFormat(t *testing.T) {
 	var buf bytes.Buffer
-	log, err := New("pkgname", 0, &buf)
+	log, err := NewLogger(&Options{
+		Module:      "pkgname",
+		Out:         &buf,
+		Environment: 0,
+		UseColor:    false,
+	})
 	if err != nil || log == nil {
-		panic(err)
+		t.Error(err)
+		return
 	}
 
 	log.SetLogLevel(DebugLevel)
@@ -294,10 +312,18 @@ func TestLogger_SetFormat(t *testing.T) {
 func TestSetDefaultFormat(t *testing.T) {
 	SetDefaultFormat("%{module} %{lvl} %{message}")
 	var buf bytes.Buffer
-	log, err := New("pkgname", 0, &buf)
+
+	log, err := NewLogger(&Options{
+		Module:      "pkgname",
+		Out:         &buf,
+		Environment: 0,
+		UseColor:    false,
+	})
 	if err != nil || log == nil {
-		panic(err)
+		t.Error(err)
+		return
 	}
+
 	log.Criticalf("Test %d", 123)
 	want := "pkgname CRI Test 123\n"
 	have := buf.String()
@@ -343,9 +369,16 @@ func TestLogLevel(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	log, err := New("pkgname", 0, &buf)
-	if err != nil {
-		panic(err)
+
+	log, err := NewLogger(&Options{
+		Module:      "pkgname",
+		Out:         &buf,
+		Environment: 0,
+		UseColor:    false,
+	})
+	if err != nil || log == nil {
+		t.Error(err)
+		return
 	}
 
 	for i, test := range tests {
