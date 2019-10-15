@@ -19,7 +19,7 @@ func TestNewInfo(t *testing.T) {
 		t.Error(err) // Check for error
 		return
 	}
-	log.Options.Out = &buf
+	log.SetOutput(&buf)
 
 	// Get current function name
 	pc := make([]uintptr, 15)
@@ -35,19 +35,19 @@ func TestNewInfo(t *testing.T) {
 		Time:     time.Now().Format(log.worker.timeFormat),
 		Module:   log.Module,
 		Function: frame.Function,
-		Level:    WarningLevel,
+		Level:    InfoLevel,
 		Message:  "Hello World!",
 		Filename: filename,
 		Line:     line,
 		//format:   formatString,
 	}
-	err = log.worker.Log(WarningLevel, 2, info)
+	err = log.worker.Log(CriticalLevel, 2, info)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	want := fmt.Sprintf("[33mtest %s WARNING ▶ testing.tRunner ▶ Hello World![0m\n", time.Now().Format("2006-01-02 15:04:05"))
+	want := fmt.Sprintf("unknown %s INF ▶ Hello World!\n", time.Now().Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)

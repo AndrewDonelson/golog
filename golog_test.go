@@ -259,7 +259,7 @@ func TestLogger_SetFormat(t *testing.T) {
 	log.SetLogLevel(InfoLevel)
 
 	//want := time.Now().Format("2006-01-02 15:04:05")
-	want := fmt.Sprintf("#10 %s golog_test.go:240 ▶ DEB Test\n", time.Now().Format("2006-01-02 15:04:05"))
+	want := fmt.Sprintf("pkgname %s DEB ▶ Test\n", time.Now().Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)
@@ -310,7 +310,6 @@ func TestLogger_SetFormat(t *testing.T) {
 }
 
 func TestSetDefaultFormat(t *testing.T) {
-	SetDefaultFormat("%{module} %{lvl} %{message}")
 	var buf bytes.Buffer
 
 	log, err := NewLogger(&Options{
@@ -324,8 +323,11 @@ func TestSetDefaultFormat(t *testing.T) {
 		return
 	}
 
+	SetDefaultFormat(defFmt)
+
+	now := time.Now()
 	log.Criticalf("Test %d", 123)
-	want := "pkgname CRI Test 123\n"
+	want := fmt.Sprintf("pkgname %s CRI ▶ Test 123\n", now.Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if want != have {
 		t.Errorf("\nWant: %sHave: %s", want, have)
