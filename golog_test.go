@@ -81,6 +81,14 @@ func BenchmarkLoggerNewLogger(b *testing.B) {
 }
 
 func TestParseFormat(t *testing.T) {
+	// We do this just to initialize the required code on the
+	log, err := NewLogger(nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	log.SetEnvironment(2)
+
 	msgFmt, tmeFmt := parseFormat("foobar")
 	want := fmt.Sprintf("%s, %s", defFmt, defTimeFmt)
 	have := fmt.Sprintf("%s, %s", msgFmt, tmeFmt)
@@ -94,6 +102,20 @@ func TestParseFormat(t *testing.T) {
 	if have != want {
 		t.Errorf("\nWant: %s\nHave: %s", want, have)
 	}
+
+	msgFmt, tmeFmt = parseFormat("%{id}, %{time}, %{module}, %{function}, %{filename}, %{file}, %{line}, %{level}, %{lvl}, %{message}")
+	want = "%[1]d, %[2]s, %[3]s, %[4]s, %[5]s, %[5]s, %[6]d, %[7]s, %.3[7]s, %[8]s, 2006-01-02 15:04:05"
+	have = fmt.Sprintf("%s, %s", msgFmt, tmeFmt)
+	if have != want {
+		t.Errorf("\nWant: %s\nHave: %s", want, have)
+	}
+
+	// msgFmt, tmeFmt = parseFormat("{%{id}}, %{%time}")
+	// want = "%[1]d, %[2]s, %[3]s, %[4]s, %[5]s, %[5]s, %[6]d, %[7]s, %.3[7]s, %[8]s, 2006-01-02 15:04:05"
+	// have = fmt.Sprintf("%s, %s", msgFmt, tmeFmt)
+	// if have != want {
+	// 	t.Errorf("\nWant: %s\nHave: %s", want, have)
+	// }
 
 }
 
@@ -110,6 +132,29 @@ func TestLoggerNew(t *testing.T) {
 
 	log.SetFunction("TestLoggerNew")
 	log.SetEnvironment(2)
+
+	// Test for invalid output passed in
+	log, err = NewLogger(&Options{Module: "BadOut", Out: nil})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Test for Module name to short < 4
+	log, err = NewLogger(&Options{Module: "mod"})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Test for Module name to short < 4
+	log, err = NewLogger(&Options{Module: "mod"})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+
 }
 
 func TestNewLogger(t *testing.T) {
@@ -194,6 +239,21 @@ func TestLogger_SetFormat(t *testing.T) {
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)
 	}
+}
+
+func TestAdvancedFormat(t *testing.T) {
+	var buf bytes.Buffer
+	log, err := NewLogger(&Options{
+		Module:      "pkgname",
+		Out:         &buf,
+		Environment: 0,
+		UseColor:    false,
+	})
+	if err != nil || log == nil {
+		t.Error(err)
+		return
+	}
+
 	format :=
 		"text123 %{id} " + // text and digits before id
 			"!@#$% %{time:Monday, 2006 Jan 01, 15:04:05} " + // symbols before time with spec format
@@ -204,23 +264,22 @@ func TestLogger_SetFormat(t *testing.T) {
 			"%{nonex_verb} %{lvl} " + // nonexistent verb berfore real verb
 			"%{incorr_verb %{level} " + // incorrect verb before real verb
 			"%{} [%{message}]" // empty verb before message in sq brackets
-	buf.Reset()
 	log.SetFormat(format)
 	log.Error("This is Error!")
 	now := time.Now()
-	want = fmt.Sprintf(
-		"text123 11 "+
+	want := fmt.Sprintf(
+		"text123 11 "+ //SET TO 1 for running this test alone and SET TO 11 for running as package test
 			"!@#$%% %s "+
 			"a{b pkgname "+
 			"a}b golog_test.go "+
 			"%%%% golog_test.go "+ // it's printf, escaping %, don't forget
-			"%%{261 "+
+			"%%{260 "+
 			" ERR "+
 			"%%{incorr_verb ERROR "+
 			" [This is Error!]\n",
 		now.Format("Monday, 2006 Jan 01, 15:04:05"),
 	)
-	have = buf.String()
+	have := buf.String()
 	if want != have {
 		t.Errorf("\nWant: %sHave: %s", want, have)
 		wantLen := len(want)
@@ -237,6 +296,7 @@ func TestLogger_SetFormat(t *testing.T) {
 			}
 		}
 	}
+
 }
 
 func TestSetDefaultFormat(t *testing.T) {

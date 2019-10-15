@@ -40,7 +40,7 @@ func parseFormat(format string) (msgfmt, timefmt string) {
 					}
 					format = format[jdx+1:]
 				} else {
-					format = format[1:]
+					format = format[1:] // TODO: Hit with test
 				}
 			} else {
 				msgfmt += "%%"
@@ -61,7 +61,7 @@ func ph2verb(ph string) (verb string, arg string) {
 		return ``, ``
 	}
 	if ph[0] != '%' || ph[1] != '{' || ph[n-1] != '}' {
-		return ``, ``
+		return ``, `` // TODO: Hit with test
 	}
 	idx := strings.IndexRune(ph, ':')
 	if idx == -1 {
@@ -75,4 +75,34 @@ func ph2verb(ph string) (verb string, arg string) {
 // colorString Returns a proper string to output for colored logging
 func colorString(color int) string {
 	return fmt.Sprintf("\033[%dm", int(color))
+}
+
+// initColors Initializes the map of colors
+func initColors() {
+	colors = map[LogLevel]string{
+		CriticalLevel: colorString(Magenta),
+		ErrorLevel:    colorString(Red),
+		SuccessLevel:  colorString(Green),
+		WarningLevel:  colorString(Yellow),
+		NoticeLevel:   colorString(Cyan),
+		InfoLevel:     colorString(White),
+		DebugLevel:    colorString(Blue),
+	}
+}
+
+// initFormatPlaceholders Initializes the map of placeholders
+// "%{id}, %{time}, %{module}, %{function}, %{filename}, %{file}, %{line}, %{level}, %{lvl}, %{message}" 
+func initFormatPlaceholders() {
+	phfs = map[string]string{
+		"%{id}":       "%[1]d",
+		"%{time}":     "%[2]s",
+		"%{module}":   "%[3]s",
+		"%{function}": "%[4]s",
+		"%{filename}": "%[5]s",
+		"%{file}":     "%[5]s",
+		"%{line}":     "%[6]d",
+		"%{level}":    "%[7]s",
+		"%{lvl}":      "%.3[7]s",
+		"%{message}":  "%[8]s",
+	}
 }

@@ -25,23 +25,26 @@ func main() {
 	// Get the instance for logger class
 	// Third option is optional and is instance of type io.Writer, defaults to os.Stderr
 	println("\nProduction Output:")
-	log, err := golog.NewLogger("production", 0, nil)
+	log, err := golog.NewLogger(nil)
 	if err != nil {
 		panic(err) // Check for error
 	}
+	log.SetEnvironment(0)
 	doLogs(log)
 
 	println("\nTest/QA Output:")
-	log, err = golog.NewLogger("test-qa", 1, nil)
+	log, err = golog.NewLogger(nil)
 	if err != nil {
 		panic(err) // Check for error
 	}
+	log.SetEnvironment(1)
 	doLogs(log)
 
 	println("\nDevelopment Output:")
-	log, err = golog.NewLogger("development", 2, nil)
+	log, err = golog.NewLogger(nil)
 	if err != nil {
 		panic(err) // Check for error
 	}
+	log.SetEnvironment(0)
 	doLogs(log)
 }

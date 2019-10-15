@@ -32,8 +32,6 @@ const (
 )
 
 var (
-	detectedBuildEnv = ""
-
 	// Map for the various codes of colors
 	colors map[LogLevel]string
 
@@ -87,20 +85,23 @@ type Logger struct {
 func (l *Logger) init() {
 	if flag.Lookup("test.v") != nil {
 		println("Environment: Testing")
-		detectedBuildEnv = "Testing"
+		l.SetEnvironment(-1)
 	} else {
 		be := os.Getenv("BUILD_ENV")
 		if be == "dev" {
 			println("Environment: Development")
-			detectedBuildEnv = "Development"
+			l.SetEnvironment(2)
 		} else if be == "qa" {
 			println("Environment: Quality Assurance")
-			detectedBuildEnv = "Quality Assurance"
+			l.SetEnvironment(1)
 		} else {
 			println("Environment: Production")
-			detectedBuildEnv = "Production"
+			l.SetEnvironment(0)
 		}
 	}
+
+	initColors()
+	initFormatPlaceholders()
 }
 
 // NewLogger creates and returns new logger for the given model & environment
@@ -118,14 +119,14 @@ func NewLogger(opts *Options) (*Logger, error) {
 	}
 
 	if len(opts.Module) <= 3 {
-		return nil, fmt.Errorf("You must provide a name for the module (app, rpc, etc)")
+		opts.Module = "unknown"
 	}
 
 	newWorker := NewWorker("", 0, opts.UseColor, opts.Out)
-	newWorker.SetEnvironment(opts.Environment)
 	l := &Logger{Module: opts.Module, worker: newWorker}
 	l.init()
 	l.Options = *opts
+	newWorker.SetEnvironment(opts.Environment)
 	return l, nil
 
 }
