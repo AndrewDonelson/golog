@@ -101,9 +101,6 @@ func (l *Logger) init() {
 			detectedBuildEnv = "Production"
 		}
 	}
-
-	//initColors()
-	//initFormatPlaceholders()
 }
 
 // NewLogger creates and returns new logger for the given model & environment
@@ -132,57 +129,6 @@ func NewLogger(opts *Options) (*Logger, error) {
 	return l, nil
 
 }
-
-// New creates and returns new logger for the given model & environment
-// module is the specific module for which we are logging
-// environment overrides detected environment (if -1)
-// color defines whether the output is to be colored or not, out is instance of type io.Writer defaults
-// to os.Stderr
-// func New(module string, environment int, color bool, out io.Writer) (*Logger, error) {
-
-// 	if out == nil {
-// 		out = os.Stderr
-// 	}
-
-// 	if len(module) <= 3 {
-// 		return nil, fmt.Errorf("You must provide a name for the module (app, rpc, etc)")
-// 	}
-
-// 	newWorker := NewWorker("", 0, color, out)
-// 	newWorker.SetEnvironment(environment)
-// 	return &Logger{Module: module, worker: newWorker}, nil
-// }
-
-// New Returns a new instance of logger class, module is the specific module for which we are logging
-// , color defines whether the output is to be colored or not, out is instance of type io.Writer defaults
-// to os.Stderr
-// func New(args ...interface{}) (*Logger, error) {
-
-// 	var (
-// 		module           = "DEFAULT"
-// 		color            = true
-// 		out    io.Writer = os.Stderr
-// 		level            = InfoLevel
-// 	)
-
-// 	for _, arg := range args {
-// 		switch t := arg.(type) {
-// 		case string:
-// 			module = t
-// 		case bool:
-// 			color = t
-// 		case io.Writer:
-// 			out = t
-// 		case LogLevel:
-// 			level = t
-// 		default:
-// 			return nil, fmt.Errorf("logger: Unknown argument")
-// 		}
-// 	}
-// 	newWorker := NewWorker("", 0, color, out)
-// 	newWorker.SetLogLevel(level)
-// 	return &Logger{Module: module, worker: newWorker}, nil
-// }
 
 // SetDefaultFormat ...
 func SetDefaultFormat(format string) {
@@ -225,7 +171,6 @@ func (l *Logger) Log(lvl LogLevel, message string) {
 
 // logInternal ...
 func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
-	//var formatString string = "#%d %s [%s] %s:%d ▶ %.3s %s"
 	_, filename, line, _ := runtime.Caller(pos)
 	filename = path.Base(filename)
 	info := &Info{

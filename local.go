@@ -7,58 +7,6 @@ import (
 	"strings"
 )
 
-// // init pkg
-// func init() {
-// 	if flag.Lookup("test.v") != nil {
-// 		println("Environment: Testing")
-// 		detectedBuildEnv = "Testing"
-// 	} else {
-// 		be := os.Getenv("BUILD_ENV")
-// 		if be == "dev" {
-// 			println("Environment: Development")
-// 			detectedBuildEnv = "Development"
-// 		} else if be == "qa" {
-// 			println("Environment: Quality Assurance")
-// 			detectedBuildEnv = "Quality Assurance"
-// 		} else {
-// 			println("Environment: Production")
-// 			detectedBuildEnv = "Production"
-// 		}
-// 	}
-
-// 	initColors()
-// 	initFormatPlaceholders()
-// }
-
-// // initColors Initializes the map of colors
-// func initColors() {
-// 	colors = map[LogLevel]string{
-// 		CriticalLevel: colorString(Magenta),
-// 		ErrorLevel:    colorString(Red),
-// 		SuccessLevel:  colorString(Green),
-// 		WarningLevel:  colorString(Yellow),
-// 		NoticeLevel:   colorString(Cyan),
-// 		InfoLevel:     colorString(White),
-// 		DebugLevel:    colorString(Blue),
-// 	}
-// }
-
-// // initFormatPlaceholders Initializes the map of placeholders
-// func initFormatPlaceholders() {
-// 	phfs = map[string]string{
-// 		"%{id}":       "%[1]d",
-// 		"%{time}":     "%[2]s",
-// 		"%{module}":   "%[3]s",
-// 		"%{function}": "%[4]s",
-// 		"%{filename}": "%[5]s",
-// 		"%{file}":     "%[5]s",
-// 		"%{line}":     "%[6]d",
-// 		"%{level}":    "%[7]s",
-// 		"%{lvl}":      "%.3[7]s",
-// 		"%{message}":  "%[8]s",
-// 	}
-// }
-
 // Analyze and represent format string as printf format string and time format
 func parseFormat(format string) (msgfmt, timefmt string) {
 	if len(format) < 10 /* (len of "%{message} */ {

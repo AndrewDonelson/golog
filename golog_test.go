@@ -12,7 +12,6 @@ import (
 
 func BenchmarkLoggerLog(b *testing.B) {
 	b.StopTimer()
-	//log, err := New("test", 0, false, nil)
 	log, err := NewLogger(nil)
 	if err != nil {
 		panic(err)
@@ -99,7 +98,6 @@ func TestParseFormat(t *testing.T) {
 }
 
 func TestLoggerNew(t *testing.T) {
-	//log, err := New("test", 1, true, nil)
 	log, err := NewLogger(NewDefaultOptions())
 	if err != nil {
 		t.Error(err)
@@ -124,12 +122,6 @@ func TestNewLogger(t *testing.T) {
 	}
 	log.SetLogLevel(DebugLevel)
 
-	// // Test for module name less than 4 characters in length
-	// log, err := NewLogger(NewDefaultOptions())
-	// if err == nil || log != nil {
-	// 	t.Error("Expected an error")
-	// }
-
 	// test with standard out
 	log, err = NewLogger(&Options{
 		Module: "test",
@@ -146,8 +138,6 @@ func TestNewLogger(t *testing.T) {
 	log.SetEnvironment(2)
 	log.Log(WarningLevel, "This is only a warning")
 
-	//log.Fatal("This is a fatal message")
-	//log.Fatalf("This is %d %s message", 1, "fatal")
 	log.Errorf("This is %d %s message", 1, "error")
 	log.Successf("This is %d %s message", 1, "success")
 	log.Warningf("This is %d %s message", 1, "warning")
@@ -165,65 +155,6 @@ func TestColorString(t *testing.T) {
 		t.Errorf("Unexpected string: %s", colorCode)
 	}
 }
-
-// CriticalLevel LogLevel = iota + 1 // Magneta 	35
-// ErrorLevel                        // Red 		31
-// SuccessLevel                      // Green 		32
-// WarningLevel                      // Yellow 		33
-// NoticeLevel                       // Cyan 		36
-// InfoLevel                         // White 		37
-// DebugLevel                        // Blue 		34
-
-// func TestInitColors(t *testing.T) {
-// 	//initColors()
-// 	var tests = []struct {
-// 		level       LogLevel
-// 		color       int
-// 		colorString string
-// 	}{
-// 		{
-// 			CriticalLevel,
-// 			Magenta,
-// 			"\033[35m",
-// 		},
-// 		{
-// 			ErrorLevel,
-// 			Red,
-// 			"\033[31m",
-// 		},
-// 		{
-// 			SuccessLevel,
-// 			Green,
-// 			"\033[32m",
-// 		},
-// 		{
-// 			WarningLevel,
-// 			Yellow,
-// 			"\033[33m",
-// 		},
-// 		{
-// 			NoticeLevel,
-// 			Cyan,
-// 			"\033[36m",
-// 		},
-// 		{
-// 			InfoLevel,
-// 			White,
-// 			"\033[37m",
-// 		},
-// 		{
-// 			DebugLevel,
-// 			Blue,
-// 			"\033[34m",
-// 		},
-// 	}
-
-// 	for _, test := range tests {
-// 		if colors[test.level] != test.colorString {
-// 			t.Errorf("Unexpected color string %d", test.color)
-// 		}
-// 	}
-// }
 
 func TestNewWorker(t *testing.T) {
 	var worker = NewWorker("", 0, true, os.Stderr)
@@ -258,7 +189,6 @@ func TestLogger_SetFormat(t *testing.T) {
 	log.Debug("Test")
 	log.SetLogLevel(InfoLevel)
 
-	//want := time.Now().Format("2006-01-02 15:04:05")
 	want := fmt.Sprintf("pkgname %s DEB ▶ Test\n", time.Now().Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if have != want {

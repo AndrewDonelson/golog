@@ -13,7 +13,6 @@ import (
 func TestNewInfo(t *testing.T) {
 	var buf bytes.Buffer
 
-	//log, err := New("test", 0, &buf)
 	log, err := NewLogger(nil)
 	if err != nil {
 		t.Error(err) // Check for error
@@ -26,7 +25,6 @@ func TestNewInfo(t *testing.T) {
 	n := runtime.Callers(2, pc)
 	frames := runtime.CallersFrames(pc[:n])
 	frame, _ := frames.Next()
-	//fmt.Printf("%s:%d %s\n", frame.File, frame.Line, frame.Function)
 
 	_, filename, line, _ := runtime.Caller(1)
 	filename = path.Base(filename)
@@ -39,7 +37,6 @@ func TestNewInfo(t *testing.T) {
 		Message:  "Hello World!",
 		Filename: filename,
 		Line:     line,
-		//format:   formatString,
 	}
 	err = log.worker.Log(CriticalLevel, 2, info)
 	if err != nil {
