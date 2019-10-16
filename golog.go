@@ -23,8 +23,9 @@ const (
 	// %[6] // %{line}
 	// %[7] // %{level}
 	// %[8] // %{message}
+	defDefault        = "#%[1]d [%.16[3]s] %.19[2]s %.3[7]s %[8]s"
 	defProductionFmt  = "%.16[3]s %.19[2]s %.3[7]s ▶ %[8]s"
-	defDevelopmentFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[4]s ▶ %[8]s"
+	defDevelopmentFmt = "[%.16[3]s] %.19[2]s %.3[7]s ▶ %[5]s:%[6]d %[4]s ▶ %[8]s"
 
 	// Error, Fatal, Critical Format
 	//defErrorFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[8]s\n▶ %[5]s:%[6]d-%[4]s"
@@ -40,7 +41,7 @@ var (
 	// Contains color strings for stdout
 	logNo uint64
 
-	defFmt = "#%[1]d %.19[2]s %[5]s:%[6]d ▶ %.3[7]s %[8]s"
+	defFmt = defDefault
 
 	// Default format of time
 	defTimeFmt = "2006-01-02 15:04:05"
@@ -75,13 +76,43 @@ const (
 // Logger class that is an interface to user to log messages, Module is the module for which we are testing
 // worker is variable of Worker class that is used in bottom layers to log the message
 type Logger struct {
-	Module string
-	worker *Worker
+	Options Options
+	Module  string
+	worker  *Worker
 }
 
-// SetDefaultFormat ...
-func SetDefaultFormat(format string) {
-	defFmt, defTimeFmt = parseFormat(format)
+// init is called by NewLogger to detect running conditions and set all defaults
+func (l *Logger) init() {
+	l.SetEnvironment(detectEnvironment(true))
+	initColors()
+	initFormatPlaceholders()
+}
+
+// NewLogger creates and returns new logger for the given model & environment
+// module is the specific module for which we are logging
+// environment overrides detected environment (if -1)
+// color defines whether the output is to be colored or not, out is instance of type io.Writer defaults
+// to os.Stderr
+func NewLogger(opts *Options) (*Logger, error) {
+	if opts == nil {
+		opts = NewDefaultOptions()
+	}
+
+	if opts.Out == nil {
+		opts.Out = os.Stderr
+	}
+
+	if len(opts.Module) <= 3 {
+		opts.Module = "unknown"
+	}
+
+	newWorker := NewWorker("", 0, opts.UseColor, opts.Out)
+	l := &Logger{Module: opts.Module, worker: newWorker}
+	l.init()
+	l.Options = *opts
+	newWorker.SetEnvironment(opts.Environment)
+	return l, nil
+
 }
 
 // SetFormat ...
@@ -100,59 +131,18 @@ func (l *Logger) SetFunction(name string) {
 }
 
 // SetEnvironment is used to manually set the log environment to either development, testing or production
-func (l *Logger) SetEnvironment(env uint8) {
-	l.worker.SetEnvironment(env)
+func (l *Logger) SetEnvironment(env Environment) {
+	// Only change the environment if we are not testing
+	if l.worker.Environment != EnvTesting {
+		l.Options.Environment = env
+		l.worker.SetEnvironment(env)
+	}
 }
 
-// NewLogger creates a new logger for the given model & environment
-func NewLogger(module string, environment uint8, out io.Writer) (*Logger, error) {
-	var (
-		color = 1
-	)
-
-	if out == nil {
-		out = os.Stderr
-	}
-
-	if len(module) <= 3 {
-		return nil, fmt.Errorf("You must provide a name for the module (app, rpc, etc)")
-	}
-
-	newWorker := NewWorker("", 0, color, out)
-	newWorker.SetEnvironment(environment)
-	return &Logger{Module: module, worker: newWorker}, nil
-}
-
-// New Returns a new instance of logger class, module is the specific module for which we are logging
-// , color defines whether the output is to be colored or not, out is instance of type io.Writer defaults
-// to os.Stderr
-func New(args ...interface{}) (*Logger, error) {
-	//initColors()
-
-	var (
-		module           = "DEFAULT"
-		color            = 1
-		out    io.Writer = os.Stderr
-		level            = InfoLevel
-	)
-
-	for _, arg := range args {
-		switch t := arg.(type) {
-		case string:
-			module = t
-		case int:
-			color = t
-		case io.Writer:
-			out = t
-		case LogLevel:
-			level = t
-		default:
-			panic("logger: Unknown argument")
-		}
-	}
-	newWorker := NewWorker("", 0, color, out)
-	newWorker.SetLogLevel(level)
-	return &Logger{Module: module, worker: newWorker}, nil
+// SetOutput is used to manually set the output to send log data
+func (l *Logger) SetOutput(out io.Writer) {
+	l.Options.Out = out
+	l.worker.SetOutput(out)
 }
 
 // Log The log command is the function available to user to log message,
@@ -164,7 +154,6 @@ func (l *Logger) Log(lvl LogLevel, message string) {
 
 // logInternal ...
 func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
-	//var formatString string = "#%d %s [%s] %s:%d ▶ %.3s %s"
 	_, filename, line, _ := runtime.Caller(pos)
 	filename = path.Base(filename)
 	info := &Info{
@@ -186,24 +175,36 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 // Fatal is just like func l.Critical logger except that it is followed by exit to program
 func (l *Logger) Fatal(message string) {
 	l.logInternal(CriticalLevel, message, 2)
+	if l.worker.Environment == EnvTesting {
+		return
+	}
 	os.Exit(1)
 }
 
 // Fatalf is just like func l.CriticalF logger except that it is followed by exit to program
 func (l *Logger) Fatalf(format string, a ...interface{}) {
 	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
+	if l.worker.Environment == EnvTesting {
+		return
+	}
 	os.Exit(1)
 }
 
 // Panic is just like func l.Critical except that it is followed by a call to panic
 func (l *Logger) Panic(message string) {
 	l.logInternal(CriticalLevel, message, 2)
+	if l.worker.Environment == EnvTesting {
+		return
+	}
 	panic(message)
 }
 
 // Panicf is just like func l.CriticalF except that it is followed by a call to panic
 func (l *Logger) Panicf(format string, a ...interface{}) {
 	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
+	if l.worker.Environment == EnvTesting {
+		return
+	}
 	panic(fmt.Sprintf(format, a...))
 }
 
