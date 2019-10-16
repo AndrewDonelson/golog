@@ -3,6 +3,7 @@
 
 [![Build Status](https://travis-ci.org/AndrewDonelson/golog.svg?branch=master)](https://travis-ci.org/AndrewDonelson/golog)
 [![Coverage Status](https://coveralls.io/repos/github/AndrewDonelson/golog/badge.svg)](https://coveralls.io/github/AndrewDonelson/golog)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/488f571baa13489494fa6002dbdf0897)](https://www.codacy.com/manual/AndrewDonelson/golog?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AndrewDonelson/golog&amp;utm_campaign=Badge_Grade)
 [![GoDoc](https://godoc.org/github.com/AndrewDonelson/golog?status.svg)](http://godoc.org/github.com/AndrewDonelson/golog)
 
 Versatile Go Logger with a focus on Build Environments to provide performance and information where needed. Also allows setting custom format for messages.
@@ -81,7 +82,32 @@ func main() {
 }
 ```
 
-# Formatting
+# Usage 
+
+
+## Creating New Logger
+
+Default (minumum)
+
+```go
+ log, err := golog.NewLogger(nil)
+ if err != nil {
+    panic(err) // Check for error
+ }
+```
+
+Typical
+
+```go
+ log, err := golog.NewLogger(nil)
+ if err != nil {
+    panic(err) // Check for error
+ }
+ log.SetModule("rpc.ServiceName")
+
+```
+
+## Formatting
 
 By default all log messages have format that you can see above (on pic).
 But you can override the default format and set format that you want.
@@ -89,6 +115,11 @@ But you can override the default format and set format that you want.
 You can do it for Logger instance (after creating logger) ...
 
 ```go
+// Default (minumum)
+ log, err := golog.NewLogger(nil)
+ if err != nil {
+    panic(err) // Check for error
+ }
 log, _ := logger.New("pkgname", 1)
 log.SetFormat(format)
 ```
@@ -107,7 +138,7 @@ But anyway after this, you can still set format of message for specific Logger i
 Format of log message must contains verbs that represent some info about current log entry.
 Ofc, format can contain not only verbs but also something else (for example text, digits, symbols, etc)
 
-## Format verbs
+### Format verbs
 
 You can use the following verbs:
 
