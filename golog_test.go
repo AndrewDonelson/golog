@@ -268,7 +268,7 @@ func TestLogger_SetFormat(t *testing.T) {
 	log.Debug("Test")
 	//log.SetLogLevel(InfoLevel)
 
-	want := fmt.Sprintf("pkgname %s DEBUG ▶ TestLogger_SetFormat ▶ Test\n", time.Now().Format("2006-01-02 15:04:05"))
+	want := fmt.Sprintf("[pkgname] %s DEB ▶ golog_test.go:268 TestLogger_SetFormat ▶ Test\n", time.Now().Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)
