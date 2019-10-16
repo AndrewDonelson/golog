@@ -84,7 +84,7 @@ func main() {
 
 ## Usage
 
-You can set a environment variable "BUILD_ENV" to either [dev, qa or prod] and when a logger is created it will auto-detect and set the proper environment. After
+You can set a environment variable BUILD_ENV to either [dev, qa or prod] and when a logger is created it will auto-detect and set the proper environment. After
 creating the logger you may of course manually set the environment by using `log.SetEnvironment({EnvDevelopment})`. Below are the Options for when creating a Custom Logger:
 
 ```go
@@ -127,8 +127,8 @@ Custom
 ```go
  log, err = NewLogger(&Options{Module: "my-service", UseColor: clrDisabled})
  ```
- 
-This will create a new logger with the module name "my-service" and color disabled.
+
+This will create a new logger with the module name `my-service` and color disabled.
 
 ### Formatting
 
@@ -153,20 +153,18 @@ log.SetFormat(format)
 golog.SetDefaultFormat(format)
 ```
 
-If you do it for package, all existing loggers will print log messages with format that these used already.
-But all newest loggers (which will be created after changing format for package) will use your specified format.
+If you do it for package, all existing loggers will print log messages with format that these used already. But all newest loggers (which will be created after changing format for package) will use your specified format.
 
 But anyway after this, you can still set format of message for specific Logger instance.
 
-Format of log message must contains verbs that represent some info about current log entry.
-Ofc, format can contain not only verbs but also something else (for example text, digits, symbols, etc)
+Format of log message must contains verbs that represent some info about current log entry. Ofc, format can contain not only verbs but also something else (for example text, digits, symbols, etc)
 
 #### Format verbs
 
 You can use the following verbs:
 
-| Verb | Description |
-| ----------- | ----------- |
+| Verb           | Description                                              |
+|:-------------- |:--------------------------------------------------------:|
 | %{id} | number of current log message |
 | %{module} | module name (that you passed to func New()) |
 | %{time} | current time in format "2006-01-02 15:04:05" |
