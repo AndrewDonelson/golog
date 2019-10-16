@@ -4,7 +4,6 @@ package golog
 
 // Import packages
 import (
-	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -24,6 +23,7 @@ const (
 	// %[6] // %{line}
 	// %[7] // %{level}
 	// %[8] // %{message}
+	defDefault        = "#%[1]d %.19[2]s %[5]s:%[6]d ▶ %.3[7]s %[8]s"
 	defProductionFmt  = "%.16[3]s %.19[2]s %.3[7]s ▶ %[8]s"
 	defDevelopmentFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[4]s ▶ %[8]s"
 
@@ -41,7 +41,7 @@ var (
 	// Contains color strings for stdout
 	logNo uint64
 
-	defFmt = "#%[1]d %.19[2]s %[5]s:%[6]d ▶ %.3[7]s %[8]s"
+	defFmt = defDefault
 
 	// Default format of time
 	defTimeFmt = "2006-01-02 15:04:05"
@@ -83,23 +83,7 @@ type Logger struct {
 
 // init is called by NewLogger to detect running conditions and set all defaults
 func (l *Logger) init() {
-	if flag.Lookup("test.v") != nil {
-		println("Environment: Testing")
-		l.SetEnvironment(-1)
-	} else {
-		be := os.Getenv("BUILD_ENV")
-		if be == "dev" {
-			println("Environment: Development")
-			l.SetEnvironment(2)
-		} else if be == "qa" {
-			println("Environment: Quality Assurance")
-			l.SetEnvironment(1)
-		} else {
-			println("Environment: Production")
-			l.SetEnvironment(0)
-		}
-	}
-
+	l.SetEnvironment(detectEnvironment(true))
 	initColors()
 	initFormatPlaceholders()
 }
@@ -131,11 +115,6 @@ func NewLogger(opts *Options) (*Logger, error) {
 
 }
 
-// SetDefaultFormat ...
-func SetDefaultFormat(format string) {
-	defFmt, defTimeFmt = parseFormat(format)
-}
-
 // SetFormat ...
 func (l *Logger) SetFormat(format string) {
 	l.worker.SetFormat(format)
@@ -152,9 +131,12 @@ func (l *Logger) SetFunction(name string) {
 }
 
 // SetEnvironment is used to manually set the log environment to either development, testing or production
-func (l *Logger) SetEnvironment(env int) {
-	l.Options.Environment = env
-	l.worker.SetEnvironment(env)
+func (l *Logger) SetEnvironment(env Environment) {
+	// Only change the environment if we are not testing
+	if l.worker.Environment != EnvTesting {
+		l.Options.Environment = env
+		l.worker.SetEnvironment(env)
+	}
 }
 
 // SetOutput is used to manually set the output to send log data
@@ -193,24 +175,36 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 // Fatal is just like func l.Critical logger except that it is followed by exit to program
 func (l *Logger) Fatal(message string) {
 	l.logInternal(CriticalLevel, message, 2)
+	if l.worker.Environment == EnvTesting {
+		return
+	}
 	os.Exit(1)
 }
 
 // Fatalf is just like func l.CriticalF logger except that it is followed by exit to program
 func (l *Logger) Fatalf(format string, a ...interface{}) {
 	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
+	if l.worker.Environment == EnvTesting {
+		return
+	}
 	os.Exit(1)
 }
 
 // Panic is just like func l.Critical except that it is followed by a call to panic
 func (l *Logger) Panic(message string) {
 	l.logInternal(CriticalLevel, message, 2)
+	if l.worker.Environment == EnvTesting {
+		return
+	}
 	panic(message)
 }
 
 // Panicf is just like func l.CriticalF except that it is followed by a call to panic
 func (l *Logger) Panicf(format string, a ...interface{}) {
 	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
+	if l.worker.Environment == EnvTesting {
+		return
+	}
 	panic(fmt.Sprintf(format, a...))
 }
 

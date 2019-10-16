@@ -44,7 +44,7 @@ type Options struct {
 func NewDefaultOptions() *Options {
 	return &Options{
 		Module:      "unknown",
-		Environment: EnvNotSet,
+		Environment: detectEnvironment(true),
 		UseColor:    ClrAuto,
 		Out:         os.Stderr,
 		FmtProd:     defProductionFmt,

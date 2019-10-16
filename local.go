@@ -3,9 +3,26 @@
 package golog
 
 import (
+	"flag"
 	"fmt"
+	"os"
 	"strings"
 )
+
+func detectEnvironment(testing bool) Environment {
+	if testing && flag.Lookup("test.v") != nil {
+		return EnvTesting
+	}
+
+	be := os.Getenv("BUILD_ENV")
+	if be == "dev" {
+		return EnvDevelopment
+	} else if be == "qa" {
+		return EnvQuality
+	}
+
+	return EnvProduction
+}
 
 // Analyze and represent format string as printf format string and time format
 func parseFormat(format string) (msgfmt, timefmt string) {
@@ -91,7 +108,7 @@ func initColors() {
 }
 
 // initFormatPlaceholders Initializes the map of placeholders
-// "%{id}, %{time}, %{module}, %{function}, %{filename}, %{file}, %{line}, %{level}, %{lvl}, %{message}" 
+// "%{id}, %{time}, %{module}, %{function}, %{filename}, %{file}, %{line}, %{level}, %{lvl}, %{message}"
 func initFormatPlaceholders() {
 	phfs = map[string]string{
 		"%{id}":       "%[1]d",
