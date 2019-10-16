@@ -5,6 +5,7 @@ import (
 )
 
 func doLogs(log *golog.Logger) {
+	log.SetFunction("doLogs")
 	// Critically log critical
 	log.Critical("This is Critical!")
 	// Show the error
@@ -29,7 +30,7 @@ func main() {
 	if err != nil {
 		panic(err) // Check for error
 	}
-	log.SetEnvironment(0)
+	log.SetEnvironment(golog.EnvProduction)
 	doLogs(log)
 
 	println("\nTest/QA Output:")
@@ -37,7 +38,7 @@ func main() {
 	if err != nil {
 		panic(err) // Check for error
 	}
-	log.SetEnvironment(1)
+	log.SetEnvironment(golog.EnvQuality)
 	doLogs(log)
 
 	println("\nDevelopment Output:")
@@ -45,6 +46,6 @@ func main() {
 	if err != nil {
 		panic(err) // Check for error
 	}
-	log.SetEnvironment(0)
+	log.SetEnvironment(golog.EnvDevelopment)
 	doLogs(log)
 }
