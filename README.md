@@ -29,53 +29,53 @@ Example [program](example/example.go) demonstrates how to use the logger. See be
 package main
 
 import (
-	"github.com/AndrewDonelson/golog"
+   "github.com/AndrewDonelson/golog"
 )
 
 func doLogs(log *golog.Logger) {
-	log.SetFunction("doLogs")
-	// Critically log critical
-	log.Critical("This is Critical!")
-	// Show the error
-	log.Error("This is Error!")
-	// Show the success
-	log.Success("This is Success!")
-	// Give the Warning
-	log.Warning("This is Warning!")
-	// Notice
-	log.Notice("This is Notice!")
-	// Show the info
-	log.Info("This is Info!")
-	// Debug
-	log.Debug("This is Debug!")
+ log.SetFunction("doLogs")
+ // Critically log critical
+ log.Critical("This is Critical!")
+ // Show the error
+ log.Error("This is Error!")
+ // Show the success
+ log.Success("This is Success!")
+ // Give the Warning
+ log.Warning("This is Warning!")
+ // Notice
+ log.Notice("This is Notice!")
+ // Show the info
+ log.Info("This is Info!")
+ // Debug
+ log.Debug("This is Debug!")
 }
 
 func main() {
-	// Get the instance for logger class
-	// Third option is optional and is instance of type io.Writer, defaults to os.Stderr
-	println("\nProduction Output:")
-	log, err := golog.NewLogger(nil)
-	if err != nil {
-		panic(err) // Check for error
-	}
-	log.SetEnvironment(golog.EnvProduction)
-	doLogs(log)
+ // Get the instance for logger class
+ // Third option is optional and is instance of type io.Writer, defaults to os.Stderr
+ println("\nProduction Output:")
+ log, err := golog.NewLogger(nil)
+ if err != nil {
+    panic(err) // Check for error
+ }
+ log.SetEnvironment(golog.EnvProduction)
+ doLogs(log)
 
-	println("\nTest/QA Output:")
-	log, err = golog.NewLogger(nil)
-	if err != nil {
-		panic(err) // Check for error
-	}
-	log.SetEnvironment(golog.EnvQuality)
-	doLogs(log)
+ println("\nTest/QA Output:")
+ log, err = golog.NewLogger(nil)
+ if err != nil {
+    panic(err) // Check for error
+ }
+ log.SetEnvironment(golog.EnvQuality)
+ doLogs(log)
 
-	println("\nDevelopment Output:")
-	log, err = golog.NewLogger(nil)
-	if err != nil {
-		panic(err) // Check for error
-	}
-	log.SetEnvironment(golog.EnvDevelopment)
-	doLogs(log)
+ println("\nDevelopment Output:")
+ log, err = golog.NewLogger(nil)
+ if err != nil {
+    panic(err) // Check for error
+ }
+ log.SetEnvironment(golog.EnvDevelopment)
+ doLogs(log)
 }
 ```
 
@@ -112,7 +112,7 @@ You can use the following verbs:
 | Verb | Description |
 | ----------- | ----------- |
 | %{id} | number of current log message |
-| %{module} | module name (that you passed to func New()) | 
+| %{module} | module name (that you passed to func New()) |
 | %{time} | current time in format "2006-01-02 15:04:05" |
 | %{time:format} | current time in format that you want |
 | %{level} | level name (upper case) of log message ("ERROR", "DEBUG", etc) |
@@ -134,7 +134,7 @@ Run:
 
 ## Thanks
 
-golog is not a fork, but it was the starting point for the project. 
+golog is not a fork, but it was the starting point for the project.
 I'd like to thank all out there which helped with go-logging.
 
 Following contributors have made major contributions to go-logger:
