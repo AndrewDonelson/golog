@@ -1,9 +1,11 @@
 # golog
 
 [![Build Status](https://travis-ci.org/AndrewDonelson/golog.svg?branch=master)](https://travis-ci.org/AndrewDonelson/golog)
+![GitHub last commit](https://img.shields.io/github/last-commit/AndrewDonelson/golog)
 [![Coverage Status](https://coveralls.io/repos/github/AndrewDonelson/golog/badge.svg)](https://coveralls.io/github/AndrewDonelson/golog)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/488f571baa13489494fa6002dbdf0897)](https://www.codacy.com/manual/AndrewDonelson/golog?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AndrewDonelson/golog&amp;utm_campaign=Badge_Grade)
 [![GoDoc](https://godoc.org/github.com/AndrewDonelson/golog?status.svg)](http://godoc.org/github.com/AndrewDonelson/golog)
+![GitHub stars](https://img.shields.io/github/stars/AndrewDonelson/golog?style=flat)
 
 Versatile Go Logger with a focus on Build Environments to provide performance and information where needed. Also allows setting custom format for messages.
 
