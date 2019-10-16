@@ -140,21 +140,21 @@ func TestLoggerNew(t *testing.T) {
 
 	// Test for invalid output passed in
 	log, err = NewLogger(&Options{Module: "BadOut", Out: nil})
-	if err != nil {
+	if err != nil || log == nil {
 		t.Error(err)
 		return
 	}
 
 	// Test for Module name to short < 4
 	log, err = NewLogger(&Options{Module: "mod"})
-	if err != nil {
+	if err != nil || log == nil {
 		t.Error(err)
 		return
 	}
 
 	// Test for Module name to short < 4
 	log, err = NewLogger(&Options{Module: "mod"})
-	if err != nil {
+	if err != nil || log == nil {
 		t.Error(err)
 		return
 	}
