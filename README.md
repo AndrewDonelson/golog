@@ -8,23 +8,23 @@
 
 Versatile Go Logger with a focus on Build Environments to provide performance and information where needed. Also allows setting custom format for messages.
 
-# Notice
+## Notice
 
 **Even though this is currently building, Use it at your own risk. IT IS NOT quite ready for use IMHO.**
 
 If you would like to help, please do so. Besides the obvious performance tweaks checkout the issues and do a PR. Please make sure to handle code coverage.
 
-# Preview
+## Preview
 
 [![Example Output](example/example.png)](example/example.go)
 
-# Install
+## Install
 
-`go get github.com/AndrewDonelson/golog`
+`go get -u github.com/AndrewDonelson/golog`
 
-Use `go get -u` to update the package.
+This will either Insstall or Update the package.
 
-# Example
+## Example
 
 Example [program](example/example.go) demonstrates how to use the logger. See below for __formatting__ instructions.
 
@@ -82,14 +82,29 @@ func main() {
 }
 ```
 
-# Usage 
+## Usage
 
+You can set a environment variable "BUILD_ENV" to either [dev, qa or prod] and when a logger is created it will auto-detect and set the proper environment. After
+creating the logger you may of course manually set the environment by using `log.SetEnvironment({EnvDevelopment})`. Below are the Options for when creating a Custom Logger:
 
-## Creating New Logger
+```go
+// Options allow customization of the logger by the end user
+type Options struct {
+   Module      string      // Name of running module
+   Environment Environment // Override default handling
+   UseColor    ColorMode   // Enable color (override) default handling
+   Out         io.Writer   // Where to write output
+   FmtProd     string      // for use with production environment
+   FmtDev      string      // for use with development environment
+}
+```
+
+### Creating New Logger
 
 Default (minumum)
 
 ```go
+ // Create a logger with all default options
  log, err := golog.NewLogger(nil)
  if err != nil {
     panic(err) // Check for error
@@ -107,7 +122,15 @@ Typical
 
 ```
 
-## Formatting
+Custom
+
+```go
+ log, err = NewLogger(&Options{Module: "my-service", UseColor: clrDisabled})
+ ```
+ 
+This will create a new logger with the module name "my-service" and color disabled.
+
+### Formatting
 
 By default all log messages have format that you can see above (on pic).
 But you can override the default format and set format that you want.
@@ -138,7 +161,7 @@ But anyway after this, you can still set format of message for specific Logger i
 Format of log message must contains verbs that represent some info about current log entry.
 Ofc, format can contain not only verbs but also something else (for example text, digits, symbols, etc)
 
-### Format verbs
+#### Format verbs
 
 You can use the following verbs:
 
@@ -158,7 +181,7 @@ You can use the following verbs:
 Non-existent verbs (like ```%{nonex-verb}``` or ```%{}```) will be replaced by an empty string.
 Invalid verbs (like ```%{inv-verb```) will be treated as plain text.
 
-# Tests
+## Tests
 
 Run:
 
