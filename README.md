@@ -94,7 +94,7 @@ log.SetFormat(format)
 ... or for package
 
 ```go
-logger.SetDefaultFormat(format)
+golog.SetDefaultFormat(format)
 ```
 
 If you do it for package, all existing loggers will print log messages with format that these used already.
@@ -109,19 +109,18 @@ Ofc, format can contain not only verbs but also something else (for example text
 
 You can use the following verbs:
 
-```text
-%{id}           - means number of current log message
-%{module}       - means module name (that you passed to func New())
-%{time}			- means current time in format "2006-01-02 15:04:05"
-%{time:format}	- means current time in format that you want
-					(supports all formats supported by go package "time")
-%{level}		- means level name (upper case) of log message ("ERROR", "DEBUG", etc)
-%{lvl}			- means first 3 letters of level name (upper case) of log message ("ERR", "DEB", etc)
-%{file} 		- means name of file in what you wanna write log
-%{filename}		- means the same as %{file}
-%{line}			- means line number of file in what you wanna write log
-%{message}		- means your log message
-```
+| Verb | Description |
+| ----------- | ----------- |
+| %{id} | number of current log message |
+| %{module} | module name (that you passed to func New()) | 
+| %{time} | current time in format "2006-01-02 15:04:05" |
+| %{time:format} | current time in format that you want |
+| %{level} | level name (upper case) of log message ("ERROR", "DEBUG", etc) |
+| %{lvl} | first 3 letters of level name (upper case) of log message |
+| %{file} | name of file in what you wanna write log |
+| %{filename} | the same as %{file} |
+| %{line} | line number of file in what you wanna write log |
+| %{message} | your log message |
 
 Non-existent verbs (like ```%{nonex-verb}``` or ```%{}```) will be replaced by an empty string.
 Invalid verbs (like ```%{inv-verb```) will be treated as plain text.
@@ -130,14 +129,13 @@ Invalid verbs (like ```%{inv-verb```) will be treated as plain text.
 
 Run:
 
-- `go test logger` to run test on logger.
+- `go test -v` to run test on logger.
 - `go test -bench=.` for benchmarks.
 
 ## Thanks
 
-Thanks goes to all go-loggers out there which I used as reference.
-
-## Contributors
+golog is not a fork, but it was the starting point for the project. 
+I'd like to thank all out there which helped with go-logging.
 
 Following contributors have made major contributions to go-logger:
 
