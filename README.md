@@ -9,7 +9,7 @@ Versatile Go Logger with a focus on Build Environments to provide performance an
 
 # Notice
 
-**Even though this is currently building, it IS NOT ready for use in projects.**
+**Even though this is currently building, Use it at your own risk. IT IS NOT quite ready for use IMHO.**
 
 # Preview
 
