@@ -5,6 +5,7 @@ import (
 )
 
 func doLogs(log *golog.Logger) {
+	log.SetFunction("doLogs")
 	// Critically log critical
 	log.Critical("This is Critical!")
 	// Show the error
@@ -25,23 +26,26 @@ func main() {
 	// Get the instance for logger class
 	// Third option is optional and is instance of type io.Writer, defaults to os.Stderr
 	println("\nProduction Output:")
-	log, err := golog.NewLogger("production", 0)
+	log, err := golog.NewLogger(nil)
 	if err != nil {
 		panic(err) // Check for error
 	}
+	log.SetEnvironment(golog.EnvProduction)
 	doLogs(log)
 
 	println("\nTest/QA Output:")
-	log, err = golog.NewLogger("test-qa", 1)
+	log, err = golog.NewLogger(nil)
 	if err != nil {
 		panic(err) // Check for error
 	}
+	log.SetEnvironment(golog.EnvQuality)
 	doLogs(log)
 
 	println("\nDevelopment Output:")
-	log, err = golog.NewLogger("development", 2)
+	log, err = golog.NewLogger(nil)
 	if err != nil {
 		panic(err) // Check for error
 	}
+	log.SetEnvironment(golog.EnvDevelopment)
 	doLogs(log)
 }
