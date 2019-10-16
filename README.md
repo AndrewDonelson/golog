@@ -1,4 +1,3 @@
-
 # golog
 
 [![Build Status](https://travis-ci.org/AndrewDonelson/golog.svg?branch=master)](https://travis-ci.org/AndrewDonelson/golog)
@@ -26,7 +25,7 @@ This will either Insstall or Update the package.
 
 ## Example
 
-Example [program](example/example.go) demonstrates how to use the logger. See below for __formatting__ instructions.
+Example [program](example/example.go) demonstrates how to use the logger. See below for *formatting* instructions.
 
 ```go
 package main
@@ -84,7 +83,7 @@ func main() {
 
 ## Usage
 
-You can set a environment variable BUILD_ENV to either [dev, qa or prod] and when a logger is created it will auto-detect and set the proper environment. After
+You can set a environment variable BUILD_ENV to either \[dev, qa or prod] and when a logger is created it will auto-detect and set the proper environment. After
 creating the logger you may of course manually set the environment by using `log.SetEnvironment({EnvDevelopment})`. Below are the Options for when creating a Custom Logger:
 
 ```go
@@ -163,18 +162,18 @@ Format of log message must contains verbs that represent some info about current
 
 You can use the following verbs:
 
-| Verb           | Description                                              |
-|:-------------- |:--------------------------------------------------------:|
-| %{id} | number of current log message |
-| %{module} | module name (that you passed to func New()) |
-| %{time} | current time in format "2006-01-02 15:04:05" |
-| %{time:format} | current time in format that you want |
-| %{level} | level name (upper case) of log message ("ERROR", "DEBUG", etc) |
-| %{lvl} | first 3 letters of level name (upper case) of log message |
-| %{file} | name of file in what you wanna write log |
-| %{filename} | the same as %{file} |
-| %{line} | line number of file in what you wanna write log |
-| %{message} | your log message |
+| Verb           | Description                                                    |
+|:-------------- |:-------------------------------------------------------------- |
+| %{id}          | number of current log message                                  |
+| %{module}      | module name (that you passed to func New())                    |
+| %{time}        | current time in format "2006-01-02 15:04:05"                   |
+| %{time:format} | current time in format that you want                           |
+| %{level}       | level name (upper case) of log message ("ERROR", "DEBUG", etc) |
+| %{lvl}         | first 3 letters of level name (upper case) of log message      |
+| %{file}        | name of file in what you wanna write log                       |
+| %{filename}    | the same as %{file}                                            |
+| %{line}        | line number of file in what you wanna write log                |
+| %{message}     | your log message                                               |
 
 Non-existent verbs (like ```%{nonex-verb}``` or ```%{}```) will be replaced by an empty string.
 Invalid verbs (like ```%{inv-verb```) will be treated as plain text.
