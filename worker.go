@@ -28,7 +28,9 @@ func NewWorker(prefix string, flag int, color ColorMode, out io.Writer) *Worker 
 
 // UseJSONForProduction forces using JSON instead of log for production
 func (w *Worker) UseJSONForProduction() {
-	w.format = FmtProductionJSON
+	if w.environment == EnvProduction || w.environment == EnvTesting {
+		w.format = FmtProductionJSON
+	}
 }
 
 // SetFormat ...

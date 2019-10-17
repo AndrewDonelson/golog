@@ -23,9 +23,14 @@ const (
 	// %[6] // %{line}
 	// %[7] // %{level}
 	// %[8] // %{message}
-	FmtDefault        = "[%.16[3]s] #%[1]d %.19[2]s %.3[7]s %[8]s"
-	FmtProductionLog  = "[%.16[3]s] %.19[2]s %.3[7]s ▶ %[8]s"
+
+	// FmtDefault is the default log format (QA)
+	FmtDefault = "[%.16[3]s] #%[1]d %.19[2]s %.3[7]s %[8]s"
+	// FmtProductionLog is the built-in production log format
+	FmtProductionLog = "[%.16[3]s] %.19[2]s %.3[7]s ▶ %[8]s"
+	// FmtProductionJSON is the built-in production json format
 	FmtProductionJSON = "{\"%.16[3]s\",\"%[5]s\",\"%[6]d\",\"%[4]s\",\"%[1]d\",\"%.19[2]s\",\"%[7]s\",\"%[8]s\"}"
+	// FmtDevelopmentLog is the built-in development log format
 	FmtDevelopmentLog = "[%.16[3]s] %.19[2]s %.3[7]s ▶ %[5]s#%[6]d-%[4]s ▶ %[8]s"
 
 	// Error, Fatal, Critical Format
@@ -133,10 +138,13 @@ func (l *Logger) SetFunction(name string) {
 
 // SetEnvironment is used to manually set the log environment to either development, testing or production
 func (l *Logger) SetEnvironment(env Environment) {
-	// Only change the environment if we are not testing
-	if l.worker.GetEnvironment() != EnvTesting {
-		l.Options.Environment = env
+	l.Options.Environment = env
+	l.worker.SetEnvironment(env)
+
+	// For testing, schange but reset back to testing
+	if l.worker.GetEnvironment() == EnvTesting {
 		l.worker.SetEnvironment(env)
+		l.worker.SetEnvironment(EnvTesting)
 	}
 }
 

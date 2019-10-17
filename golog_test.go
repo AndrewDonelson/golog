@@ -15,7 +15,7 @@ func TestAdvancedFormat(t *testing.T) {
 	log, err := NewLogger(&Options{
 		Module:      "pkgname",
 		Out:         &buf,
-		Environment: 0,
+		Environment: EnvDevelopment,
 		UseColor:    ClrNotSet,
 	})
 	if err != nil || log == nil {
@@ -37,7 +37,7 @@ func TestAdvancedFormat(t *testing.T) {
 	log.Error("This is Error!")
 	now := time.Now()
 	want := fmt.Sprintf(
-		"text123 1 "+ //SET TO 1 for running this test alone and SET TO 11 for running as package test
+		"[31mtext123 1 "+ //SET TO 1 for running this test alone and SET TO 11 for running as package test
 			"!@#$%% %s "+
 			"a{b pkgname "+
 			"a}b golog_test.go "+
@@ -45,7 +45,7 @@ func TestAdvancedFormat(t *testing.T) {
 			"%%{37 "+
 			" ERR "+
 			"%%{incorr_verb ERROR "+
-			" [This is Error!]\n",
+			" [This is Error!][0m\n",
 		now.Format("Monday, 2006 Jan 01, 15:04:05"),
 	)
 	have := buf.String()
@@ -83,6 +83,16 @@ func TestBuildEnvironments(t *testing.T) {
 	if detectEnvironment(false) != EnvProduction {
 		t.Error("Failed to SetEnvironment to EnvProduction")
 	}
+
+	log, err := NewLogger(&Options{UseColor: ClrDisabled})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	log.SetEnvironment(EnvNotSet)
+	log.SetEnvironment(EnvDevelopment)
+	log.SetEnvironment(EnvQuality)
+	log.SetEnvironment(EnvProduction)
 }
 func TestParseFormat(t *testing.T) {
 	// We do this just to initialize the required code on the
@@ -158,6 +168,15 @@ func TestLoggerNew(t *testing.T) {
 		t.Error(err)
 		return
 	}
+
+	// Test for Module name to short < 4
+	log, err = NewLogger(NewDefaultOptions())
+	if err != nil || log == nil {
+		t.Error(err)
+		return
+	}
+	log.SetEnvironment(EnvProduction)
+	log.UseJSONForProduction()
 
 }
 
@@ -268,7 +287,7 @@ func TestLogger_SetFormat(t *testing.T) {
 	log.Debug("Test")
 	//log.SetLogLevel(InfoLevel)
 
-	want := fmt.Sprintf("[pkgname] %s DEB ▶ golog_test.go:268 TestLogger_SetFormat ▶ Test\n", time.Now().Format("2006-01-02 15:04:05"))
+	want := fmt.Sprintf("[34m[pkgname] %s DEB ▶ golog_test.go#287-TestLogger_SetFormat ▶ Test[0m\n", time.Now().Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)
