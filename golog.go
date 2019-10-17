@@ -202,6 +202,7 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 	}
 }
 
+// Trace is a basic timing function that will log InfoLevel duration of name
 func (l *Logger) Trace(name string) {
 	defer l.timeLog(time.Now(), name)
 }
