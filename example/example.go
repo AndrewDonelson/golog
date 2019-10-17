@@ -5,36 +5,43 @@ import (
 )
 
 func doLogs(log *golog.Logger) {
-	log.SetFunction("doLogs")
+	method := "doLogs"
+	log.Trace(method)
+	log.SetFunction(method)
+
 	// Critically log critical
-	log.Critical("This is Critical!")
+	log.Critical("This is Critical message!")
 	// Show the error
-	log.Error("This is Error!")
+	log.Error("This is Error message!")
 	// Show the success
-	log.Success("This is Success!")
+	log.Success("This is Success message!")
 	// Give the Warning
-	log.Warning("This is Warning!")
+	log.Warning("This is Warning message!")
 	// Notice
-	log.Notice("This is Notice!")
+	log.Notice("This is Notice message!")
 	// Show the info
-	log.Info("This is Info!")
+	log.Info("This is Info message, Fatal & Panic skipped!")
 	// Debug
-	log.Debug("This is Debug!")
+	log.Debug("This is Debug message!")
 }
 
 func main() {
 	// Get the instance for logger class
 	// Third option is optional and is instance of type io.Writer, defaults to os.Stderr
-	println("\nProduction Output:")
-	log, err := golog.NewLogger(nil)
+	println("\nProduction Output: as Log")
+	log, err := golog.NewLogger(&golog.Options{Module: "prod-example"})
 	if err != nil {
 		panic(err) // Check for error
 	}
 	log.SetEnvironment(golog.EnvProduction)
 	doLogs(log)
 
+	println("\nProduction Output: as JSON")
+	log.UseJSONForProduction()
+	doLogs(log)
+
 	println("\nTest/QA Output:")
-	log, err = golog.NewLogger(nil)
+	log, err = golog.NewLogger(&golog.Options{Module: "qa-example"})
 	if err != nil {
 		panic(err) // Check for error
 	}
@@ -42,7 +49,7 @@ func main() {
 	doLogs(log)
 
 	println("\nDevelopment Output:")
-	log, err = golog.NewLogger(nil)
+	log, err = golog.NewLogger(&golog.Options{Module: "dev-example"})
 	if err != nil {
 		panic(err) // Check for error
 	}
