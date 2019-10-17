@@ -139,6 +139,7 @@ func TestLoggerNew(t *testing.T) {
 		t.Error(err)
 		return
 	}
+	log.Trace("TestLoggerNew")
 
 	if log.Module != "unknown" {
 		t.Errorf("Unexpected module: %s", log.Module)
@@ -287,7 +288,7 @@ func TestLogger_SetFormat(t *testing.T) {
 	log.Debug("Test")
 	//log.SetLogLevel(InfoLevel)
 
-	want := fmt.Sprintf("[34m[pkgname] %s DEB ▶ golog_test.go#287-TestLogger_SetFormat ▶ Test[0m\n", time.Now().Format("2006-01-02 15:04:05"))
+	want := fmt.Sprintf("[34m[pkgname] %s DEB ▶ golog_test.go#288-TestLogger_SetFormat ▶ Test[0m\n", time.Now().Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)

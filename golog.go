@@ -84,14 +84,30 @@ const (
 type Logger struct {
 	Options Options
 	Module  string
+	timer   time.Time
 	worker  *Worker
 }
 
 // init is called by NewLogger to detect running conditions and set all defaults
 func (l *Logger) init() {
+	l.timeReset()
 	l.SetEnvironment(detectEnvironment(true))
 	initColors()
 	initFormatPlaceholders()
+}
+
+func (l *Logger) timeReset() {
+	l.timer = time.Now()
+}
+
+// defer timeElapsed(time.Now(), "factorial")
+
+func (l *Logger) timeElapsed(start time.Time) time.Duration {
+	return time.Since(start)
+}
+
+func (l *Logger) timeLog(start time.Time, name string) {
+	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", name, l.timeElapsed(start)), 2)
 }
 
 // NewLogger creates and returns new logger for the given model & environment
@@ -184,6 +200,10 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (l *Logger) Trace(name string) {
+	defer l.timeLog(time.Now(), name)
 }
 
 // Fatal is just like func l.Critical logger except that it is followed by exit to program

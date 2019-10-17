@@ -5,7 +5,10 @@ import (
 )
 
 func doLogs(log *golog.Logger) {
-	log.SetFunction("doLogs")
+	method := "doLogs"
+	log.Trace(method)
+	log.SetFunction(method)
+
 	// Critically log critical
 	log.Critical("This is Critical message!")
 	// Show the error
