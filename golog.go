@@ -23,9 +23,10 @@ const (
 	// %[6] // %{line}
 	// %[7] // %{level}
 	// %[8] // %{message}
-	defDefault        = "#%[1]d [%.16[3]s] %.19[2]s %.3[7]s %[8]s"
-	defProductionFmt  = "%.16[3]s %.19[2]s %.3[7]s ▶ %[8]s"
-	defDevelopmentFmt = "[%.16[3]s] %.19[2]s %.3[7]s ▶ %[5]s:%[6]d %[4]s ▶ %[8]s"
+	FmtDefault        = "[%.16[3]s] #%[1]d %.19[2]s %.3[7]s %[8]s"
+	FmtProductionLog  = "[%.16[3]s] %.19[2]s %.3[7]s ▶ %[8]s"
+	FmtProductionJSON = "{\"%.16[3]s\",\"%[5]s\",\"%[6]d\",\"%[4]s\",\"%[1]d\",\"%.19[2]s\",\"%[7]s\",\"%[8]s\"}"
+	FmtDevelopmentLog = "[%.16[3]s] %.19[2]s %.3[7]s ▶ %[5]s#%[6]d-%[4]s ▶ %[8]s"
 
 	// Error, Fatal, Critical Format
 	//defErrorFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[8]s\n▶ %[5]s:%[6]d-%[4]s"
@@ -41,7 +42,7 @@ var (
 	// Contains color strings for stdout
 	logNo uint64
 
-	defFmt = defDefault
+	defFmt = FmtDefault
 
 	// Default format of time
 	defTimeFmt = "2006-01-02 15:04:05"
@@ -133,7 +134,7 @@ func (l *Logger) SetFunction(name string) {
 // SetEnvironment is used to manually set the log environment to either development, testing or production
 func (l *Logger) SetEnvironment(env Environment) {
 	// Only change the environment if we are not testing
-	if l.worker.Environment != EnvTesting {
+	if l.worker.GetEnvironment() != EnvTesting {
 		l.Options.Environment = env
 		l.worker.SetEnvironment(env)
 	}
@@ -143,6 +144,11 @@ func (l *Logger) SetEnvironment(env Environment) {
 func (l *Logger) SetOutput(out io.Writer) {
 	l.Options.Out = out
 	l.worker.SetOutput(out)
+}
+
+// UseJSONForProduction forces using JSON instead of log for production
+func (l *Logger) UseJSONForProduction() {
+	l.worker.UseJSONForProduction()
 }
 
 // Log The log command is the function available to user to log message,
@@ -175,7 +181,7 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 // Fatal is just like func l.Critical logger except that it is followed by exit to program
 func (l *Logger) Fatal(message string) {
 	l.logInternal(CriticalLevel, message, 2)
-	if l.worker.Environment == EnvTesting {
+	if l.worker.GetEnvironment() == EnvTesting {
 		return
 	}
 	os.Exit(1)
@@ -184,7 +190,7 @@ func (l *Logger) Fatal(message string) {
 // Fatalf is just like func l.CriticalF logger except that it is followed by exit to program
 func (l *Logger) Fatalf(format string, a ...interface{}) {
 	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
-	if l.worker.Environment == EnvTesting {
+	if l.worker.GetEnvironment() == EnvTesting {
 		return
 	}
 	os.Exit(1)
@@ -193,7 +199,7 @@ func (l *Logger) Fatalf(format string, a ...interface{}) {
 // Panic is just like func l.Critical except that it is followed by a call to panic
 func (l *Logger) Panic(message string) {
 	l.logInternal(CriticalLevel, message, 2)
-	if l.worker.Environment == EnvTesting {
+	if l.worker.GetEnvironment() == EnvTesting {
 		return
 	}
 	panic(message)
@@ -202,7 +208,7 @@ func (l *Logger) Panic(message string) {
 // Panicf is just like func l.CriticalF except that it is followed by a call to panic
 func (l *Logger) Panicf(format string, a ...interface{}) {
 	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
-	if l.worker.Environment == EnvTesting {
+	if l.worker.GetEnvironment() == EnvTesting {
 		return
 	}
 	panic(fmt.Sprintf(format, a...))

@@ -58,8 +58,8 @@ func NewDefaultOptions() *Options {
 		Environment: detectEnvironment(true),
 		UseColor:    ClrAuto,
 		Out:         os.Stderr,
-		FmtProd:     defProductionFmt,
-		FmtDev:      defDevelopmentFmt,
+		FmtProd:     FmtProductionLog,
+		FmtDev:      FmtDevelopmentLog,
 	}
 }
 

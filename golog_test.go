@@ -220,8 +220,8 @@ func TestNewloggerCustom(t *testing.T) {
 		EnvDevelopment,
 		ClrAuto,
 		&buf,
-		defDefault,
-		defDefault,
+		FmtDefault,
+		FmtDefault,
 	))
 	if err != nil || log == nil {
 		t.Error("Unexpected error. Wanted valid logger")
