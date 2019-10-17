@@ -111,15 +111,19 @@ func initColors() {
 // "%{id}, %{time}, %{module}, %{function}, %{filename}, %{file}, %{line}, %{level}, %{lvl}, %{message}"
 func initFormatPlaceholders() {
 	phfs = map[string]string{
-		"%{id}":       "%[1]d",
-		"%{time}":     "%[2]s",
-		"%{module}":   "%[3]s",
-		"%{function}": "%[4]s",
-		"%{filename}": "%[5]s",
-		"%{file}":     "%[5]s",
-		"%{line}":     "%[6]d",
-		"%{level}":    "%[7]s",
-		"%{lvl}":      "%.3[7]s",
-		"%{message}":  "%[8]s",
+		"%{id}":         "%[1]d",
+		"%{time}":       "%[2]s",
+		"%{module}":     "%[3]s",
+		"%{function}":   "%[4]s",
+		"%{filename}":   "%[5]s",
+		"%{file}":       "%[5]s",
+		"%{line}":       "%[6]d",
+		"%{level}":      "%[7]s",
+		"%{lvl}":        "%.3[7]s",
+		"%{message}":    "%[8]s",
+		"%{duration}":   "%[9]s",
+		"%{method}":     "%[10]s",
+		"%{statuscode}": "%[11]s",
+		"%{route}":      "%[12]s",
 	}
 }
