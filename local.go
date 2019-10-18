@@ -98,6 +98,7 @@ func colorString(color int) string {
 // initColors Initializes the map of colors
 func initColors() {
 	colors = map[LogLevel]string{
+		RawLevel:      colorString(White),
 		CriticalLevel: colorString(Magenta),
 		ErrorLevel:    colorString(Red),
 		SuccessLevel:  colorString(Green),

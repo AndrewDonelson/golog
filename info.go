@@ -54,6 +54,7 @@ func (r *Info) Output(format string) string {
 // logLevelString Returns the loglevel as string
 func (r *Info) logLevelString() string {
 	logLevels := [...]string{
+		"RAW",
 		"CRITICAL",
 		"ERROR",
 		"SUCCESS",

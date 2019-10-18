@@ -71,13 +71,14 @@ const (
 
 // Log Level
 const (
-	CriticalLevel LogLevel = iota + 1 // Magneta 	35
-	ErrorLevel                        // Red 		31
-	SuccessLevel                      // Green 		32
-	WarningLevel                      // Yellow 	33
-	NoticeLevel                       // Cyan 		36
-	InfoLevel                         // White 		37
-	DebugLevel                        // Blue 		34
+	RawLevel      = iota + 1 // None
+	CriticalLevel            // Magneta 	35
+	ErrorLevel               // Red 		31
+	SuccessLevel             // Green 		32
+	WarningLevel             // Yellow 	33
+	NoticeLevel              // Cyan 		36
+	InfoLevel                // White 		37
+	DebugLevel               // Blue 		34
 )
 
 // Logger class that is an interface to user to log messages, Module is the module for which we are testing
@@ -322,7 +323,7 @@ func (l *Logger) Debugf(format string, a ...interface{}) {
 }
 
 // HandlerLog Traces & logs a message at Debug level for a REST handler
-func (l *Logger) HandlerLog(r *http.Request, w *http.ResponseWriter) {
+func (l *Logger) HandlerLog(w http.ResponseWriter, r *http.Request, message string) {
 	function, file, line := getCaller(3)
 	l.Trace(function, file, line)
 	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", function, l.timeElapsed(l.timer)), 2)
@@ -331,8 +332,18 @@ func (l *Logger) HandlerLog(r *http.Request, w *http.ResponseWriter) {
 }
 
 // HandlerLogf logs a message at Debug level using the same syntax and options as fmt.Printf
-func (l *Logger) HandlerLogf(format string, a ...interface{}) {
+func (l *Logger) HandlerLogf(w http.ResponseWriter, r *http.Request, format string, a ...interface{}) {
 	l.logInternal(DebugLevel, fmt.Sprintf(format, a...), 2)
+}
+
+// Print logs a message at directly with no level (RAW)
+func (l *Logger) Print(message string) {
+	l.logInternal(RawLevel, message, 2)
+}
+
+// Printf logs a message at Info level using the same syntax and options as fmt.Printf
+func (l *Logger) Printf(format string, a ...interface{}) {
+	l.logInternal(RawLevel, fmt.Sprintf(format, a...), 2)
 }
 
 // StackAsError Prints this goroutine's execution stack as an error with an optional message at the begining
