@@ -139,7 +139,7 @@ func TestLoggerNew(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	log.Trace("TestLoggerNew")
+	log.Trace("TestLoggerNew", "golang_test.go", 136)
 
 	if log.Module != "unknown" {
 		t.Errorf("Unexpected module: %s", log.Module)

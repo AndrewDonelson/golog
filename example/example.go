@@ -6,7 +6,7 @@ import (
 
 func doLogs(log *golog.Logger) {
 	method := "doLogs"
-	log.Trace(method)
+	log.Trace(method, "example.go", 7)
 	log.SetFunction(method)
 
 	// Critically log critical

@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -123,7 +124,22 @@ func initFormatPlaceholders() {
 		"%{message}":    "%[8]s",
 		"%{duration}":   "%[9]s",
 		"%{method}":     "%[10]s",
-		"%{statuscode}": "%[11]s",
+		"%{statuscode}": "%[11]d",
 		"%{route}":      "%[12]s",
 	}
+}
+
+func getCaller(skipLevels int) (function, file string, line int) {
+	fpcs := make([]uintptr, 1)
+	// Skip `skipLevels` levels to get the caller
+	n := runtime.Callers(skipLevels, fpcs)
+	if n != 0 {
+		caller := runtime.FuncForPC(fpcs[0] - 1)
+		if caller != nil {
+			file, line = caller.FileLine(fpcs[0] - 1)
+			function = caller.Name()
+		}
+	}
+
+	return
 }

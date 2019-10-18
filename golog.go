@@ -6,6 +6,7 @@ package golog
 import (
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path"
 	"runtime"
@@ -82,15 +83,20 @@ const (
 // Logger class that is an interface to user to log messages, Module is the module for which we are testing
 // worker is variable of Worker class that is used in bottom layers to log the message
 type Logger struct {
-	Options Options
-	Module  string
-	timer   time.Time
-	worker  *Worker
+	Options    Options
+	Module     string
+	started    time.Time // Set once on initialization
+	timer      time.Time // reset on each call to timeElapsed()
+	statusCode int       // tracking http.StatusCode for Handle*() functions
+	method     string    // tracking method||verb (GET, PUT) for Handle*() functions
+	route      string    // tracking route for Handle*() functions
+	worker     *Worker
 }
 
 // init is called by NewLogger to detect running conditions and set all defaults
 func (l *Logger) init() {
 	l.timeReset()
+	l.started = l.timer
 	l.SetEnvironment(detectEnvironment(true))
 	initColors()
 	initFormatPlaceholders()
@@ -106,8 +112,8 @@ func (l *Logger) timeElapsed(start time.Time) time.Duration {
 	return time.Since(start)
 }
 
-func (l *Logger) timeLog(start time.Time, name string) {
-	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", name, l.timeElapsed(start)), 2)
+func (l *Logger) timeLog(name string) {
+	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", name, l.timeElapsed(l.timer)), 2)
 }
 
 // NewLogger creates and returns new logger for the given model & environment
@@ -194,6 +200,7 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 		Message:  message,
 		Filename: filename,
 		Line:     line,
+		Duration: l.timeElapsed(l.timer),
 		//format:   formatString,
 	}
 	err := l.worker.Log(lvl, 2, info)
@@ -203,8 +210,9 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 }
 
 // Trace is a basic timing function that will log InfoLevel duration of name
-func (l *Logger) Trace(name string) {
-	defer l.timeLog(time.Now(), name)
+func (l *Logger) Trace(name, file string, line int) {
+	l.timeReset()
+	defer l.timeLog(name)
 }
 
 // Fatal is just like func l.Critical logger except that it is followed by exit to program
@@ -310,6 +318,20 @@ func (l *Logger) Debug(message string) {
 
 // Debugf logs a message at Debug level using the same syntax and options as fmt.Printf
 func (l *Logger) Debugf(format string, a ...interface{}) {
+	l.logInternal(DebugLevel, fmt.Sprintf(format, a...), 2)
+}
+
+// HandlerLog Traces & logs a message at Debug level for a REST handler
+func (l *Logger) HandlerLog(r *http.Request, w *http.ResponseWriter) {
+	function, file, line := getCaller(3)
+	l.Trace(function, file, line)
+	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", function, l.timeElapsed(l.timer)), 2)
+
+	//l.logInternal(DebugLevel, message, 2)
+}
+
+// HandlerLogf logs a message at Debug level using the same syntax and options as fmt.Printf
+func (l *Logger) HandlerLogf(format string, a ...interface{}) {
 	l.logInternal(DebugLevel, fmt.Sprintf(format, a...), 2)
 }
 
