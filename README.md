@@ -17,7 +17,7 @@ If you would like to help, please do so. Besides the obvious performance tweaks 
 
 ## Preview
 
-[![Example Output](examples/basic.png)](examples/basic/main.go)
+[![Example Output](examples/basic/basic.png)](examples/basic/main.go)
 
 ## Install
 
