@@ -210,6 +210,27 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 	}
 }
 
+func (l *Logger) traceInternal(message string, pos int) {
+	function, file, line := getCaller(pos)
+	file = path.Base(file)
+	info := &Info{
+		ID:       atomic.AddUint64(&logNo, 1),
+		Time:     time.Now().Format(l.worker.timeFormat),
+		Module:   l.Module,
+		Level:    InfoLevel,
+		Message:  message,
+		Filename: file,
+		Line:     line,
+		Function: function,
+		Duration: l.timeElapsed(l.timer),
+		//format:   formatString,
+	}
+	err := l.worker.Log(info.Level, 2, info)
+	if err != nil {
+		panic(err)
+	}
+}
+
 // Trace is a basic timing function that will log InfoLevel duration of name
 func (l *Logger) Trace(name, file string, line int) {
 	l.timeReset()
@@ -323,17 +344,15 @@ func (l *Logger) Debugf(format string, a ...interface{}) {
 }
 
 // HandlerLog Traces & logs a message at Debug level for a REST handler
-func (l *Logger) HandlerLog(w http.ResponseWriter, r *http.Request, message string) {
-	function, file, line := getCaller(3)
-	l.Trace(function, file, line)
-	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", function, l.timeElapsed(l.timer)), 2)
-
-	//l.logInternal(DebugLevel, message, 2)
+func (l *Logger) HandlerLog(w http.ResponseWriter, r *http.Request) {
+	l.timeReset()
+	defer l.traceInternal(fmt.Sprintf("%s %s %v", r.Method, r.RequestURI, l.timeElapsed(l.timer)), 4)
 }
 
 // HandlerLogf logs a message at Debug level using the same syntax and options as fmt.Printf
 func (l *Logger) HandlerLogf(w http.ResponseWriter, r *http.Request, format string, a ...interface{}) {
-	l.logInternal(DebugLevel, fmt.Sprintf(format, a...), 2)
+	l.timeReset()
+	defer l.logInternal(DebugLevel, fmt.Sprintf(format, a...), 2)
 }
 
 // Print logs a message at directly with no level (RAW)

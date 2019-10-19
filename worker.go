@@ -100,6 +100,7 @@ func (w *Worker) Log(level LogLevel, calldepth int, info *Info) error {
 		if w.level < level {
 			return nil
 		}
+	} else {
 		clr = ClrDisabled
 	}
 
