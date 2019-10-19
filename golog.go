@@ -6,6 +6,7 @@ package golog
 import (
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path"
 	"runtime"
@@ -70,13 +71,14 @@ const (
 
 // Log Level
 const (
-	CriticalLevel LogLevel = iota + 1 // Magneta 	35
-	ErrorLevel                        // Red 		31
-	SuccessLevel                      // Green 		32
-	WarningLevel                      // Yellow 	33
-	NoticeLevel                       // Cyan 		36
-	InfoLevel                         // White 		37
-	DebugLevel                        // Blue 		34
+	RawLevel      = iota + 1 // None
+	CriticalLevel            // Magneta 	35
+	ErrorLevel               // Red 		31
+	SuccessLevel             // Green 		32
+	WarningLevel             // Yellow 	33
+	NoticeLevel              // Cyan 		36
+	InfoLevel                // White 		37
+	DebugLevel               // Blue 		34
 )
 
 // Logger class that is an interface to user to log messages, Module is the module for which we are testing
@@ -84,13 +86,15 @@ const (
 type Logger struct {
 	Options Options
 	Module  string
-	timer   time.Time
+	started time.Time // Set once on initialization
+	timer   time.Time // reset on each call to timeElapsed()
 	worker  *Worker
 }
 
 // init is called by NewLogger to detect running conditions and set all defaults
 func (l *Logger) init() {
 	l.timeReset()
+	l.started = l.timer
 	l.SetEnvironment(detectEnvironment(true))
 	initColors()
 	initFormatPlaceholders()
@@ -106,8 +110,8 @@ func (l *Logger) timeElapsed(start time.Time) time.Duration {
 	return time.Since(start)
 }
 
-func (l *Logger) timeLog(start time.Time, name string) {
-	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", name, l.timeElapsed(start)), 2)
+func (l *Logger) timeLog(name string) {
+	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", name, l.timeElapsed(l.timer)), 2)
 }
 
 // NewLogger creates and returns new logger for the given model & environment
@@ -194,6 +198,7 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 		Message:  message,
 		Filename: filename,
 		Line:     line,
+		Duration: l.timeElapsed(l.timer),
 		//format:   formatString,
 	}
 	err := l.worker.Log(lvl, 2, info)
@@ -202,9 +207,31 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 	}
 }
 
+func (l *Logger) traceInternal(message string, pos int) {
+	function, file, line := getCaller(pos)
+	file = path.Base(file)
+	info := &Info{
+		ID:       atomic.AddUint64(&logNo, 1),
+		Time:     time.Now().Format(l.worker.timeFormat),
+		Module:   l.Module,
+		Level:    InfoLevel,
+		Message:  message,
+		Filename: file,
+		Line:     line,
+		Function: function,
+		Duration: l.timeElapsed(l.timer),
+		//format:   formatString,
+	}
+	err := l.worker.Log(info.Level, 2, info)
+	if err != nil {
+		panic(err)
+	}
+}
+
 // Trace is a basic timing function that will log InfoLevel duration of name
-func (l *Logger) Trace(name string) {
-	defer l.timeLog(time.Now(), name)
+func (l *Logger) Trace(name, file string, line int) {
+	l.timeReset()
+	defer l.timeLog(name)
 }
 
 // Fatal is just like func l.Critical logger except that it is followed by exit to program
@@ -311,6 +338,28 @@ func (l *Logger) Debug(message string) {
 // Debugf logs a message at Debug level using the same syntax and options as fmt.Printf
 func (l *Logger) Debugf(format string, a ...interface{}) {
 	l.logInternal(DebugLevel, fmt.Sprintf(format, a...), 2)
+}
+
+// HandlerLog Traces & logs a message at Debug level for a REST handler
+func (l *Logger) HandlerLog(w http.ResponseWriter, r *http.Request) {
+	l.timeReset()
+	defer l.traceInternal(fmt.Sprintf("%s %s %v", r.Method, r.RequestURI, l.timeElapsed(l.timer)), 4)
+}
+
+// HandlerLogf logs a message at Debug level using the same syntax and options as fmt.Printf
+func (l *Logger) HandlerLogf(w http.ResponseWriter, r *http.Request, format string, a ...interface{}) {
+	l.timeReset()
+	defer l.logInternal(DebugLevel, fmt.Sprintf(format, a...), 2)
+}
+
+// Print logs a message at directly with no level (RAW)
+func (l *Logger) Print(message string) {
+	l.logInternal(RawLevel, message, 2)
+}
+
+// Printf logs a message at Info level using the same syntax and options as fmt.Printf
+func (l *Logger) Printf(format string, a ...interface{}) {
+	l.logInternal(RawLevel, fmt.Sprintf(format, a...), 2)
 }
 
 // StackAsError Prints this goroutine's execution stack as an error with an optional message at the begining
