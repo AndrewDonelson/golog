@@ -84,14 +84,11 @@ const (
 // Logger class that is an interface to user to log messages, Module is the module for which we are testing
 // worker is variable of Worker class that is used in bottom layers to log the message
 type Logger struct {
-	Options    Options
-	Module     string
-	started    time.Time // Set once on initialization
-	timer      time.Time // reset on each call to timeElapsed()
-	statusCode int       // tracking http.StatusCode for Handle*() functions
-	method     string    // tracking method||verb (GET, PUT) for Handle*() functions
-	route      string    // tracking route for Handle*() functions
-	worker     *Worker
+	Options Options
+	Module  string
+	started time.Time // Set once on initialization
+	timer   time.Time // reset on each call to timeElapsed()
+	worker  *Worker
 }
 
 // init is called by NewLogger to detect running conditions and set all defaults
