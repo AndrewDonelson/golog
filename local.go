@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -97,6 +98,7 @@ func colorString(color int) string {
 // initColors Initializes the map of colors
 func initColors() {
 	colors = map[LogLevel]string{
+		RawLevel:      colorString(White),
 		CriticalLevel: colorString(Magenta),
 		ErrorLevel:    colorString(Red),
 		SuccessLevel:  colorString(Green),
@@ -111,15 +113,34 @@ func initColors() {
 // "%{id}, %{time}, %{module}, %{function}, %{filename}, %{file}, %{line}, %{level}, %{lvl}, %{message}"
 func initFormatPlaceholders() {
 	phfs = map[string]string{
-		"%{id}":       "%[1]d",
-		"%{time}":     "%[2]s",
-		"%{module}":   "%[3]s",
-		"%{function}": "%[4]s",
-		"%{filename}": "%[5]s",
-		"%{file}":     "%[5]s",
-		"%{line}":     "%[6]d",
-		"%{level}":    "%[7]s",
-		"%{lvl}":      "%.3[7]s",
-		"%{message}":  "%[8]s",
+		"%{id}":         "%[1]d",
+		"%{time}":       "%[2]s",
+		"%{module}":     "%[3]s",
+		"%{function}":   "%[4]s",
+		"%{filename}":   "%[5]s",
+		"%{file}":       "%[5]s",
+		"%{line}":       "%[6]d",
+		"%{level}":      "%[7]s",
+		"%{lvl}":        "%.3[7]s",
+		"%{message}":    "%[8]s",
+		"%{duration}":   "%[9]s",
+		"%{method}":     "%[10]s",
+		"%{statuscode}": "%[11]d",
+		"%{route}":      "%[12]s",
 	}
+}
+
+func getCaller(skipLevels int) (function, file string, line int) {
+	fpcs := make([]uintptr, 1)
+	// Skip `skipLevels` levels to get the caller
+	n := runtime.Callers(skipLevels, fpcs)
+	if n != 0 {
+		caller := runtime.FuncForPC(fpcs[0] - 1)
+		if caller != nil {
+			file, line = caller.FileLine(fpcs[0] - 1)
+			function = caller.Name()
+		}
+	}
+
+	return
 }

@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"math"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
@@ -15,7 +17,7 @@ func TestAdvancedFormat(t *testing.T) {
 	log, err := NewLogger(&Options{
 		Module:      "pkgname",
 		Out:         &buf,
-		Environment: 0,
+		Environment: EnvDevelopment,
 		UseColor:    ClrNotSet,
 	})
 	if err != nil || log == nil {
@@ -37,15 +39,15 @@ func TestAdvancedFormat(t *testing.T) {
 	log.Error("This is Error!")
 	now := time.Now()
 	want := fmt.Sprintf(
-		"text123 1 "+ //SET TO 1 for running this test alone and SET TO 11 for running as package test
+		"[31mtext123 1 "+ //SET TO 1 for running this test alone and SET TO 11 for running as package test
 			"!@#$%% %s "+
 			"a{b pkgname "+
 			"a}b golog_test.go "+
 			"%%%% golog_test.go "+ // it's printf, escaping %, don't forget
-			"%%{37 "+
+			"%%{39 "+
 			" ERR "+
 			"%%{incorr_verb ERROR "+
-			" [This is Error!]\n",
+			" [This is Error!][0m\n",
 		now.Format("Monday, 2006 Jan 01, 15:04:05"),
 	)
 	have := buf.String()
@@ -83,6 +85,16 @@ func TestBuildEnvironments(t *testing.T) {
 	if detectEnvironment(false) != EnvProduction {
 		t.Error("Failed to SetEnvironment to EnvProduction")
 	}
+
+	log, err := NewLogger(&Options{UseColor: ClrDisabled})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	log.SetEnvironment(EnvNotSet)
+	log.SetEnvironment(EnvDevelopment)
+	log.SetEnvironment(EnvQuality)
+	log.SetEnvironment(EnvProduction)
 }
 func TestParseFormat(t *testing.T) {
 	// We do this just to initialize the required code on the
@@ -113,14 +125,6 @@ func TestParseFormat(t *testing.T) {
 	if have != want {
 		t.Errorf("\nWant: %s\nHave: %s", want, have)
 	}
-
-	// msgFmt, tmeFmt = parseFormat("{%{id}}, %{%time}")
-	// want = "%[1]d, %[2]s, %[3]s, %[4]s, %[5]s, %[5]s, %[6]d, %[7]s, %.3[7]s, %[8]s, 2006-01-02 15:04:05"
-	// have = fmt.Sprintf("%s, %s", msgFmt, tmeFmt)
-	// if have != want {
-	// 	t.Errorf("\nWant: %s\nHave: %s", want, have)
-	// }
-
 }
 
 func TestLoggerNew(t *testing.T) {
@@ -129,6 +133,7 @@ func TestLoggerNew(t *testing.T) {
 		t.Error(err)
 		return
 	}
+	log.Trace("TestLoggerNew", "golang_test.go", 136)
 
 	if log.Module != "unknown" {
 		t.Errorf("Unexpected module: %s", log.Module)
@@ -158,6 +163,15 @@ func TestLoggerNew(t *testing.T) {
 		t.Error(err)
 		return
 	}
+
+	// Test for Module name to short < 4
+	log, err = NewLogger(NewDefaultOptions())
+	if err != nil || log == nil {
+		t.Error(err)
+		return
+	}
+	log.SetEnvironment(EnvProduction)
+	log.UseJSONForProduction()
 
 }
 
@@ -195,6 +209,8 @@ func TestNewLogger(t *testing.T) {
 	log.Notice("This is a Notice message")
 	log.Info("This is a Info message")
 	log.Debug("This is a Debug message")
+	log.Print("This is a plain RAW Message")
+	log.Trace("This is a trace message", "golog_test", 211)
 
 	log.Criticalf("This is %d %s message", 1, "critical")
 	log.Fatalf("This is %d %s message", 1, "fatal")
@@ -205,6 +221,7 @@ func TestNewLogger(t *testing.T) {
 	log.Noticef("This is %d %s message", 1, "notice")
 	log.Infof("This is %d %s message", 1, "info")
 	log.Debugf("This is %d %s message", 1, "debug")
+	log.Printf("%s with %d args", "Message", 2)
 
 	log.StackAsError("")
 	log.StackAsCritical("")
@@ -220,8 +237,8 @@ func TestNewloggerCustom(t *testing.T) {
 		EnvDevelopment,
 		ClrAuto,
 		&buf,
-		defDefault,
-		defDefault,
+		FmtDefault,
+		FmtDefault,
 	))
 	if err != nil || log == nil {
 		t.Error("Unexpected error. Wanted valid logger")
@@ -268,7 +285,7 @@ func TestLogger_SetFormat(t *testing.T) {
 	log.Debug("Test")
 	//log.SetLogLevel(InfoLevel)
 
-	want := fmt.Sprintf("[pkgname] %s DEB ▶ golog_test.go:268 TestLogger_SetFormat ▶ Test\n", time.Now().Format("2006-01-02 15:04:05"))
+	want := fmt.Sprintf("[34m[pkgname] %s DEB ▶ golog_test.go#285-TestLogger_SetFormat ▶ Test[0m\n", time.Now().Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)
@@ -341,6 +358,46 @@ func TestLogLevel(t *testing.T) {
 			t.Error()
 		}
 		buf.Reset()
+	}
+}
+
+var golog *Logger
+
+func ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	golog.HandlerLog(w, r)
+	golog.HandlerLogf(w, r, "")
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write([]byte(`{"message": "hello world"}`))
+}
+func TestHandlers(t *testing.T) {
+	var (
+		buf bytes.Buffer
+	)
+
+	golog, _ = NewLogger(&Options{Module: "test-handlers", Out: &buf})
+	golog.SetEnvironment(EnvDevelopment)
+
+	req, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(ServeHTTP)
+
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	expected := `{"message": "hello world"}`
+	if rr.Body.String() != expected {
+		t.Errorf("handler returned unexpected body: got %v want %v",
+			rr.Body.String(), expected)
 	}
 }
 

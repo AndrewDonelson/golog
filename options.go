@@ -11,22 +11,33 @@ import (
 // - Add support for loading from file JSON || YAML
 // - Add support for loading from Environment Variables
 
+// Environment enumeration
 type Environment int
 
 const (
+	// EnvNotSet - No Environment set (initial)
 	EnvNotSet Environment = -2 + iota
+	// EnvTesting - Internal, Used with `go test`, `goveralls`, ect
 	EnvTesting
+	// EnvDevelopment - All Log levels, color enabled and extra info on errors
 	EnvDevelopment
+	// EnvQuality - No debug level logging, color enabled, no extra info on errors
 	EnvQuality
+	// EnvProduction - Error level & higher, no color, minimum information
 	EnvProduction
 )
 
+// ColorMode enumeration
 type ColorMode int
 
 const (
+	// ClrNotSet - No color mode is set (initial)
 	ClrNotSet ColorMode = -1 + iota
+	// ClrDisabled - Do not use color. Overrides defaults
 	ClrDisabled
+	// ClrEnabled - Force use of color. Overrides defaults
 	ClrEnabled
+	// ClrAuto - Use color based on detected (or set) Environment
 	ClrAuto
 )
 
@@ -47,8 +58,8 @@ func NewDefaultOptions() *Options {
 		Environment: detectEnvironment(true),
 		UseColor:    ClrAuto,
 		Out:         os.Stderr,
-		FmtProd:     defProductionFmt,
-		FmtDev:      defDevelopmentFmt,
+		FmtProd:     FmtProductionLog,
+		FmtDev:      FmtDevelopmentLog,
 	}
 }
 
