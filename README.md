@@ -184,8 +184,8 @@ Invalid verbs (like ```%{inv-verb```) will be treated as plain text.
 
 Run:
 
-- `go test -v` to run test on logger.
-- `go test -bench=.` for benchmarks.
+  - `go test -v` to run test on logger.
+  - `go test -bench=.` for benchmarks.
 
 ## Thanks
 
