@@ -35,7 +35,7 @@ const (
 	FmtDevelopmentLog = "[%.16[3]s] %.19[2]s %.3[7]s - %[5]s#%[6]d-%[4]s - %[8]s"
 
 	// Error, Fatal, Critical Format
-	//defErrorFmt = "%.16[3]s %.19[2]s %.8[7]s - %[8]s\n- %[5]s:%[6]d-%[4]s"
+	//defErrorLogFmt = "\n%.8[7]s\nin %.16[3]s->%[4]s() file %[5]s on line %[6]d\n%[8]s\n"
 )
 
 var (
@@ -91,29 +91,6 @@ type Logger struct {
 	worker  *Worker
 }
 
-// init is called by NewLogger to detect running conditions and set all defaults
-func (l *Logger) init() {
-	l.timeReset()
-	l.started = l.timer
-	l.SetEnvironment(detectEnvironment(true))
-	initColors()
-	initFormatPlaceholders()
-}
-
-func (l *Logger) timeReset() {
-	l.timer = time.Now()
-}
-
-// defer timeElapsed(time.Now(), "factorial")
-
-func (l *Logger) timeElapsed(start time.Time) time.Duration {
-	return time.Since(start)
-}
-
-func (l *Logger) timeLog(name string) {
-	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", name, l.timeElapsed(l.timer)), 2)
-}
-
 // NewLogger creates and returns new logger for the given model & environment
 // module is the specific module for which we are logging
 // environment overrides detected environment (if -1)
@@ -141,42 +118,25 @@ func NewLogger(opts *Options) (*Logger, error) {
 
 }
 
-// SetFormat ...
-func (l *Logger) SetFormat(format string) {
-	l.worker.SetFormat(format)
+// init is called by NewLogger to detect running conditions and set all defaults
+func (l *Logger) init() {
+	l.timeReset()
+	l.started = l.timer
+	l.SetEnvironment(detectEnvironment(true))
+	initColors()
+	initFormatPlaceholders()
 }
 
-// SetLogLevel ...
-func (l *Logger) SetLogLevel(level LogLevel) {
-	l.worker.SetLogLevel(level)
+func (l *Logger) timeReset() {
+	l.timer = time.Now()
 }
 
-// SetFunction sets the function name of the logger
-func (l *Logger) SetFunction(name string) {
-	l.worker.SetFunction(name)
+func (l *Logger) timeElapsed(start time.Time) time.Duration {
+	return time.Since(start)
 }
 
-// SetEnvironment is used to manually set the log environment to either development, testing or production
-func (l *Logger) SetEnvironment(env Environment) {
-	l.Options.Environment = env
-	l.worker.SetEnvironment(env)
-
-	// For testing, schange but reset back to testing
-	if l.worker.GetEnvironment() == EnvTesting {
-		l.worker.SetEnvironment(env)
-		l.worker.SetEnvironment(EnvTesting)
-	}
-}
-
-// SetOutput is used to manually set the output to send log data
-func (l *Logger) SetOutput(out io.Writer) {
-	l.Options.Out = out
-	l.worker.SetOutput(out)
-}
-
-// UseJSONForProduction forces using JSON instead of log for production
-func (l *Logger) UseJSONForProduction() {
-	l.worker.UseJSONForProduction()
+func (l *Logger) timeLog(name string) {
+	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", name, l.timeElapsed(l.timer)), 2)
 }
 
 // Log The log command is the function available to user to log message,
@@ -226,6 +186,44 @@ func (l *Logger) traceInternal(message string, pos int) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// SetFormat ...
+func (l *Logger) SetFormat(format string) {
+	l.worker.SetFormat(format)
+}
+
+// SetLogLevel ...
+func (l *Logger) SetLogLevel(level LogLevel) {
+	l.worker.SetLogLevel(level)
+}
+
+// SetFunction sets the function name of the logger
+func (l *Logger) SetFunction(name string) {
+	l.worker.SetFunction(name)
+}
+
+// SetEnvironment is used to manually set the log environment to either development, testing or production
+func (l *Logger) SetEnvironment(env Environment) {
+	l.Options.Environment = env
+	l.worker.SetEnvironment(env)
+
+	// For testing, schange but reset back to testing
+	if l.worker.GetEnvironment() == EnvTesting {
+		l.worker.SetEnvironment(env)
+		l.worker.SetEnvironment(EnvTesting)
+	}
+}
+
+// SetOutput is used to manually set the output to send log data
+func (l *Logger) SetOutput(out io.Writer) {
+	l.Options.Out = out
+	l.worker.SetOutput(out)
+}
+
+// UseJSONForProduction forces using JSON instead of log for production
+func (l *Logger) UseJSONForProduction() {
+	l.worker.UseJSONForProduction()
 }
 
 // Trace is a basic timing function that will log InfoLevel duration of name
