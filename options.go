@@ -46,6 +46,7 @@ type Options struct {
 	Module      string      // Name of running module
 	Environment Environment // Override default handling
 	UseColor    ColorMode   // Enable color (override) default handling
+	SmartError  bool        // Extended error that adapts by envionment
 	Out         io.Writer   // Where to write output
 	FmtProd     string      // for use with production environment
 	FmtDev      string      // for use with development environment
@@ -57,6 +58,7 @@ func NewDefaultOptions() *Options {
 		Module:      "unknown",
 		Environment: detectEnvironment(true),
 		UseColor:    ClrAuto,
+		SmartError:  true,
 		Out:         os.Stderr,
 		FmtProd:     FmtProductionLog,
 		FmtDev:      FmtDevelopmentLog,
@@ -64,7 +66,7 @@ func NewDefaultOptions() *Options {
 }
 
 // NewCustomOptions returns a new Options object with all user options
-func NewCustomOptions(module string, env Environment, clr ColorMode, out io.Writer, fmtProd, fmtDev string) *Options {
+func NewCustomOptions(module string, env Environment, clr ColorMode, SmartError bool, out io.Writer, fmtProd, fmtDev string) *Options {
 	o := NewDefaultOptions()
 
 	// If given module is valid use it, otherwise keep default
@@ -79,6 +81,8 @@ func NewCustomOptions(module string, env Environment, clr ColorMode, out io.Writ
 	if clr != ClrNotSet {
 		o.UseColor = clr
 	}
+
+	o.SmartError = SmartError
 
 	if out != nil {
 		o.Out = out
