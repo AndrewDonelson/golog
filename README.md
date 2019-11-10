@@ -35,37 +35,37 @@ import (
 )
 
 func main() {
-	// Get the instance for logger class
-	// Third option is optional and is instance of type io.Writer, defaults to os.Stderr
-	println("\nProduction Output: as Log")
-	log, err := golog.NewLogger(&golog.Options{Module: "prod-example"})
-	if err != nil {
-		panic(err) // Check for error
-	}
-	log.SetEnvironment(golog.EnvProduction)
-   
-	method := "main"
-	log.Trace(method, "main.go", 7)
-	log.SetFunction(method)
+    // Get the instance for logger class
+    // Third option is optional and is instance of type io.Writer, defaults to os.Stderr
+    println("\nProduction Output: as Log")
+    log, err := golog.NewLogger(&golog.Options{Module: "prod-example"})
+    if err != nil {
+        panic(err) // Check for error
+    }
+    log.SetEnvironment(golog.EnvProduction)
 
-	// Critically log critical
-	log.Critical("This is Critical message!")
-	// Show the error
-	log.Error("This is Error message!")
-	// Show the success
-	log.Success("This is Success message!")
-	// Give the Warning
-	log.Warning("This is Warning message!")
-	// Notice
-	log.Notice("This is Notice message!")
-	// Show the info
-	log.Info("This is Info message, Fatal & Panic skipped!")
-	// Debug
-	log.Debug("This is Debug message!")
+    method := "main"
+    log.Trace(method, "main.go", 7)
+    log.SetFunction(method)
+
+    // Critically log critical
+    log.Critical("This is Critical message!")
+    // Show the error
+    log.Error("This is Error message!")
+    // Show the success
+    log.Success("This is Success message!")
+    // Give the Warning
+    log.Warning("This is Warning message!")
+    // Notice
+    log.Notice("This is Notice message!")
+    // Show the info
+    log.Info("This is Info message, Fatal & Panic skipped!")
+    // Debug
+    log.Debug("This is Debug message!")
 }
 ```
 
-## Usage
+## Example Usage
 
 You can set a environment variable BUILD_ENV to either \[dev, qa or prod] and when a logger is created it will auto-detect and set the proper environment. After
 creating the logger you may of course manually set the environment by using `log.SetEnvironment({EnvDevelopment})`. Below are the Options for when creating a Custom Logger:
@@ -166,16 +166,16 @@ Invalid verbs (like ```%{inv-verb```) will be treated as plain text.
 
 Run:
 
-  - `go test -v .` to run test on logger.
-  - `go test -bench .` for benchmarks.
+- `go test -v .` to run test on logger.
+- `go test -bench .` for benchmarks.
 
 ## Usage
 
-  - make			# everything
-  - make test		# just run tests
-  - make bench		# just run benchmarks
-  - make build		# just build examples
-  - make run		# just run examples
+- make           # everything
+- make test      # just run tests
+- make bencH     # just run benchmarks
+- make build     # just build examples
+- make run       # just run examples
 
 ## Thanks
 
