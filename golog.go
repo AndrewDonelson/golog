@@ -28,17 +28,19 @@ const (
 	// FmtDefault is the default log format (QA)
 	FmtDefault = "[%.16[3]s] #%[1]d %.19[2]s %.3[7]s %[8]s"
 	// FmtProductionLog is the built-in production log format
-	FmtProductionLog = "[%.16[3]s] %.19[2]s %.3[7]s ▶ %[8]s"
+	FmtProductionLog = "[%.16[3]s] %.19[2]s %.3[7]s - %[8]s"
 	// FmtProductionJSON is the built-in production json format
 	FmtProductionJSON = "{\"%.16[3]s\",\"%[5]s\",\"%[6]d\",\"%[4]s\",\"%[1]d\",\"%.19[2]s\",\"%[7]s\",\"%[8]s\"}"
 	// FmtDevelopmentLog is the built-in development log format
-	FmtDevelopmentLog = "[%.16[3]s] %.19[2]s %.3[7]s ▶ %[5]s#%[6]d-%[4]s ▶ %[8]s"
+	FmtDevelopmentLog = "[%.16[3]s] %.19[2]s %.3[7]s - %[5]s#%[6]d-%[4]s - %[8]s"
 
 	// Error, Fatal, Critical Format
-	//defErrorFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[8]s\n▶ %[5]s:%[6]d-%[4]s"
+	//defErrorLogFmt = "\n%.8[7]s\nin %.16[3]s->%[4]s() file %[5]s on line %[6]d\n%[8]s\n"
 )
 
 var (
+	// Log is set y the init function to be a default thelogger
+	Log *Logger
 	// Map for the various codes of colors
 	colors map[LogLevel]string
 
@@ -91,27 +93,8 @@ type Logger struct {
 	worker  *Worker
 }
 
-// init is called by NewLogger to detect running conditions and set all defaults
-func (l *Logger) init() {
-	l.timeReset()
-	l.started = l.timer
-	l.SetEnvironment(detectEnvironment(true))
-	initColors()
-	initFormatPlaceholders()
-}
-
-func (l *Logger) timeReset() {
-	l.timer = time.Now()
-}
-
-// defer timeElapsed(time.Now(), "factorial")
-
-func (l *Logger) timeElapsed(start time.Time) time.Duration {
-	return time.Since(start)
-}
-
-func (l *Logger) timeLog(name string) {
-	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", name, l.timeElapsed(l.timer)), 2)
+func init() {
+	Log, _ = NewLogger(nil)
 }
 
 // NewLogger creates and returns new logger for the given model & environment
@@ -139,6 +122,69 @@ func NewLogger(opts *Options) (*Logger, error) {
 	newWorker.SetEnvironment(opts.Environment)
 	return l, nil
 
+}
+
+// init is called by NewLogger to detect running conditions and set all defaults
+func (l *Logger) init() {
+	l.timeReset()
+	l.started = l.timer
+	l.SetEnvironment(detectEnvironment(true))
+	initColors()
+	initFormatPlaceholders()
+}
+
+func (l *Logger) timeReset() {
+	l.timer = time.Now()
+}
+
+func (l *Logger) timeElapsed(start time.Time) time.Duration {
+	return time.Since(start)
+}
+
+func (l *Logger) timeLog(name string) {
+	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", name, l.timeElapsed(l.timer)), 2)
+}
+
+// logInternal ...
+func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
+	_, filename, line, _ := runtime.Caller(pos)
+	filename = path.Base(filename)
+	info := &Info{
+		ID:       atomic.AddUint64(&logNo, 1),
+		Time:     time.Now().Format(l.worker.timeFormat),
+		Module:   l.Module,
+		Level:    lvl,
+		Message:  message,
+		Filename: filename,
+		Line:     line,
+		Duration: l.timeElapsed(l.timer),
+		//format:   formatString,
+	}
+	err := l.worker.Log(lvl, 2, info)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (l *Logger) traceInternal(message string, pos int) {
+	function, file, line := getCaller(pos)
+	file = path.Base(file)
+	info := &Info{
+		ID:       atomic.AddUint64(&logNo, 1),
+		Time:     time.Now().Format(l.worker.timeFormat),
+		Module:   l.Module,
+		Level:    InfoLevel,
+		Message:  message,
+		Filename: file,
+		Line:     line,
+		Function: function,
+		Duration: l.timeElapsed(l.timer),
+		//format:   formatString,
+	}
+	err := l.worker.Log(info.Level, 2, info)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // SetFormat ...
@@ -184,48 +230,6 @@ func (l *Logger) UseJSONForProduction() {
 // is the info user wants to log
 func (l *Logger) Log(lvl LogLevel, message string) {
 	l.logInternal(lvl, message, 2)
-}
-
-// logInternal ...
-func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
-	_, filename, line, _ := runtime.Caller(pos)
-	filename = path.Base(filename)
-	info := &Info{
-		ID:       atomic.AddUint64(&logNo, 1),
-		Time:     time.Now().Format(l.worker.timeFormat),
-		Module:   l.Module,
-		Level:    lvl,
-		Message:  message,
-		Filename: filename,
-		Line:     line,
-		Duration: l.timeElapsed(l.timer),
-		//format:   formatString,
-	}
-	err := l.worker.Log(lvl, 2, info)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (l *Logger) traceInternal(message string, pos int) {
-	function, file, line := getCaller(pos)
-	file = path.Base(file)
-	info := &Info{
-		ID:       atomic.AddUint64(&logNo, 1),
-		Time:     time.Now().Format(l.worker.timeFormat),
-		Module:   l.Module,
-		Level:    InfoLevel,
-		Message:  message,
-		Filename: file,
-		Line:     line,
-		Function: function,
-		Duration: l.timeElapsed(l.timer),
-		//format:   formatString,
-	}
-	err := l.worker.Log(info.Level, 2, info)
-	if err != nil {
-		panic(err)
-	}
 }
 
 // Trace is a basic timing function that will log InfoLevel duration of name
