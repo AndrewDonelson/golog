@@ -139,13 +139,6 @@ func (l *Logger) timeLog(name string) {
 	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", name, l.timeElapsed(l.timer)), 2)
 }
 
-// Log The log command is the function available to user to log message,
-// lvl specifies the degree of the message the user wants to log, message
-// is the info user wants to log
-func (l *Logger) Log(lvl LogLevel, message string) {
-	l.logInternal(lvl, message, 2)
-}
-
 // logInternal ...
 func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 	_, filename, line, _ := runtime.Caller(pos)
@@ -224,6 +217,13 @@ func (l *Logger) SetOutput(out io.Writer) {
 // UseJSONForProduction forces using JSON instead of log for production
 func (l *Logger) UseJSONForProduction() {
 	l.worker.UseJSONForProduction()
+}
+
+// Log The log command is the function available to user to log message,
+// lvl specifies the degree of the message the user wants to log, message
+// is the info user wants to log
+func (l *Logger) Log(lvl LogLevel, message string) {
+	l.logInternal(lvl, message, 2)
 }
 
 // Trace is a basic timing function that will log InfoLevel duration of name
