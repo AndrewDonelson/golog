@@ -39,6 +39,7 @@ const (
 )
 
 var (
+	Log *Logger
 	// Map for the various codes of colors
 	colors map[LogLevel]string
 
@@ -89,6 +90,10 @@ type Logger struct {
 	started time.Time // Set once on initialization
 	timer   time.Time // reset on each call to timeElapsed()
 	worker  *Worker
+}
+
+func init() {
+	Log, _ = NewLogger(nil)
 }
 
 // NewLogger creates and returns new logger for the given model & environment

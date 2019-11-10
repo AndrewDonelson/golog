@@ -236,6 +236,7 @@ func TestNewloggerCustom(t *testing.T) {
 		"modulename",
 		EnvDevelopment,
 		ClrAuto,
+		true,
 		&buf,
 		FmtDefault,
 		FmtDefault,
