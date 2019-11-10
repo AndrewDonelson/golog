@@ -39,6 +39,7 @@ const (
 )
 
 var (
+	// Log is set y the init function to be a default thelogger
 	Log *Logger
 	// Map for the various codes of colors
 	colors map[LogLevel]string
