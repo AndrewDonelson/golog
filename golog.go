@@ -93,7 +93,11 @@ type Logger struct {
 }
 
 func init() {
-	Log, _ = NewLogger(nil)
+	var err error
+	Log, err = NewLogger(nil)
+	if err != nil {
+		panic(fmt.Sprintf("Error creating logger: %v", err))
+	}
 }
 
 // NewLogger creates and returns new logger for the given model & environment
@@ -245,13 +249,14 @@ func (l *Logger) Fatal(message string) {
 	os.Exit(1)
 }
 
+// FatalE logs a error at Fatallevel
+func (l *Logger) FatalE(err error) {
+	l.Fatal(err.Error())
+}
+
 // Fatalf is just like func l.CriticalF logger except that it is followed by exit to program
 func (l *Logger) Fatalf(format string, a ...interface{}) {
-	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
-	if l.worker.GetEnvironment() == EnvTesting {
-		return
-	}
-	os.Exit(1)
+	l.Fatal(fmt.Sprintf(format, a...))
 }
 
 // Panic is just like func l.Critical except that it is followed by a call to panic
@@ -263,13 +268,14 @@ func (l *Logger) Panic(message string) {
 	panic(message)
 }
 
+// PanicE logs a error at Criticallevel
+func (l *Logger) PanicE(err error) {
+	l.Panic(err.Error())
+}
+
 // Panicf is just like func l.CriticalF except that it is followed by a call to panic
 func (l *Logger) Panicf(format string, a ...interface{}) {
-	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
-	if l.worker.GetEnvironment() == EnvTesting {
-		return
-	}
-	panic(fmt.Sprintf(format, a...))
+	l.Panic(fmt.Sprintf(format, a...))
 }
 
 // Critical logs a message at a Critical Level
@@ -277,14 +283,24 @@ func (l *Logger) Critical(message string) {
 	l.logInternal(CriticalLevel, message, 2)
 }
 
+// CriticalE logs a error at Criticallevel
+func (l *Logger) CriticalE(err error) {
+	l.logInternal(CriticalLevel, err.Error(), 2)
+}
+
 // Criticalf logs a message at Critical level using the same syntax and options as fmt.Printf
 func (l *Logger) Criticalf(format string, a ...interface{}) {
 	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
 }
 
-// Error logs a message at Error level
-func (l *Logger) Error(message string) {
-	l.logInternal(ErrorLevel, message, 2)
+// Error logs a customer message at Error level
+func (l *Logger) Error(err error) {
+	l.logInternal(ErrorLevel, err.Error(), 2)
+}
+
+// ErrorE logs a error at Error level
+func (l *Logger) ErrorE(err error) {
+	l.logInternal(ErrorLevel, err.Error(), 2)
 }
 
 // Errorf logs a message at Error level using the same syntax and options as fmt.Printf
@@ -305,6 +321,11 @@ func (l *Logger) Successf(format string, a ...interface{}) {
 // Warning logs a message at Warning level
 func (l *Logger) Warning(message string) {
 	l.logInternal(WarningLevel, message, 2)
+}
+
+// WarningE logs a error at Warning level
+func (l *Logger) WarningE(err error) {
+	l.Warning(err.Error())
 }
 
 // Warningf logs a message at Warning level using the same syntax and options as fmt.Printf
@@ -335,6 +356,11 @@ func (l *Logger) Infof(format string, a ...interface{}) {
 // Debug logs a message at Debug level
 func (l *Logger) Debug(message string) {
 	l.logInternal(DebugLevel, message, 2)
+}
+
+// DebugE logs a error at Debug level
+func (l *Logger) DebugE(err error) {
+	l.Debug(err.Error())
 }
 
 // Debugf logs a message at Debug level using the same syntax and options as fmt.Printf
