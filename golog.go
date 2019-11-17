@@ -87,7 +87,6 @@ const (
 // worker is variable of Worker class that is used in bottom layers to log the message
 type Logger struct {
 	Options Options
-	Module  string
 	started time.Time // Set once on initialization
 	timer   time.Time // reset on each call to timeElapsed()
 	worker  *Worker
@@ -116,12 +115,11 @@ func NewLogger(opts *Options) (*Logger, error) {
 	}
 
 	newWorker := NewWorker("", 0, opts.UseColor, opts.Out)
-	l := &Logger{Module: opts.Module, worker: newWorker}
+	l := &Logger{worker: newWorker}
 	l.init()
 	l.Options = *opts
 	newWorker.SetEnvironment(opts.Environment)
 	return l, nil
-
 }
 
 // init is called by NewLogger to detect running conditions and set all defaults
@@ -152,7 +150,7 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 	info := &Info{
 		ID:       atomic.AddUint64(&logNo, 1),
 		Time:     time.Now().Format(l.worker.timeFormat),
-		Module:   l.Module,
+		Module:   l.Options.Module,
 		Level:    lvl,
 		Message:  message,
 		Filename: filename,
@@ -172,7 +170,7 @@ func (l *Logger) traceInternal(message string, pos int) {
 	info := &Info{
 		ID:       atomic.AddUint64(&logNo, 1),
 		Time:     time.Now().Format(l.worker.timeFormat),
-		Module:   l.Module,
+		Module:   l.Options.Module,
 		Level:    InfoLevel,
 		Message:  message,
 		Filename: file,

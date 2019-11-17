@@ -31,7 +31,7 @@ func TestNewInfo(t *testing.T) {
 	info := &Info{
 		ID:       atomic.AddUint64(&logNo, 1),
 		Time:     time.Now().Format(log.worker.timeFormat),
-		Module:   log.Module,
+		Module:   log.Options.Module,
 		Function: frame.Function,
 		Level:    InfoLevel,
 		Message:  "Hello World!",
