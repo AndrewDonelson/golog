@@ -98,6 +98,7 @@ func init() {
 	if err != nil {
 		panic(fmt.Sprintf("Error creating logger: %v", err))
 	}
+	Log.Printf("Default Log intialized for %s", Log.Options.EnvAsString())
 }
 
 // NewLogger creates and returns new logger for the given model & environment
@@ -119,10 +120,10 @@ func NewLogger(opts *Options) (*Logger, error) {
 	}
 
 	newWorker := NewWorker("", 0, opts.UseColor, opts.Out)
-	l := &Logger{worker: newWorker}
-	l.init()
-	l.Options = *opts
 	newWorker.SetEnvironment(opts.Environment)
+	l := &Logger{worker: newWorker}
+	l.Options = *opts
+	l.init()
 	return l, nil
 }
 
