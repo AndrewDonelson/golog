@@ -101,18 +101,12 @@ func NewCustomOptions(module string, env Environment, clr ColorMode, SmartError 
 
 // EnvAsString returns the current envirnment for options as a string
 func (o *Options) EnvAsString() string {
-	switch o.Environment {
-	case EnvNotSet:
-		return "EvnNotSet"
-	case EnvTesting:
-		return "EnvTesting"
-	case EnvDevelopment:
-		return "EnvDevelopment"
-	case EnvQuality:
-		return "EnvQuality"
-	case EnvProduction:
-		return "EnvProduction"
-	default:
-		return "EnvUnknown"
+	environments := [...]string{
+		"EvnNotSet",
+		"EnvTesting",
+		"EnvDevelopment",
+		"EnvQuality",
+		"EnvProduction",
 	}
+	return environments[o.Environment-1]
 }
