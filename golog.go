@@ -294,8 +294,8 @@ func (l *Logger) Criticalf(format string, a ...interface{}) {
 }
 
 // Error logs a customer message at Error level
-func (l *Logger) Error(err error) {
-	l.logInternal(ErrorLevel, err.Error(), 2)
+func (l *Logger) Error(message string) {
+	l.logInternal(ErrorLevel, message, 2)
 }
 
 // ErrorE logs a error at Error level
