@@ -70,6 +70,28 @@ func TestAdvancedFormat(t *testing.T) {
 
 }
 
+func TestLogger_SetFormat(t *testing.T) {
+	var buf bytes.Buffer
+	log, err := NewLogger(&Options{
+		Module: "pkgname",
+		Out:    &buf,
+	})
+	if err != nil || log == nil {
+		t.Error(err)
+		return
+	}
+
+	log.SetLogLevel(DebugLevel)
+	log.SetFunction("TestLogger_SetFormat")
+	log.Debug("Test")
+	//log.SetLogLevel(InfoLevel)
+
+	want := fmt.Sprintf("[34m[pkgname] %s DEB - golog_test.go#86-TestLogger_SetFormat - Test[0m\n", time.Now().Format("2006-01-02 15:04:05"))
+	have := buf.String()
+	if have != want {
+		t.Errorf("\nWant: %sHave: %s", want, have)
+	}
+}
 func TestBuildEnvironments(t *testing.T) {
 	os.Setenv("BUILD_ENV", "dev")
 	if detectEnvironment(false) != EnvDevelopment {
@@ -125,6 +147,10 @@ func TestParseFormat(t *testing.T) {
 	if have != want {
 		t.Errorf("\nWant: %s\nHave: %s", want, have)
 	}
+}
+
+func TestGlobalLogger(t *testing.T) {
+	Log.Info("Testing default global logger")
 }
 
 func TestLoggerNew(t *testing.T) {
@@ -223,6 +249,14 @@ func TestNewLogger(t *testing.T) {
 	log.Debugf("This is %d %s message", 1, "debug")
 	log.Printf("%s with %d args", "Message", 2)
 
+	testErr := fmt.Errorf("Test Error")
+	log.PanicE(testErr)
+	log.CriticalE(testErr)
+	log.FatalE(testErr)
+	log.ErrorE(testErr)
+	log.DebugE(testErr)
+	log.WarningE(testErr)
+
 	log.StackAsError("")
 	log.StackAsCritical("")
 
@@ -267,29 +301,6 @@ func BenchmarkNewWorker(b *testing.B) {
 		if worker == nil {
 			panic("Failed to initiate worker")
 		}
-	}
-}
-
-func TestLogger_SetFormat(t *testing.T) {
-	var buf bytes.Buffer
-	log, err := NewLogger(&Options{
-		Module: "pkgname",
-		Out:    &buf,
-	})
-	if err != nil || log == nil {
-		t.Error(err)
-		return
-	}
-
-	log.SetLogLevel(DebugLevel)
-	log.SetFunction("TestLogger_SetFormat")
-	log.Debug("Test")
-	//log.SetLogLevel(InfoLevel)
-
-	want := fmt.Sprintf("[34m[pkgname] %s DEB - golog_test.go#286-TestLogger_SetFormat - Test[0m\n", time.Now().Format("2006-01-02 15:04:05"))
-	have := buf.String()
-	if have != want {
-		t.Errorf("\nWant: %sHave: %s", want, have)
 	}
 }
 
