@@ -1,12 +1,16 @@
-phony: test build run
+phony: test bench build run
 
 test:
+	go test -v .
+
+bench:
 	go test -bench .
-	# overalls -project=github.com/AndrewDonelson/golog -covermode=count
-	# go tool cover -func=./overalls.coverprofile
 
 build:
-	cd example && go build
+	# cd example && go build
+	go build examples/basic/main.go
+	go build examples/http/main.go
 
 run:
-	./example/example
+	./examples/basic/basic
+	./examples/http/http
