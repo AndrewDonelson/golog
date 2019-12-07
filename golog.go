@@ -28,17 +28,19 @@ const (
 	// FmtDefault is the default log format (QA)
 	FmtDefault = "[%.16[3]s] #%[1]d %.19[2]s %.3[7]s %[8]s"
 	// FmtProductionLog is the built-in production log format
-	FmtProductionLog = "[%.16[3]s] %.19[2]s %.3[7]s ▶ %[8]s"
+	FmtProductionLog = "[%.16[3]s] %.19[2]s %.3[7]s - %[8]s"
 	// FmtProductionJSON is the built-in production json format
 	FmtProductionJSON = "{\"%.16[3]s\",\"%[5]s\",\"%[6]d\",\"%[4]s\",\"%[1]d\",\"%.19[2]s\",\"%[7]s\",\"%[8]s\"}"
 	// FmtDevelopmentLog is the built-in development log format
-	FmtDevelopmentLog = "[%.16[3]s] %.19[2]s %.3[7]s ▶ %[5]s#%[6]d-%[4]s ▶ %[8]s"
+	FmtDevelopmentLog = "[%.16[3]s] %.19[2]s %.3[7]s - %[5]s#%[6]d-%[4]s - %[8]s"
 
 	// Error, Fatal, Critical Format
-	//defErrorFmt = "%.16[3]s %.19[2]s %.8[7]s ▶ %[8]s\n▶ %[5]s:%[6]d-%[4]s"
+	//defErrorLogFmt = "\n%.8[7]s\nin %.16[3]s->%[4]s() file %[5]s on line %[6]d\n%[8]s\n"
 )
 
 var (
+	// Log is set y the init function to be a default thelogger
+	Log *Logger
 	// Map for the various codes of colors
 	colors map[LogLevel]string
 
@@ -85,33 +87,18 @@ const (
 // worker is variable of Worker class that is used in bottom layers to log the message
 type Logger struct {
 	Options Options
-	Module  string
 	started time.Time // Set once on initialization
 	timer   time.Time // reset on each call to timeElapsed()
 	worker  *Worker
 }
 
-// init is called by NewLogger to detect running conditions and set all defaults
-func (l *Logger) init() {
-	l.timeReset()
-	l.started = l.timer
-	l.SetEnvironment(detectEnvironment(true))
-	initColors()
-	initFormatPlaceholders()
-}
-
-func (l *Logger) timeReset() {
-	l.timer = time.Now()
-}
-
-// defer timeElapsed(time.Now(), "factorial")
-
-func (l *Logger) timeElapsed(start time.Time) time.Duration {
-	return time.Since(start)
-}
-
-func (l *Logger) timeLog(name string) {
-	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", name, l.timeElapsed(l.timer)), 2)
+func init() {
+	var err error
+	Log, err = NewLogger(nil)
+	if err != nil {
+		panic(fmt.Sprintf("Error creating logger: %v", err))
+	}
+	Log.Printf("Default Log intialized for %s", Log.Options.EnvAsString())
 }
 
 // NewLogger creates and returns new logger for the given model & environment
@@ -133,12 +120,74 @@ func NewLogger(opts *Options) (*Logger, error) {
 	}
 
 	newWorker := NewWorker("", 0, opts.UseColor, opts.Out)
-	l := &Logger{Module: opts.Module, worker: newWorker}
-	l.init()
-	l.Options = *opts
 	newWorker.SetEnvironment(opts.Environment)
+	l := &Logger{worker: newWorker}
+	l.Options = *opts
+	l.init()
 	return l, nil
+}
 
+// init is called by NewLogger to detect running conditions and set all defaults
+func (l *Logger) init() {
+	l.timeReset()
+	l.started = l.timer
+	l.SetEnvironment(detectEnvironment(true))
+	initColors()
+	initFormatPlaceholders()
+}
+
+func (l *Logger) timeReset() {
+	l.timer = time.Now()
+}
+
+func (l *Logger) timeElapsed(start time.Time) time.Duration {
+	return time.Since(start)
+}
+
+func (l *Logger) timeLog(name string) {
+	l.logInternal(InfoLevel, fmt.Sprintf("%s took %v", name, l.timeElapsed(l.timer)), 2)
+}
+
+// logInternal ...
+func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
+	_, filename, line, _ := runtime.Caller(pos)
+	filename = path.Base(filename)
+	info := &Info{
+		ID:       atomic.AddUint64(&logNo, 1),
+		Time:     time.Now().Format(l.worker.timeFormat),
+		Module:   l.Options.Module,
+		Level:    lvl,
+		Message:  message,
+		Filename: filename,
+		Line:     line,
+		Duration: l.timeElapsed(l.timer),
+		//format:   formatString,
+	}
+	err := l.worker.Log(lvl, 2, info)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (l *Logger) traceInternal(message string, pos int) {
+	function, file, line := getCaller(pos)
+	file = path.Base(file)
+	info := &Info{
+		ID:       atomic.AddUint64(&logNo, 1),
+		Time:     time.Now().Format(l.worker.timeFormat),
+		Module:   l.Options.Module,
+		Level:    InfoLevel,
+		Message:  message,
+		Filename: file,
+		Line:     line,
+		Function: function,
+		Duration: l.timeElapsed(l.timer),
+		//format:   formatString,
+	}
+	err := l.worker.Log(info.Level, 2, info)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // SetFormat ...
@@ -186,48 +235,6 @@ func (l *Logger) Log(lvl LogLevel, message string) {
 	l.logInternal(lvl, message, 2)
 }
 
-// logInternal ...
-func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
-	_, filename, line, _ := runtime.Caller(pos)
-	filename = path.Base(filename)
-	info := &Info{
-		ID:       atomic.AddUint64(&logNo, 1),
-		Time:     time.Now().Format(l.worker.timeFormat),
-		Module:   l.Module,
-		Level:    lvl,
-		Message:  message,
-		Filename: filename,
-		Line:     line,
-		Duration: l.timeElapsed(l.timer),
-		//format:   formatString,
-	}
-	err := l.worker.Log(lvl, 2, info)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (l *Logger) traceInternal(message string, pos int) {
-	function, file, line := getCaller(pos)
-	file = path.Base(file)
-	info := &Info{
-		ID:       atomic.AddUint64(&logNo, 1),
-		Time:     time.Now().Format(l.worker.timeFormat),
-		Module:   l.Module,
-		Level:    InfoLevel,
-		Message:  message,
-		Filename: file,
-		Line:     line,
-		Function: function,
-		Duration: l.timeElapsed(l.timer),
-		//format:   formatString,
-	}
-	err := l.worker.Log(info.Level, 2, info)
-	if err != nil {
-		panic(err)
-	}
-}
-
 // Trace is a basic timing function that will log InfoLevel duration of name
 func (l *Logger) Trace(name, file string, line int) {
 	l.timeReset()
@@ -243,13 +250,14 @@ func (l *Logger) Fatal(message string) {
 	os.Exit(1)
 }
 
+// FatalE logs a error at Fatallevel
+func (l *Logger) FatalE(err error) {
+	l.Fatal(err.Error())
+}
+
 // Fatalf is just like func l.CriticalF logger except that it is followed by exit to program
 func (l *Logger) Fatalf(format string, a ...interface{}) {
-	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
-	if l.worker.GetEnvironment() == EnvTesting {
-		return
-	}
-	os.Exit(1)
+	l.Fatal(fmt.Sprintf(format, a...))
 }
 
 // Panic is just like func l.Critical except that it is followed by a call to panic
@@ -261,13 +269,14 @@ func (l *Logger) Panic(message string) {
 	panic(message)
 }
 
+// PanicE logs a error at Criticallevel
+func (l *Logger) PanicE(err error) {
+	l.Panic(err.Error())
+}
+
 // Panicf is just like func l.CriticalF except that it is followed by a call to panic
 func (l *Logger) Panicf(format string, a ...interface{}) {
-	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
-	if l.worker.GetEnvironment() == EnvTesting {
-		return
-	}
-	panic(fmt.Sprintf(format, a...))
+	l.Panic(fmt.Sprintf(format, a...))
 }
 
 // Critical logs a message at a Critical Level
@@ -275,14 +284,24 @@ func (l *Logger) Critical(message string) {
 	l.logInternal(CriticalLevel, message, 2)
 }
 
+// CriticalE logs a error at Criticallevel
+func (l *Logger) CriticalE(err error) {
+	l.logInternal(CriticalLevel, err.Error(), 2)
+}
+
 // Criticalf logs a message at Critical level using the same syntax and options as fmt.Printf
 func (l *Logger) Criticalf(format string, a ...interface{}) {
 	l.logInternal(CriticalLevel, fmt.Sprintf(format, a...), 2)
 }
 
-// Error logs a message at Error level
+// Error logs a customer message at Error level
 func (l *Logger) Error(message string) {
 	l.logInternal(ErrorLevel, message, 2)
+}
+
+// ErrorE logs a error at Error level
+func (l *Logger) ErrorE(err error) {
+	l.logInternal(ErrorLevel, err.Error(), 2)
 }
 
 // Errorf logs a message at Error level using the same syntax and options as fmt.Printf
@@ -303,6 +322,11 @@ func (l *Logger) Successf(format string, a ...interface{}) {
 // Warning logs a message at Warning level
 func (l *Logger) Warning(message string) {
 	l.logInternal(WarningLevel, message, 2)
+}
+
+// WarningE logs a error at Warning level
+func (l *Logger) WarningE(err error) {
+	l.Warning(err.Error())
 }
 
 // Warningf logs a message at Warning level using the same syntax and options as fmt.Printf
@@ -333,6 +357,11 @@ func (l *Logger) Infof(format string, a ...interface{}) {
 // Debug logs a message at Debug level
 func (l *Logger) Debug(message string) {
 	l.logInternal(DebugLevel, message, 2)
+}
+
+// DebugE logs a error at Debug level
+func (l *Logger) DebugE(err error) {
+	l.Debug(err.Error())
 }
 
 // Debugf logs a message at Debug level using the same syntax and options as fmt.Printf

@@ -1,3 +1,4 @@
+
 phony: test bench build run
 
 test:
@@ -7,9 +8,8 @@ bench:
 	go test -bench .
 
 build:
-	# cd example && go build
-	go build examples/basic/main.go
-	go build examples/http/main.go
+	go build -o ./examples/basic/basic examples/basic/main.go
+	go build -o ./examples/http/http examples/http/main.go
 
 run:
 	./examples/basic/basic

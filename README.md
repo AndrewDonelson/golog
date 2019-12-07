@@ -11,8 +11,6 @@ Versatile Go Logger with a focus on Build Environments to provide performance an
 
 ## Notice
 
-**Even though this is currently building, Use it at your own risk. IT IS NOT quite ready for use IMHO.**
-
 If you would like to help, please do so. Besides the obvious performance tweaks checkout the issues and do a PR. Please make sure to handle code coverage.
 
 ## Preview
@@ -23,7 +21,7 @@ If you would like to help, please do so. Besides the obvious performance tweaks 
 
 `go get -u github.com/AndrewDonelson/golog`
 
-This will either Insstall or Update the package.
+This will either Install or Update the package.
 
 ## Example
 
@@ -36,54 +34,38 @@ import (
    "github.com/AndrewDonelson/golog"
 )
 
-func doLogs(log *golog.Logger) {
- log.SetFunction("doLogs")
- // Critically log critical
- log.Critical("This is Critical!")
- // Show the error
- log.Error("This is Error!")
- // Show the success
- log.Success("This is Success!")
- // Give the Warning
- log.Warning("This is Warning!")
- // Notice
- log.Notice("This is Notice!")
- // Show the info
- log.Info("This is Info!")
- // Debug
- log.Debug("This is Debug!")
-}
-
 func main() {
- // Get the instance for logger class
- // Third option is optional and is instance of type io.Writer, defaults to os.Stderr
- println("\nProduction Output:")
- log, err := golog.NewLogger(nil)
- if err != nil {
-    panic(err) // Check for error
- }
- log.SetEnvironment(golog.EnvProduction)
- doLogs(log)
+    // Get the instance for logger class
+    // Third option is optional and is instance of type io.Writer, defaults to os.Stderr
+    println("\nProduction Output: as Log")
+    log, err := golog.NewLogger(&golog.Options{Module: "prod-example"})
+    if err != nil {
+        panic(err) // Check for error
+    }
+    log.SetEnvironment(golog.EnvProduction)
 
- println("\nTest/QA Output:")
- log, err = golog.NewLogger(nil)
- if err != nil {
-    panic(err) // Check for error
- }
- log.SetEnvironment(golog.EnvQuality)
- doLogs(log)
+    method := "main"
+    log.Trace(method, "main.go", 7)
+    log.SetFunction(method)
 
- println("\nDevelopment Output:")
- log, err = golog.NewLogger(nil)
- if err != nil {
-    panic(err) // Check for error
- }
- log.SetEnvironment(golog.EnvDevelopment)
- doLogs(log)
+    // Critically log critical
+    log.Critical("This is Critical message!")
+    // Show the error
+    log.Error("This is Error message!")
+    // Show the success
+    log.Success("This is Success message!")
+    // Give the Warning
+    log.Warning("This is Warning message!")
+    // Notice
+    log.Notice("This is Notice message!")
+    // Show the info
+    log.Info("This is Info message, Fatal & Panic skipped!")
+    // Debug
+    log.Debug("This is Debug message!")
 }
 ```
 
-## Usage
+## Example Usage
 
 You can set a environment variable BUILD_ENV to either \[dev, qa or prod] and when a logger is created it will auto-detect and set the proper environment. After
 creating the logger you may of course manually set the environment by using `log.SetEnvironment({EnvDevelopment})`. Below are the Options for when creating a Custom Logger:
@@ -184,8 +166,16 @@ Invalid verbs (like ```%{inv-verb```) will be treated as plain text.
 
 Run:
 
-  - `go test -v` to run test on logger.
-  - `go test -bench=.` for benchmarks.
+  - `go test -v .` to run test on logger.
+  - `go test -bench .` for benchmarks.
+
+## Usage
+
+  - make           # everything
+  - make test      # just run tests
+  - make bencH     # just run benchmarks
+  - make build     # just build examples
+  - make run       # just run examples
 
 ## Thanks
 
