@@ -190,6 +190,11 @@ func (l *Logger) traceInternal(message string, pos int) {
 	}
 }
 
+// SetModuleName sets the name of the module being logged
+func (l *Logger) SetModuleName(name string) {
+	l.Options.Module = name
+}
+
 // SetFormat ...
 func (l *Logger) SetFormat(format string) {
 	l.worker.SetFormat(format)
