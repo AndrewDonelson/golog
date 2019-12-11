@@ -16,7 +16,7 @@ type Environment int
 
 const (
 	// EnvNotSet - No Environment set (initial)
-	EnvNotSet Environment = -2 + iota
+	EnvNotSet Environment = 0 + iota
 	// EnvTesting - Internal, Used with `go test`, `goveralls`, ect
 	EnvTesting
 	// EnvDevelopment - All Log levels, color enabled and extra info on errors
