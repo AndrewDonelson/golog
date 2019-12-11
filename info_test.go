@@ -31,7 +31,7 @@ func TestNewInfo(t *testing.T) {
 	info := &Info{
 		ID:       atomic.AddUint64(&logNo, 1),
 		Time:     time.Now().Format(log.worker.timeFormat),
-		Module:   log.Module,
+		Module:   log.Options.Module,
 		Function: frame.Function,
 		Level:    InfoLevel,
 		Message:  "Hello World!",
@@ -43,8 +43,8 @@ func TestNewInfo(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	// "[35munknown 2019-10-15 19:20:51 INF ▶ Hello World![0m"
-	want := fmt.Sprintf("[35m[unknown] #81 %s INF Hello World![0m\n", time.Now().Format("2006-01-02 15:04:05"))
+	// "[35munknown 2019-10-15 19:20:51 INF - Hello World![0m"
+	want := fmt.Sprintf("[35m[unknown] #88 %s INF Hello World![0m\n", time.Now().Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)
