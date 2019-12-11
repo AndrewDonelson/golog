@@ -108,5 +108,5 @@ func (o *Options) EnvAsString() string {
 		"EnvQuality",
 		"EnvProduction",
 	}
-	return environments[o.Environment-1]
+	return environments[o.Environment]
 }
