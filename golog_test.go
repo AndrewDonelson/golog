@@ -343,7 +343,6 @@ func TestLogLevel(t *testing.T) {
 	var buf bytes.Buffer
 
 	log, err := NewLogger(&Options{
-		Module:      "pkgname",
 		Out:         &buf,
 		Environment: EnvDevelopment,
 		UseColor:    ClrNotSet,
@@ -352,6 +351,7 @@ func TestLogLevel(t *testing.T) {
 		t.Error(err)
 		return
 	}
+	log.SetModuleName("pkgname")
 
 	for i, test := range tests {
 		log.SetLogLevel(test.level)

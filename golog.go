@@ -166,12 +166,7 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 		Duration: l.timeElapsed(l.timer),
 		//format:   formatString,
 	}
-	err := l.worker.Log(lvl, 2, info)
-	if err != nil {
-		// Removed panic as program execution should not halt for alog issue. Replaced with
-		// golang log Fatal event for developer to recitfy.
-		log.Fatalf("golog:logInternal error: %v", err)
-	}
+	l.worker.Log(lvl, 2, info)
 }
 
 func (l *Logger) traceInternal(message string, pos int) {
@@ -189,12 +184,7 @@ func (l *Logger) traceInternal(message string, pos int) {
 		Duration: l.timeElapsed(l.timer),
 		//format:   formatString,
 	}
-	err := l.worker.Log(info.Level, 2, info)
-	if err != nil {
-		// Removed panic as program execution should not halt for alog issue. Replaced with
-		// golang log Fatal event for developer to recitfy.
-		log.Fatalf("golog:traceInternal error: %v", err)
-	}
+	l.worker.Log(info.Level, 2, info)
 }
 
 // SetModuleName sets the name of the module being logged
