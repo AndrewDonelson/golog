@@ -84,7 +84,17 @@ type Options struct {
 
 ### Creating New Logger
 
-Default (minumum)
+There is no need to manually create a logger. Simply import golog and start using.
+
+```go
+golog.Log.SetModule("myapp")
+err := RunSomeFunction()
+if err != nil {
+   golog.Log.ErrorE(err)
+}
+```
+
+#### Default (minumum)
 
 ```go
  // Create a logger with all default options
@@ -94,15 +104,18 @@ Default (minumum)
  }
 ```
 
-Typical
+#### Typical
 
 ```go
- log, err := golog.NewLogger(nil)
- if err != nil {
-    panic(err) // Check for error
- }
- log.SetModule("rpc.ServiceName")
-
+// create a new golag logger
+log, err := golog.NewLogger(&golog.Options{Module: "myapp"})
+if err != nil {
+   panic(err) // Check for error
+}
+// You can set the Environment here, or in the above NewLogger() call but suggested way
+// is to use an OS Environment variable named "BUILD_ENV" to set either dev or qa. 
+// Anything else would be considered production
+log.SetEnvironment(golog.EnvProduction)
 ```
 
 Custom
