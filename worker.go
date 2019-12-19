@@ -116,5 +116,4 @@ func (w *Worker) Log(level LogLevel, calldepth int, info *Info) {
 
 	// Regular no color output
 	_ = w.Minion.Output(calldepth+1, info.Output(w.format))
-	return 
 }
