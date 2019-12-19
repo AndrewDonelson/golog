@@ -12,6 +12,7 @@ import (
 	"runtime"
 	"sync/atomic"
 	"time"
+	"log"
 )
 
 const (
@@ -71,14 +72,13 @@ const (
 	White
 )
 
-// Log Level
+// Log Level. Panic is not included as a level.
 const (
 	RawLevel      = iota + 1 // None
-	Fatallevel				 // 
-	CriticalLevel            // Magneta 	35
+	CriticalLevel            // Magneta 	35 - Critical & Fatal Levels are same
 	ErrorLevel               // Red 		31
-	SuccessLevel             // Green 		32
 	WarningLevel             // Yellow 		33
+	SuccessLevel             // Green 		32
 	NoticeLevel              // Cyan 		36
 	InfoLevel                // White 		37
 	DebugLevel               // Blue 		34
@@ -97,7 +97,9 @@ func init() {
 	var err error
 	Log, err = NewLogger(nil)
 	if err != nil {
-		panic(fmt.Sprintf("Error creating logger: %v", err))
+		// Removed panic as program execution should not halt for alog issue. Replaced with
+		// golang log Fatal event for developer to recitfy.
+		log.Fatalf("golog:init error: %v", err)		
 	}
 	Log.Printf("Default Log intialized for %s", Log.Options.EnvAsString())
 }
@@ -166,7 +168,9 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 	}
 	err := l.worker.Log(lvl, 2, info)
 	if err != nil {
-		panic(err)
+		// Removed panic as program execution should not halt for alog issue. Replaced with
+		// golang log Fatal event for developer to recitfy.
+		log.Fatalf("golog:logInternal error: %v", err)
 	}
 }
 
@@ -187,7 +191,9 @@ func (l *Logger) traceInternal(message string, pos int) {
 	}
 	err := l.worker.Log(info.Level, 2, info)
 	if err != nil {
-		panic(err)
+		// Removed panic as program execution should not halt for alog issue. Replaced with
+		// golang log Fatal event for developer to recitfy.
+		log.Fatalf("golog:traceInternal error: %v", err)
 	}
 }
 
