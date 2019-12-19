@@ -12,6 +12,7 @@ import (
 	"runtime"
 	"sync/atomic"
 	"time"
+	"log"
 )
 
 const (
@@ -71,13 +72,13 @@ const (
 	White
 )
 
-// Log Level
+// Log Level. Panic is not included as a level.
 const (
 	RawLevel      = iota + 1 // None
-	CriticalLevel            // Magneta 	35
+	CriticalLevel            // Magneta 	35 - Critical & Fatal Levels are same
 	ErrorLevel               // Red 		31
+	WarningLevel             // Yellow 		33
 	SuccessLevel             // Green 		32
-	WarningLevel             // Yellow 	33
 	NoticeLevel              // Cyan 		36
 	InfoLevel                // White 		37
 	DebugLevel               // Blue 		34
@@ -96,7 +97,9 @@ func init() {
 	var err error
 	Log, err = NewLogger(nil)
 	if err != nil {
-		panic(fmt.Sprintf("Error creating logger: %v", err))
+		// Removed panic as program execution should not halt for alog issue. Replaced with
+		// golang log Fatal event for developer to recitfy.
+		log.Fatalf("golog:init error: %v", err)		
 	}
 	Log.Printf("Default Log intialized for %s", Log.Options.EnvAsString())
 }
@@ -165,7 +168,9 @@ func (l *Logger) logInternal(lvl LogLevel, message string, pos int) {
 	}
 	err := l.worker.Log(lvl, 2, info)
 	if err != nil {
-		panic(err)
+		// Removed panic as program execution should not halt for alog issue. Replaced with
+		// golang log Fatal event for developer to recitfy.
+		log.Fatalf("golog:logInternal error: %v", err)
 	}
 }
 
@@ -186,7 +191,9 @@ func (l *Logger) traceInternal(message string, pos int) {
 	}
 	err := l.worker.Log(info.Level, 2, info)
 	if err != nil {
-		panic(err)
+		// Removed panic as program execution should not halt for alog issue. Replaced with
+		// golang log Fatal event for developer to recitfy.
+		log.Fatalf("golog:traceInternal error: %v", err)
 	}
 }
 
@@ -246,25 +253,6 @@ func (l *Logger) Trace(name, file string, line int) {
 	defer l.timeLog(name)
 }
 
-// Fatal is just like func l.Critical logger except that it is followed by exit to program
-func (l *Logger) Fatal(message string) {
-	l.logInternal(CriticalLevel, message, 2)
-	if l.worker.GetEnvironment() == EnvTesting {
-		return
-	}
-	os.Exit(1)
-}
-
-// FatalE logs a error at Fatallevel
-func (l *Logger) FatalE(err error) {
-	l.Fatal(err.Error())
-}
-
-// Fatalf is just like func l.CriticalF logger except that it is followed by exit to program
-func (l *Logger) Fatalf(format string, a ...interface{}) {
-	l.Fatal(fmt.Sprintf(format, a...))
-}
-
 // Panic is just like func l.Critical except that it is followed by a call to panic
 func (l *Logger) Panic(message string) {
 	l.logInternal(CriticalLevel, message, 2)
@@ -282,6 +270,25 @@ func (l *Logger) PanicE(err error) {
 // Panicf is just like func l.CriticalF except that it is followed by a call to panic
 func (l *Logger) Panicf(format string, a ...interface{}) {
 	l.Panic(fmt.Sprintf(format, a...))
+}
+
+// Fatal is just like func l.Critical logger except that it is followed by exit to program
+func (l *Logger) Fatal(message string) {
+	l.logInternal(CriticalLevel, message, 2)
+	if l.worker.GetEnvironment() == EnvTesting {
+		return
+	}
+	os.Exit(1)
+}
+
+// FatalE logs a error at Fatallevel
+func (l *Logger) FatalE(err error) {
+	l.Fatal(err.Error())
+}
+
+// Fatalf is just like func l.CriticalF logger except that it is followed by exit to program
+func (l *Logger) Fatalf(format string, a ...interface{}) {
+	l.Fatal(fmt.Sprintf(format, a...))
 }
 
 // Critical logs a message at a Critical Level
@@ -314,16 +321,6 @@ func (l *Logger) Errorf(format string, a ...interface{}) {
 	l.logInternal(ErrorLevel, fmt.Sprintf(format, a...), 2)
 }
 
-// Success logs a message at Success level
-func (l *Logger) Success(message string) {
-	l.logInternal(SuccessLevel, message, 2)
-}
-
-// Successf logs a message at Success level using the same syntax and options as fmt.Printf
-func (l *Logger) Successf(format string, a ...interface{}) {
-	l.logInternal(SuccessLevel, fmt.Sprintf(format, a...), 2)
-}
-
 // Warning logs a message at Warning level
 func (l *Logger) Warning(message string) {
 	l.logInternal(WarningLevel, message, 2)
@@ -337,6 +334,16 @@ func (l *Logger) WarningE(err error) {
 // Warningf logs a message at Warning level using the same syntax and options as fmt.Printf
 func (l *Logger) Warningf(format string, a ...interface{}) {
 	l.logInternal(WarningLevel, fmt.Sprintf(format, a...), 2)
+}
+
+// Success logs a message at Success level
+func (l *Logger) Success(message string) {
+	l.logInternal(SuccessLevel, message, 2)
+}
+
+// Successf logs a message at Success level using the same syntax and options as fmt.Printf
+func (l *Logger) Successf(format string, a ...interface{}) {
+	l.logInternal(SuccessLevel, fmt.Sprintf(format, a...), 2)
 }
 
 // Notice logs a message at Notice level

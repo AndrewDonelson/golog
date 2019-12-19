@@ -46,7 +46,7 @@ type Options struct {
 	Module      string      // Name of running module
 	Environment Environment // Override default handling
 	UseColor    ColorMode   // Enable color (override) default handling
-	SmartError  bool        // Extended error that adapts by envionment
+	SmartError  bool        // Extended error that adapts by environment
 	Out         io.Writer   // Where to write output
 	FmtProd     string      // for use with production environment
 	FmtDev      string      // for use with development environment
