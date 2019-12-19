@@ -25,7 +25,7 @@ This will either Install or Update the package.
 
 ## Example
 
-Example [program](example/example.go) demonstrates how to use the logger. See below for *formatting* instructions.
+Example [program](examples/basic/main.go) demonstrates how to use the logger. See below for *formatting* instructions.
 
 ```go
 package main
