@@ -110,11 +110,11 @@ func (w *Worker) Log(level LogLevel, calldepth int, info *Info) {
 		buf.Write([]byte(colors[level]))
 		buf.Write([]byte(info.Output(w.format)))
 		buf.Write([]byte("\033[0m"))
-		w.Minion.Output(calldepth+1, buf.String())
+		_ = w.Minion.Output(calldepth+1, buf.String())
 		return 
 	}
 
 	// Regular no color output
-	w.Minion.Output(calldepth+1, info.Output(w.format))
+	_ = w.Minion.Output(calldepth+1, info.Output(w.format))
 	return 
 }
