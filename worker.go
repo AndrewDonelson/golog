@@ -91,14 +91,14 @@ func (w *Worker) SetOutput(out io.Writer) {
 }
 
 // Log Function of Worker class to log a string based on level
-func (w *Worker) Log(level LogLevel, calldepth int, info *Info) error {
+func (w *Worker) Log(level LogLevel, calldepth int, info *Info) {
 	info.Function = w.function
 
 	// Support RawLevel on any environment
 	clr := w.color
 	if level != RawLevel {
 		if w.level < level {
-			return nil
+			return
 		}
 	} else {
 		clr = ClrDisabled
@@ -110,9 +110,10 @@ func (w *Worker) Log(level LogLevel, calldepth int, info *Info) error {
 		buf.Write([]byte(colors[level]))
 		buf.Write([]byte(info.Output(w.format)))
 		buf.Write([]byte("\033[0m"))
-		return w.Minion.Output(calldepth+1, buf.String())
+		_ = w.Minion.Output(calldepth+1, buf.String())
+		return 
 	}
 
 	// Regular no color output
-	return w.Minion.Output(calldepth+1, info.Output(w.format))
+	_ = w.Minion.Output(calldepth+1, info.Output(w.format))
 }
