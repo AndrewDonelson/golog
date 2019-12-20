@@ -61,28 +61,28 @@ func (w *Worker) SetEnvironment(env Environment) {
 
 	if env == EnvTesting {
 		// set for testing
-		w.level = InfoLevel
-		w.format = defFmt
-		w.color = ClrAuto
+		w.level 	= InfoLevel
+		w.format 	= defFmt
+		w.color 	= ClrAuto
 		return
 	} else if env == EnvQuality {
 		// set for qa
-		w.level = InfoLevel
-		w.format = defFmt
-		w.color = ClrAuto
+		w.level 	= InfoLevel
+		w.format 	= defFmt
+		w.color 	= ClrAuto
 		return
 	} else if env == EnvDevelopment {
 		// set for developer
-		w.level = DebugLevel
-		w.format = FmtDevelopmentLog
-		w.color = ClrAuto
+		w.level 	= DebugLevel
+		w.format 	= FmtDevelopmentLog
+		w.color 	= ClrAuto
 		return
 	}
 
 	// set for production
-	w.level = SuccessLevel
-	w.format = FmtProductionLog
-	w.color = ClrDisabled
+	w.level 	= SuccessLevel
+	w.format 	= FmtProductionLog
+	w.color 	= ClrDisabled
 }
 
 // SetOutput is used to manually set the output to send log data
