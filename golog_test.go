@@ -26,20 +26,20 @@ func TestAdvancedFormat(t *testing.T) {
 	}
 
 	format :=
-		"text123 %{id} " + // text and digits before id
-			"!@#$% %{time:Monday, 2006 Jan 01, 15:04:05} " + // symbols before time with spec format
-			"a{b %{module} " + // brace with text that should be just text before verb
-			"a}b %{filename} " + // brace with text that should be just text before verb
-			"%% %{file} " + // percent symbols before verb
-			"%{%{line} " + // percent symbol with brace before verb w/o space
-			"%{nonex_verb} %{lvl} " + // nonexistent verb berfore real verb
-			"%{incorr_verb %{level} " + // incorrect verb before real verb
-			"%{} [%{message}]" // empty verb before message in sq brackets
+		"text123 %{id} " + 										// text and digits before id
+			"!@#$% %{time:Monday, 2006 Jan 01, 15:04:05} " + 	// symbols before time with spec format
+			"a{b %{module} " + 									// brace with text that should be just text before verb
+			"a}b %{filename} " + 								// brace with text that should be just text before verb
+			"%% %{file} " + 									// percent symbols before verb
+			"%{%{line} " + 										// percent symbol with brace before verb w/o space
+			"%{nonex_verb} %{lvl} " + 							// nonexistent verb berfore real verb
+			"%{incorr_verb %{level} " + 						// incorrect verb before real verb
+			"%{} [%{message}]" 									// empty verb before message in sq brackets
 	log.SetFormat(format)
 	log.Error("This is Error!")
 	now := time.Now()
 	want := fmt.Sprintf(
-		"[31mtext123 2 "+ //SET TO 1 for running this test alone and SET TO 11 for running as package test
+		"[31mtext123 1 "+ //SET TO 1 for running this test alone and SET TO 11 for running as package test
 			"!@#$%% %s "+
 			"a{b pkgname "+
 			"a}b golog_test.go "+
@@ -113,7 +113,7 @@ func TestBuildEnvironments(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	log.SetEnvironment(EnvNotSet)
+	log.SetEnvironment(EnvAuto)
 	log.SetEnvironment(EnvDevelopment)
 	log.SetEnvironment(EnvQuality)
 	log.SetEnvironment(EnvProduction)

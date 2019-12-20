@@ -15,8 +15,8 @@ import (
 type Environment int
 
 const (
-	// EnvNotSet - No Environment set (initial)
-	EnvNotSet Environment = 0 + iota
+	// EnvAuto - No Environment set (initial) Will detect by looking for BUILD_ENV os variable
+	EnvAuto Environment = 0 + iota
 	// EnvTesting - Internal, Used with `go test`, `goveralls`, ect
 	EnvTesting
 	// EnvDevelopment - All Log levels, color enabled and extra info on errors
@@ -102,7 +102,7 @@ func NewCustomOptions(module string, env Environment, clr ColorMode, SmartError 
 // EnvAsString returns the current envirnment for options as a string
 func (o *Options) EnvAsString() string {
 	environments := [...]string{
-		"EvnNotSet",
+		"EvnAuto",
 		"EnvTesting",
 		"EnvDevelopment",
 		"EnvQuality",
