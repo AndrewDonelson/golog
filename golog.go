@@ -94,14 +94,15 @@ type Logger struct {
 }
 
 func init() {
-	var err error
+	var	err	error
+
 	Log, err = NewLogger(nil)
 	if err != nil {
 		// Removed panic as program execution should not halt for alog issue. Replaced with
 		// golang log Fatal event for developer to recitfy.
 		log.Fatalf("golog:init error: %v", err)		
 	}
-	Log.Printf("Default Log intialized for %s", Log.Options.EnvAsString())
+	//Log.Printf("Default Log intialized for %s", Log.Options.EnvAsString())
 }
 
 // NewLogger creates and returns new logger for the given model & environment
