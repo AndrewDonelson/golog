@@ -4,55 +4,46 @@ import (
 	"github.com/AndrewDonelson/golog"
 )
 
-func doLogs(log *golog.Logger) {
+func doLogs() {
 	method := "doLogs"
-	log.Trace(method, "example.go", 7)
-	log.SetFunction(method)
+	golog.Log.Trace(method, "example.go", 7)
+	golog.Log.SetFunction(method)
 
 	// Critically log critical
-	log.Critical("This is Critical message!")
+	golog.Log.Critical("This is Critical message!")
 	// Show the error
-	log.Error("This is Error message!")
+	golog.Log.Error("This is Error message!")
 	// Show the success
-	log.Success("This is Success message!")
+	golog.Log.Success("This is Success message!")
 	// Give the Warning
-	log.Warning("This is Warning message!")
+	golog.Log.Warning("This is Warning message!")
 	// Notice
-	log.Notice("This is Notice message!")
+	golog.Log.Notice("This is Notice message!")
 	// Show the info
-	log.Info("This is Info message, Fatal & Panic skipped!")
+	golog.Log.Info("This is Info message, Fatal & Panic skipped!")
 	// Debug
-	log.Debug("This is Debug message!")
+	golog.Log.Debug("This is Debug message!")
 }
 
 func main() {
 	// Get the instance for logger class
 	// Third option is optional and is instance of type io.Writer, defaults to os.Stderr
 	println("\nProduction Output: as Log")
-	log, err := golog.NewLogger(&golog.Options{Module: "prod-example"})
-	if err != nil {
-		panic(err) // Check for error
-	}
-	log.SetEnvironment(golog.EnvProduction)
-	doLogs(log)
+	golog.Log.SetModuleName("prod-example")
+	golog.Log.SetEnvironment(golog.EnvProduction)
+	doLogs()
 
 	println("\nProduction Output: as JSON")
-	log.UseJSONForProduction()
-	doLogs(log)
+	golog.Log.UseJSONForProduction()
+	doLogs()
 
 	println("\nTest/QA Output:")
-	log, err = golog.NewLogger(&golog.Options{Module: "qa-example"})
-	if err != nil {
-		panic(err) // Check for error
-	}
-	log.SetEnvironment(golog.EnvQuality)
-	doLogs(log)
+	golog.Log.SetModuleName("qa-example")
+	golog.Log.SetEnvironment(golog.EnvQuality)
+	doLogs()
 
 	println("\nDevelopment Output:")
-	log, err = golog.NewLogger(&golog.Options{Module: "dev-example"})
-	if err != nil {
-		panic(err) // Check for error
-	}
-	log.SetEnvironment(golog.EnvDevelopment)
-	doLogs(log)
+	golog.Log.SetModuleName("dev-example")
+	golog.Log.SetEnvironment(golog.EnvDevelopment)
+	doLogs()
 }
