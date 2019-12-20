@@ -27,13 +27,13 @@ const (
 	// %[8] // %{message}
 
 	// FmtDefault is the default log format (QA)
-	FmtDefault = "[%.16[3]s] #%[1]d %.19[2]s %.3[7]s %[8]s"
+	FmtDefault = "[%.16[3]s] #%[1]d %.19[2]s %-3[7]s %[8]s"
 	// FmtProductionLog is the built-in production log format
-	FmtProductionLog = "[%.16[3]s] %.19[2]s %.3[7]s - %[8]s"
+	FmtProductionLog = "[%.16[3]s] %.19[2]s %-3[7]s - %[8]s"
 	// FmtProductionJSON is the built-in production json format
 	FmtProductionJSON = "{\"%.16[3]s\",\"%[5]s\",\"%[6]d\",\"%[4]s\",\"%[1]d\",\"%.19[2]s\",\"%[7]s\",\"%[8]s\"}"
 	// FmtDevelopmentLog is the built-in development log format
-	FmtDevelopmentLog = "[%.16[3]s] %.19[2]s %.3[7]s - %[5]s#%[6]d-%[4]s - %[8]s"
+	FmtDevelopmentLog = "[%.16[3]s] %.19[2]s %-3[7]s - %[5]s#%[6]d-%[4]s - %[8]s"
 
 	// Error, Fatal, Critical Format
 	//defErrorLogFmt = "\n%.8[7]s\nin %.16[3]s->%[4]s() file %[5]s on line %[6]d\n%[8]s\n"
