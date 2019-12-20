@@ -319,12 +319,12 @@ func TestLogLevel(t *testing.T) {
 			"Error logging",
 		},
 		{
-			SuccessLevel,
-			"Success logging",
-		},
-		{
 			WarningLevel,
 			"Warning logging",
+		},
+		{
+			SuccessLevel,
+			"Success logging",
 		},
 		{
 			NoticeLevel,
@@ -343,23 +343,23 @@ func TestLogLevel(t *testing.T) {
 	var buf bytes.Buffer
 
 	log, err := NewLogger(&Options{
-		Module:      "pkgname",
 		Out:         &buf,
-		Environment: 0,
+		Environment: EnvDevelopment,
 		UseColor:    ClrNotSet,
 	})
 	if err != nil || log == nil {
 		t.Error(err)
 		return
 	}
+	log.SetModuleName("pkgname")
 
 	for i, test := range tests {
 		log.SetLogLevel(test.level)
 
 		log.Critical("Log Critical")
 		log.Error("Log Error")
-		log.Success("Log Success")
 		log.Warning("Log Warning")
+		log.Success("Log Success")
 		log.Notice("Log Notice")
 		log.Info("Log Info")
 		log.Debug("Log Debug")
@@ -367,7 +367,7 @@ func TestLogLevel(t *testing.T) {
 		// Count output lines from logger
 		count := strings.Count(buf.String(), "\n")
 		if i+1 != count {
-			t.Error()
+			t.Errorf("Log events expected %d have %d", i+1, count)
 		}
 		buf.Reset()
 	}
