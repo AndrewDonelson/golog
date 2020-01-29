@@ -182,6 +182,13 @@ Run:
   - `go test -v .` to run test on logger.
   - `go test -bench .` for benchmarks.
 
+## Benchmarks
+
+```
+BenchmarkLoggerNew-12             500000              4557 ns/op
+BenchmarkLoggerNewLogger-12       500000              4323 ns/op
+```
+
 ## Usage
 
   - make           # everything
