@@ -229,13 +229,10 @@ func (l *Logger) SetEnvironmentFromString(env string) {
 	switch env {
 	case "dev":
 		l.SetEnvironment(EnvDevelopment)
-		break
 	case "qa":
 		l.SetEnvironment(EnvQuality)
-		break
 	default:
 		l.SetEnvironment(EnvProduction)
-		break
 	}
 }
 
