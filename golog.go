@@ -4,15 +4,17 @@ package golog
 
 // Import packages
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path"
 	"runtime"
+	"strings"
 	"sync/atomic"
 	"time"
-	"log"
 )
 
 const (
@@ -94,13 +96,13 @@ type Logger struct {
 }
 
 func init() {
-	var	err	error
+	var err error
 
 	Log, err = NewLogger(nil)
 	if err != nil {
 		// Removed panic as program execution should not halt for alog issue. Replaced with
 		// golang log Fatal event for developer to recitfy.
-		log.Fatalf("golog:init error: %v", err)		
+		log.Fatalf("golog:init error: %v", err)
 	}
 	//Log.Printf("Default Log intialized for %s", Log.Options.EnvAsString())
 }
@@ -135,7 +137,6 @@ func NewLogger(opts *Options) (*Logger, error) {
 func (l *Logger) init() {
 	l.timeReset()
 	l.started = l.timer
-	l.SetEnvironment(detectEnvironment(true))
 	initColors()
 	initFormatPlaceholders()
 }
@@ -155,7 +156,7 @@ func (l *Logger) timeLog(name string) {
 // logInternal ...
 func (l *Logger) logInternal(lvl LogLevel, pos int, a ...interface{}) {
 	_, filename, line, _ := runtime.Caller(pos)
-	msg := fmt.Sprintf("%v",a...)
+	msg := fmt.Sprintf("%v", a...)
 	filename = path.Base(filename)
 	info := &Info{
 		ID:       atomic.AddUint64(&logNo, 1),
@@ -173,7 +174,7 @@ func (l *Logger) logInternal(lvl LogLevel, pos int, a ...interface{}) {
 
 func (l *Logger) traceInternal(pos int, a ...interface{}) {
 	function, file, line := getCaller(pos)
-	msg := fmt.Sprintf("%v",a...)
+	msg := fmt.Sprintf("%v", a...)
 	file = path.Base(file)
 	info := &Info{
 		ID:       atomic.AddUint64(&logNo, 1),
@@ -222,6 +223,22 @@ func (l *Logger) SetEnvironment(env Environment) {
 	}
 }
 
+// SetEnvironmentFromString is used to manually set the log environment to either development, testing or production
+func (l *Logger) SetEnvironmentFromString(env string) {
+	env = strings.ToLower(env)
+	switch env {
+	case "dev":
+		l.SetEnvironment(EnvDevelopment)
+		break
+	case "qa":
+		l.SetEnvironment(EnvQuality)
+		break
+	default:
+		l.SetEnvironment(EnvProduction)
+		break
+	}
+}
+
 // SetOutput is used to manually set the output to send log data
 func (l *Logger) SetOutput(out io.Writer) {
 	l.Options.Out = out
@@ -240,6 +257,16 @@ func (l *Logger) Log(lvl LogLevel, a ...interface{}) {
 	l.logInternal(lvl, 2, a...)
 }
 
+// PrettyPrint is used to display any type nicely in the log output
+func (l *Logger) PrettyPrint(v interface{}) string {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return ""
+	}
+
+	return fmt.Sprintf("\n%s\n", string(b))
+}
+
 // Trace is a basic timing function that will log InfoLevel duration of name
 func (l *Logger) Trace(name, file string, line int) {
 	l.timeReset()
@@ -248,7 +275,7 @@ func (l *Logger) Trace(name, file string, line int) {
 
 // Panic is just like func l.Critical except that it is followed by a call to panic
 func (l *Logger) Panic(a ...interface{}) {
-	msg := fmt.Sprintf("%v",a...)
+	msg := fmt.Sprintf("%v", a...)
 	l.logInternal(CriticalLevel, 2, a...)
 	if l.worker.GetEnvironment() == EnvTesting {
 		return
