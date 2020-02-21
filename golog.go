@@ -296,7 +296,7 @@ func (l *Logger) Fatal(a ...interface{}) {
 	if l.worker.GetEnvironment() == EnvTesting {
 		return
 	}
-	os.Exit(1)
+	os.Exit(0)
 }
 
 // FatalE logs a error at Fatallevel
