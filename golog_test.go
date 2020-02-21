@@ -26,15 +26,15 @@ func TestAdvancedFormat(t *testing.T) {
 	}
 
 	format :=
-		"text123 %{id} " + 										// text and digits before id
-			"!@#$% %{time:Monday, 2006 Jan 01, 15:04:05} " + 	// symbols before time with spec format
-			"a{b %{module} " + 									// brace with text that should be just text before verb
-			"a}b %{filename} " + 								// brace with text that should be just text before verb
-			"%% %{file} " + 									// percent symbols before verb
-			"%{%{line} " + 										// percent symbol with brace before verb w/o space
-			"%{nonex_verb} %{lvl} " + 							// nonexistent verb berfore real verb
-			"%{incorr_verb %{level} " + 						// incorrect verb before real verb
-			"%{} [%{message}]" 									// empty verb before message in sq brackets
+		"text123 %{id} " + // text and digits before id
+			"!@#$% %{time:Monday, 2006 Jan 01, 15:04:05} " + // symbols before time with spec format
+			"a{b %{module} " + // brace with text that should be just text before verb
+			"a}b %{filename} " + // brace with text that should be just text before verb
+			"%% %{file} " + // percent symbols before verb
+			"%{%{line} " + // percent symbol with brace before verb w/o space
+			"%{nonex_verb} %{lvl} " + // nonexistent verb berfore real verb
+			"%{incorr_verb %{level} " + // incorrect verb before real verb
+			"%{} [%{message}]" // empty verb before message in sq brackets
 	log.SetFormat(format)
 	log.Error("This is Error!")
 	now := time.Now()
@@ -94,17 +94,17 @@ func TestAdvancedFormat(t *testing.T) {
 // }
 func TestBuildEnvironments(t *testing.T) {
 	os.Setenv("BUILD_ENV", "dev")
-	if detectEnvironment(false) != EnvDevelopment {
+	if detectEnvironment() != EnvDevelopment {
 		t.Error("Failed to SetEnvironment to EnvDevelopment")
 	}
 
 	os.Setenv("BUILD_ENV", "qa")
-	if detectEnvironment(false) != EnvQuality {
+	if detectEnvironment() != EnvQuality {
 		t.Error("Failed to SetEnvironment to EnvQuality")
 	}
 
 	os.Setenv("BUILD_ENV", "prod")
-	if detectEnvironment(false) != EnvProduction {
+	if detectEnvironment() != EnvProduction {
 		t.Error("Failed to SetEnvironment to EnvProduction")
 	}
 
@@ -212,19 +212,15 @@ func TestNewLogger(t *testing.T) {
 	log.SetLogLevel(DebugLevel)
 
 	// test with standard out
-	log, err = NewLogger(&Options{
-		Module: "test",
-		Out:    &buf,
-	})
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	log.SetOutput(&buf)
+
+	log.SetModuleName("test")
 	if log.Options.Module != "test" {
 		t.Errorf("Unexpected module: %s", log.Options.Module)
 	}
+
 	log.SetFunction("TestLoggerNew")
-	log.SetEnvironment(2)
+	log.SetEnvironment(EnvDevelopment)
 
 	log.Critical("This is a critial message")
 	log.Fatal("This is a Fatal message")
@@ -240,8 +236,8 @@ func TestNewLogger(t *testing.T) {
 
 	log.Criticalf("This is %d %s message", 1, "critical")
 	log.Fatalf("This is %d %s message", 1, "fatal")
-	log.Errorf("This is %d %s message", 1, "error")
 	log.Panicf("This is %d %s message", 1, "panic")
+	log.Errorf("This is %d %s message", 1, "error")
 	log.Successf("This is %d %s message", 1, "success")
 	log.Warningf("This is %d %s message", 1, "warning")
 	log.Noticef("This is %d %s message", 1, "notice")

@@ -28,7 +28,7 @@ func NewWorker(prefix string, flag int, color ColorMode, out io.Writer) *Worker 
 
 // UseJSONForProduction forces using JSON instead of log for production
 func (w *Worker) UseJSONForProduction() {
-	if w.environment == EnvProduction || w.environment == EnvTesting {
+	if w.environment == EnvProduction {
 		w.format = FmtProductionJSON
 	}
 }
@@ -55,34 +55,25 @@ func (w *Worker) GetEnvironment() Environment {
 
 // SetEnvironment is used to manually set the log environment to either development, testing or production
 func (w *Worker) SetEnvironment(env Environment) {
-	if w.environment != EnvTesting {
-		w.environment = env
-	}
 
-	if env == EnvTesting {
-		// set for testing
-		w.level 	= InfoLevel
-		w.format 	= defFmt
-		w.color 	= ClrAuto
-		return
-	} else if env == EnvQuality {
+	if env == EnvQuality {
 		// set for qa
-		w.level 	= InfoLevel
-		w.format 	= defFmt
-		w.color 	= ClrAuto
+		w.level = InfoLevel
+		w.format = defFmt
+		w.color = ClrAuto
 		return
 	} else if env == EnvDevelopment {
 		// set for developer
-		w.level 	= DebugLevel
-		w.format 	= FmtDevelopmentLog
-		w.color 	= ClrAuto
+		w.level = DebugLevel
+		w.format = FmtDevelopmentLog
+		w.color = ClrAuto
 		return
 	}
 
 	// set for production
-	w.level 	= SuccessLevel
-	w.format 	= FmtProductionLog
-	w.color 	= ClrDisabled
+	w.level = SuccessLevel
+	w.format = FmtProductionLog
+	w.color = ClrDisabled
 }
 
 // SetOutput is used to manually set the output to send log data
@@ -111,7 +102,7 @@ func (w *Worker) Log(level LogLevel, calldepth int, info *Info) {
 		buf.Write([]byte(info.Output(w.format)))
 		buf.Write([]byte("\033[0m"))
 		_ = w.Minion.Output(calldepth+1, buf.String())
-		return 
+		return
 	}
 
 	// Regular no color output

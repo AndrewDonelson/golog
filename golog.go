@@ -5,6 +5,7 @@ package golog
 // Import packages
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -126,7 +127,6 @@ func NewLogger(opts *Options) (*Logger, error) {
 	}
 
 	newWorker := NewWorker("", 0, opts.UseColor, opts.Out)
-	newWorker.SetEnvironment(opts.Environment)
 	l := &Logger{worker: newWorker}
 	l.Options = *opts
 	l.init()
@@ -135,6 +135,9 @@ func NewLogger(opts *Options) (*Logger, error) {
 
 // init is called by NewLogger to detect running conditions and set all defaults
 func (l *Logger) init() {
+	// Set Testing flag to TRUE if testing detected
+	l.Options.Testing = (flag.Lookup("test.v") != nil)
+
 	l.timeReset()
 	l.started = l.timer
 	initColors()
@@ -215,12 +218,6 @@ func (l *Logger) SetFunction(name string) {
 func (l *Logger) SetEnvironment(env Environment) {
 	l.Options.Environment = env
 	l.worker.SetEnvironment(env)
-
-	// For testing, schange but reset back to testing
-	if l.worker.GetEnvironment() == EnvTesting {
-		l.worker.SetEnvironment(env)
-		l.worker.SetEnvironment(EnvTesting)
-	}
 }
 
 // SetEnvironmentFromString is used to manually set the log environment to either development, testing or production
@@ -274,7 +271,7 @@ func (l *Logger) Trace(name, file string, line int) {
 func (l *Logger) Panic(a ...interface{}) {
 	msg := fmt.Sprintf("%v", a...)
 	l.logInternal(CriticalLevel, 2, a...)
-	if l.worker.GetEnvironment() == EnvTesting {
+	if l.Options.Testing {
 		return
 	}
 	panic(msg)
@@ -293,7 +290,7 @@ func (l *Logger) Panicf(format string, a ...interface{}) {
 // Fatal is just like func l.Critical logger except that it is followed by exit to program
 func (l *Logger) Fatal(a ...interface{}) {
 	l.logInternal(CriticalLevel, 2, a...)
-	if l.worker.GetEnvironment() == EnvTesting {
+	if l.Options.Testing {
 		return
 	}
 	os.Exit(0)
