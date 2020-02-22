@@ -14,16 +14,15 @@ import (
 
 func TestAdvancedFormat(t *testing.T) {
 	var buf bytes.Buffer
-	log, err := NewLogger(&Options{
-		Module:      "pkgname",
-		Out:         &buf,
-		Environment: EnvDevelopment,
-		UseColor:    ClrNotSet,
-	})
+	log, err := NewLogger(nil)
 	if err != nil || log == nil {
 		t.Error(err)
 		return
 	}
+	log.SetModuleName("pkgname")
+	log.SetOutput(&buf)
+	log.SetEnvironment(EnvDevelopment)
+	log.SetColor(ClrNotSet)
 
 	format :=
 		"text123 %{id} " + // text and digits before id
@@ -39,17 +38,18 @@ func TestAdvancedFormat(t *testing.T) {
 	log.Error("This is Error!")
 	now := time.Now()
 	want := fmt.Sprintf(
-		"[31mtext123 1 "+ //SET TO 1 for running this test alone and SET TO 11 for running as package test
+		"text123 1 "+ //SET TO 1 for running this test alone and SET TO 11 for running as package test
 			"!@#$%% %s "+
 			"a{b pkgname "+
 			"a}b golog_test.go "+
 			"%%%% golog_test.go "+ // it's printf, escaping %, don't forget
-			"%%{39 "+
+			"%%{38 "+
 			" ERR "+
 			"%%{incorr_verb ERROR "+
-			" [This is Error!][0m\n",
+			" [This is Error!]\n",
 		now.Format("Monday, 2006 Jan 01, 15:04:05"),
 	)
+
 	have := buf.String()
 	if want != have {
 		t.Errorf("\nWant: %sHave: %s", want, have)
@@ -275,6 +275,39 @@ func TestNewloggerCustom(t *testing.T) {
 		t.Error("Unexpected error. Wanted valid logger")
 	}
 
+}
+
+func TestPrettyPrint(t *testing.T) {
+	var buf bytes.Buffer
+
+	// Test for no user defined out
+	log, err := NewLogger(NewDefaultOptions())
+	if err != nil {
+		t.Error("Unexpected error. Wanted valid logger")
+	}
+	log.SetLogLevel(DebugLevel)
+
+	// test with standard out
+	log.SetOutput(&buf)
+
+	log.SetModuleName("pretty-print")
+	if log.Options.Module != "pretty-print" {
+		t.Errorf("Unexpected module: %s", log.Options.Module)
+	}
+
+	log.SetFunction("TestPrettyPrint")
+	log.SetEnvironment(EnvDevelopment)
+
+	log.Critical("Options", log.PrettyPrint(log.Options))
+	log.Fatal("Options", log.PrettyPrint(log.Options))
+	log.Panic("Options", log.PrettyPrint(log.Options))
+	log.Error("Options", log.PrettyPrint(log.Options))
+	log.Success("Options", log.PrettyPrint(log.Options))
+	log.Warning("Options", log.PrettyPrint(log.Options))
+	log.Notice("Options", log.PrettyPrint(log.Options))
+	log.Info("Options", log.PrettyPrint(log.Options))
+	log.Debug("Options", log.PrettyPrint(log.Options))
+	log.Print("Options", log.PrettyPrint(log.Options))
 }
 
 func TestColorString(t *testing.T) {
