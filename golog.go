@@ -239,6 +239,12 @@ func (l *Logger) SetOutput(out io.Writer) {
 	l.worker.SetOutput(out)
 }
 
+// SetColor is used to manually set the color mode
+func (l *Logger) SetColor(c ColorMode) {
+	l.Options.UseColor = c
+	l.worker.color = c
+}
+
 // UseJSONForProduction forces using JSON instead of log for production
 func (l *Logger) UseJSONForProduction() {
 	l.worker.UseJSONForProduction()
