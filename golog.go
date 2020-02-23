@@ -4,15 +4,17 @@ package golog
 
 // Import packages
 import (
+	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path"
 	"runtime"
+	"strings"
 	"sync/atomic"
 	"time"
-	"log"
 )
 
 const (
@@ -94,15 +96,7 @@ type Logger struct {
 }
 
 func init() {
-	var	err	error
-
-	Log, err = NewLogger(nil)
-	if err != nil {
-		// Removed panic as program execution should not halt for alog issue. Replaced with
-		// golang log Fatal event for developer to recitfy.
-		log.Fatalf("golog:init error: %v", err)		
-	}
-	//Log.Printf("Default Log intialized for %s", Log.Options.EnvAsString())
+	Log = NewLogger(nil)
 }
 
 // NewLogger creates and returns new logger for the given model & environment
@@ -110,7 +104,7 @@ func init() {
 // environment overrides detected environment (if -1)
 // color defines whether the output is to be colored or not, out is instance of type io.Writer defaults
 // to os.Stderr
-func NewLogger(opts *Options) (*Logger, error) {
+func NewLogger(opts *Options) *Logger {
 	if opts == nil {
 		opts = NewDefaultOptions()
 	}
@@ -124,18 +118,19 @@ func NewLogger(opts *Options) (*Logger, error) {
 	}
 
 	newWorker := NewWorker("", 0, opts.UseColor, opts.Out)
-	newWorker.SetEnvironment(opts.Environment)
 	l := &Logger{worker: newWorker}
 	l.Options = *opts
 	l.init()
-	return l, nil
+	return l
 }
 
 // init is called by NewLogger to detect running conditions and set all defaults
 func (l *Logger) init() {
+	// Set Testing flag to TRUE if testing detected
+	l.Options.Testing = (flag.Lookup("test.v") != nil)
+
 	l.timeReset()
 	l.started = l.timer
-	l.SetEnvironment(detectEnvironment(true))
 	initColors()
 	initFormatPlaceholders()
 }
@@ -155,7 +150,7 @@ func (l *Logger) timeLog(name string) {
 // logInternal ...
 func (l *Logger) logInternal(lvl LogLevel, pos int, a ...interface{}) {
 	_, filename, line, _ := runtime.Caller(pos)
-	msg := fmt.Sprintf("%v",a...)
+	msg := fmt.Sprintf("%v", a...)
 	filename = path.Base(filename)
 	info := &Info{
 		ID:       atomic.AddUint64(&logNo, 1),
@@ -173,7 +168,7 @@ func (l *Logger) logInternal(lvl LogLevel, pos int, a ...interface{}) {
 
 func (l *Logger) traceInternal(pos int, a ...interface{}) {
 	function, file, line := getCaller(pos)
-	msg := fmt.Sprintf("%v",a...)
+	msg := fmt.Sprintf("%v", a...)
 	file = path.Base(file)
 	info := &Info{
 		ID:       atomic.AddUint64(&logNo, 1),
@@ -214,11 +209,18 @@ func (l *Logger) SetFunction(name string) {
 func (l *Logger) SetEnvironment(env Environment) {
 	l.Options.Environment = env
 	l.worker.SetEnvironment(env)
+}
 
-	// For testing, schange but reset back to testing
-	if l.worker.GetEnvironment() == EnvTesting {
-		l.worker.SetEnvironment(env)
-		l.worker.SetEnvironment(EnvTesting)
+// SetEnvironmentFromString is used to manually set the log environment to either development, testing or production
+func (l *Logger) SetEnvironmentFromString(env string) {
+	env = strings.ToLower(env)
+	switch env {
+	case "dev":
+		l.SetEnvironment(EnvDevelopment)
+	case "qa":
+		l.SetEnvironment(EnvQuality)
+	default:
+		l.SetEnvironment(EnvProduction)
 	}
 }
 
@@ -226,6 +228,12 @@ func (l *Logger) SetEnvironment(env Environment) {
 func (l *Logger) SetOutput(out io.Writer) {
 	l.Options.Out = out
 	l.worker.SetOutput(out)
+}
+
+// SetColor is used to manually set the color mode
+func (l *Logger) SetColor(c ColorMode) {
+	l.Options.UseColor = c
+	l.worker.color = c
 }
 
 // UseJSONForProduction forces using JSON instead of log for production
@@ -240,6 +248,16 @@ func (l *Logger) Log(lvl LogLevel, a ...interface{}) {
 	l.logInternal(lvl, 2, a...)
 }
 
+// PrettyPrint is used to display any type nicely in the log output
+func (l *Logger) PrettyPrint(v interface{}) string {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return ""
+	}
+
+	return fmt.Sprintf("\n%s\n", string(b))
+}
+
 // Trace is a basic timing function that will log InfoLevel duration of name
 func (l *Logger) Trace(name, file string, line int) {
 	l.timeReset()
@@ -248,9 +266,9 @@ func (l *Logger) Trace(name, file string, line int) {
 
 // Panic is just like func l.Critical except that it is followed by a call to panic
 func (l *Logger) Panic(a ...interface{}) {
-	msg := fmt.Sprintf("%v",a...)
+	msg := fmt.Sprintf("%v", a...)
 	l.logInternal(CriticalLevel, 2, a...)
-	if l.worker.GetEnvironment() == EnvTesting {
+	if l.Options.Testing {
 		return
 	}
 	panic(msg)
@@ -269,10 +287,10 @@ func (l *Logger) Panicf(format string, a ...interface{}) {
 // Fatal is just like func l.Critical logger except that it is followed by exit to program
 func (l *Logger) Fatal(a ...interface{}) {
 	l.logInternal(CriticalLevel, 2, a...)
-	if l.worker.GetEnvironment() == EnvTesting {
+	if l.Options.Testing {
 		return
 	}
-	os.Exit(1)
+	os.Exit(0)
 }
 
 // FatalE logs a error at Fatallevel
