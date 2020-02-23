@@ -3,23 +3,22 @@
 package golog
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"runtime"
 	"strings"
 )
 
-func detectEnvironment(testing bool) Environment {
-	if testing && flag.Lookup("test.v") != nil {
-		return EnvTesting
-	}
+func detectEnvironment() Environment {
+	be, ok := os.LookupEnv("BUILD_ENV")
+	if ok {
+		be = strings.ToLower(be)
 
-	be := os.Getenv("BUILD_ENV")
-	if be == "dev" {
-		return EnvDevelopment
-	} else if be == "qa" {
-		return EnvQuality
+		if be == "dev" {
+			return EnvDevelopment
+		} else if be == "qa" {
+			return EnvQuality
+		}
 	}
 
 	return EnvProduction

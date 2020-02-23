@@ -17,8 +17,6 @@ type Environment int
 const (
 	// EnvAuto - No Environment set (initial) Will detect by looking for BUILD_ENV os variable
 	EnvAuto Environment = 0 + iota
-	// EnvTesting - Internal, Used with `go test`, `goveralls`, ect
-	EnvTesting
 	// EnvDevelopment - All Log levels, color enabled and extra info on errors
 	EnvDevelopment
 	// EnvQuality - No debug level logging, color enabled, no extra info on errors
@@ -50,13 +48,14 @@ type Options struct {
 	Out         io.Writer   // Where to write output
 	FmtProd     string      // for use with production environment
 	FmtDev      string      // for use with development environment
+	Testing     bool        // This is set to true if go testing is detected
 }
 
 // NewDefaultOptions returns a new Options object with all defaults
 func NewDefaultOptions() *Options {
 	return &Options{
 		Module:      "unknown",
-		Environment: detectEnvironment(true),
+		Environment: detectEnvironment(),
 		UseColor:    ClrAuto,
 		SmartError:  true,
 		Out:         os.Stderr,
@@ -103,7 +102,6 @@ func NewCustomOptions(module string, env Environment, clr ColorMode, SmartError 
 func (o *Options) EnvAsString() string {
 	environments := [...]string{
 		"EvnAuto",
-		"EnvTesting",
 		"EnvDevelopment",
 		"EnvQuality",
 		"EnvProduction",
