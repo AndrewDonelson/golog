@@ -14,14 +14,10 @@ import (
 
 func TestAdvancedFormat(t *testing.T) {
 	var buf bytes.Buffer
-	log, err := NewLogger(nil)
-	if err != nil || log == nil {
-		t.Error(err)
-		return
-	}
-	log.SetModuleName("pkgname")
+	log := NewLogger(nil)
 	log.SetOutput(&buf)
-	log.SetEnvironment(EnvDevelopment)
+	log.SetModuleName("pkgname")
+	log.SetEnvironmentFromString("dev")
 	log.SetColor(ClrNotSet)
 
 	format :=
@@ -43,7 +39,7 @@ func TestAdvancedFormat(t *testing.T) {
 			"a{b pkgname "+
 			"a}b golog_test.go "+
 			"%%%% golog_test.go "+ // it's printf, escaping %, don't forget
-			"%%{38 "+
+			"%%{34 "+
 			" ERR "+
 			"%%{incorr_verb ERROR "+
 			" [This is Error!]\n",
@@ -71,7 +67,7 @@ func TestAdvancedFormat(t *testing.T) {
 
 // func TestLogger_SetFormat(t *testing.T) {
 // 	var buf bytes.Buffer
-// 	log, err := NewLogger(&Options{
+// 	log := NewLogger(&Options{
 // 		Module: "pkgname",
 // 		Out:    &buf,
 // 	})
@@ -108,23 +104,25 @@ func TestBuildEnvironments(t *testing.T) {
 		t.Error("Failed to SetEnvironment to EnvProduction")
 	}
 
-	log, err := NewLogger(&Options{UseColor: ClrDisabled})
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	log := NewLogger(&Options{UseColor: ClrDisabled})
+
+	_ = log.worker.GetEnvironment()
+
 	log.SetEnvironment(EnvAuto)
 	log.SetEnvironment(EnvDevelopment)
 	log.SetEnvironment(EnvQuality)
 	log.SetEnvironment(EnvProduction)
+
+	log.SetEnvironmentFromString("dev")
+	log.SetEnvironmentFromString("qa")
+	log.SetEnvironmentFromString("production")
+
+	log.worker.UseJSONForProduction()
+
 }
 func TestParseFormat(t *testing.T) {
 	// We do this just to initialize the required code on the
-	log, err := NewLogger(nil)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	log := NewLogger(nil)
 	log.SetEnvironment(2)
 
 	msgFmt, tmeFmt := parseFormat("foobar")
@@ -154,11 +152,7 @@ func TestGlobalLogger(t *testing.T) {
 }
 
 func TestLoggerNew(t *testing.T) {
-	log, err := NewLogger(NewDefaultOptions())
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	log := NewLogger(NewDefaultOptions())
 	log.Trace("TestLoggerNew", "golang_test.go", 136)
 
 	if log.Options.Module != "unknown" {
@@ -170,45 +164,25 @@ func TestLoggerNew(t *testing.T) {
 	log.Log(CriticalLevel, "Testing 123")
 
 	// Test for invalid output passed in
-	log, err = NewLogger(&Options{Module: "BadOut", Out: nil})
-	if err != nil || log == nil {
-		t.Error(err)
-		return
-	}
+	log = NewLogger(&Options{Module: "BadOut", Out: nil})
 
 	// Test for Module name to short < 4
-	log, err = NewLogger(&Options{Module: "mod"})
-	if err != nil || log == nil {
-		t.Error(err)
-		return
-	}
+	log = NewLogger(&Options{Module: "mod"})
 
 	// Test for Module name to short < 4
-	log, err = NewLogger(&Options{Module: "mod"})
-	if err != nil || log == nil {
-		t.Error(err)
-		return
-	}
+	log = NewLogger(&Options{Module: "mod"})
 
 	// Test for Module name to short < 4
-	log, err = NewLogger(NewDefaultOptions())
-	if err != nil || log == nil {
-		t.Error(err)
-		return
-	}
+	log = NewLogger(NewDefaultOptions())
 	log.SetEnvironment(EnvProduction)
 	log.UseJSONForProduction()
-
 }
 
 func TestNewLogger(t *testing.T) {
 	var buf bytes.Buffer
 
 	// Test for no user defined out
-	log, err := NewLogger(NewDefaultOptions())
-	if err != nil {
-		t.Error("Unexpected error. Wanted valid logger")
-	}
+	log := NewLogger(NewDefaultOptions())
 	log.SetLogLevel(DebugLevel)
 
 	// test with standard out
@@ -262,7 +236,7 @@ func TestNewLogger(t *testing.T) {
 
 func TestNewloggerCustom(t *testing.T) {
 	var buf bytes.Buffer
-	log, err := NewLogger(NewCustomOptions(
+	log := NewLogger(NewCustomOptions(
 		"modulename",
 		EnvDevelopment,
 		ClrAuto,
@@ -271,20 +245,16 @@ func TestNewloggerCustom(t *testing.T) {
 		FmtDefault,
 		FmtDefault,
 	))
-	if err != nil || log == nil {
+	if log == nil {
 		t.Error("Unexpected error. Wanted valid logger")
 	}
-
 }
 
 func TestPrettyPrint(t *testing.T) {
 	var buf bytes.Buffer
 
 	// Test for no user defined out
-	log, err := NewLogger(NewDefaultOptions())
-	if err != nil {
-		t.Error("Unexpected error. Wanted valid logger")
-	}
+	log := NewLogger(NewDefaultOptions())
 	log.SetLogLevel(DebugLevel)
 
 	// test with standard out
@@ -370,21 +340,15 @@ func TestLogLevel(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
+	log := NewLogger(nil)
 
-	log, err := NewLogger(&Options{
-		Out:         &buf,
-		Environment: EnvDevelopment,
-		UseColor:    ClrNotSet,
-	})
-	if err != nil || log == nil {
-		t.Error(err)
-		return
-	}
 	log.SetModuleName("pkgname")
+	log.SetOutput(&buf)
+	log.SetEnvironment(EnvDevelopment)
+	log.SetColor(ClrNotSet)
 
 	for i, test := range tests {
 		log.SetLogLevel(test.level)
-
 		log.Critical("Log Critical")
 		log.Error("Log Error")
 		log.Warning("Log Warning")
@@ -417,7 +381,7 @@ func TestHandlers(t *testing.T) {
 		buf bytes.Buffer
 	)
 
-	golog, _ = NewLogger(&Options{Module: "test-handlers", Out: &buf})
+	golog = NewLogger(&Options{Module: "test-handlers", Out: &buf})
 	golog.SetEnvironment(EnvDevelopment)
 
 	req, err := http.NewRequest("GET", "/", nil)
@@ -445,10 +409,7 @@ func TestHandlers(t *testing.T) {
 /*********************** BENCHMARKS *****************************/
 func BenchmarkLoggerLog(b *testing.B) {
 	b.StopTimer()
-	log, err := NewLogger(nil)
-	if err != nil {
-		panic(err)
-	}
+	log := NewLogger(nil)
 	log.Options.Module = "BenchLog"
 
 	var tests = []struct {
@@ -495,18 +456,18 @@ func BenchmarkLoggerLog(b *testing.B) {
 
 func BenchmarkLoggerNew(b *testing.B) {
 	for n := 0; n <= b.N; n++ {
-		log, err := NewLogger(nil)
-		if err != nil && log == nil {
-			panic(err)
+		log := NewLogger(nil)
+		if log == nil {
+			panic(fmt.Errorf("BenchmarkLoggerNew failed to create NewLogger"))
 		}
 	}
 }
 
 func BenchmarkLoggerNewLogger(b *testing.B) {
 	for n := 0; n <= b.N; n++ {
-		log, err := NewLogger(nil)
-		if err != nil && log == nil {
-			panic(err)
+		log := NewLogger(nil)
+		if log == nil {
+			panic(fmt.Errorf("BenchmarkLoggerNew failed to create NewLogger"))
 		}
 		log.Options.Module = "BenchNewLogger"
 		log.SetEnvironment(0)

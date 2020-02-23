@@ -55,7 +55,7 @@ func (w *Worker) GetEnvironment() Environment {
 
 // SetEnvironment is used to manually set the log environment to either development, testing or production
 func (w *Worker) SetEnvironment(env Environment) {
-
+	w.environment = env
 	if env == EnvQuality {
 		// set for qa
 		w.level = InfoLevel
@@ -83,8 +83,6 @@ func (w *Worker) SetOutput(out io.Writer) {
 
 // Log Function of Worker class to log a string based on level
 func (w *Worker) Log(level LogLevel, calldepth int, info *Info) {
-	info.Function = w.function
-
 	// Support RawLevel on any environment
 	clr := w.color
 	if level != RawLevel {
@@ -103,6 +101,10 @@ func (w *Worker) Log(level LogLevel, calldepth int, info *Info) {
 		buf.Write([]byte("\033[0m"))
 		_ = w.Minion.Output(calldepth+1, buf.String())
 		return
+	}
+
+	if len(w.function) > 0 {
+		info.Function = w.function
 	}
 
 	// Regular no color output

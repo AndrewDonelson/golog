@@ -8,7 +8,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -97,15 +96,7 @@ type Logger struct {
 }
 
 func init() {
-	var err error
-
-	Log, err = NewLogger(nil)
-	if err != nil {
-		// Removed panic as program execution should not halt for alog issue. Replaced with
-		// golang log Fatal event for developer to recitfy.
-		log.Fatalf("golog:init error: %v", err)
-	}
-	//Log.Printf("Default Log intialized for %s", Log.Options.EnvAsString())
+	Log = NewLogger(nil)
 }
 
 // NewLogger creates and returns new logger for the given model & environment
@@ -113,7 +104,7 @@ func init() {
 // environment overrides detected environment (if -1)
 // color defines whether the output is to be colored or not, out is instance of type io.Writer defaults
 // to os.Stderr
-func NewLogger(opts *Options) (*Logger, error) {
+func NewLogger(opts *Options) *Logger {
 	if opts == nil {
 		opts = NewDefaultOptions()
 	}
@@ -130,7 +121,7 @@ func NewLogger(opts *Options) (*Logger, error) {
 	l := &Logger{worker: newWorker}
 	l.Options = *opts
 	l.init()
-	return l, nil
+	return l
 }
 
 // init is called by NewLogger to detect running conditions and set all defaults
