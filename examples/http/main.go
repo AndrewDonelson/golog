@@ -19,7 +19,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	log, _ = golog.NewLogger(&golog.Options{Module: "dev-http-example"})
+	log = golog.NewLogger(&golog.Options{Module: "dev-http-example"})
 	log.SetEnvironment(golog.EnvDevelopment)
 
 	s := &server{}
