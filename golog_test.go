@@ -164,13 +164,13 @@ func TestLoggerNew(t *testing.T) {
 	log.Log(CriticalLevel, "Testing 123")
 
 	// Test for invalid output passed in
-	log = NewLogger(&Options{Module: "BadOut", Out: nil})
+	_ = NewLogger(&Options{Module: "BadOut", Out: nil})
 
 	// Test for Module name to short < 4
-	log = NewLogger(&Options{Module: "mod"})
+	_ = NewLogger(&Options{Module: "mod"})
 
 	// Test for Module name to short < 4
-	log = NewLogger(&Options{Module: "mod"})
+	_ = NewLogger(&Options{Module: "mod"})
 
 	// Test for Module name to short < 4
 	log = NewLogger(NewDefaultOptions())
