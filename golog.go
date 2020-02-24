@@ -37,13 +37,14 @@ const (
 	// FmtDevelopmentLog is the built-in development log format
 	FmtDevelopmentLog = "[%.16[3]s] %.4[7]s %.19[2]s %[5]s#%[6]d-%[4]s : %[8]s"
 
-	// Error, Fatal, Critical Format
+	// Error, Fatal, Fatal Format
 	//defErrorLogFmt = "\n%.8[7]s\nin %.16[3]s->%[4]s() file %[5]s on line %[6]d\n%[8]s\n"
 )
 
 var (
 	// Log is set y the init function to be a default thelogger
 	Log *Logger
+
 	// Map for the various codes of colors
 	colors map[LogLevel]string
 
@@ -76,14 +77,14 @@ const (
 
 // Log Level. Panic is not included as a level.
 const (
-	RawLevel      = iota + 1 // None
-	CriticalLevel            // Magneta 	35 - Critical & Fatal Levels are same
-	ErrorLevel               // Red 		31
-	WarningLevel             // Yellow 		33
-	SuccessLevel             // Green 		32
-	NoticeLevel              // Cyan 		36
-	InfoLevel                // White 		37
-	DebugLevel               // Blue 		34
+	RawLevel     = iota + 1 // None
+	ErrorLevel              // Red 		31 - Fatal  & Error Levels are same
+	WarningLevel            // Yellow 	33
+	SuccessLevel            // Green 	32
+	NoticeLevel             // Cyan 	36
+	InfoLevel               // White 	37
+	DebugLevel              // Blue 	34
+	TraceLevel              // Magneta	35
 )
 
 // Logger class that is an interface to user to log messages, Module is the module for which we are testing
@@ -174,7 +175,7 @@ func (l *Logger) traceInternal(pos int, a ...interface{}) {
 		ID:       atomic.AddUint64(&logNo, 1),
 		Time:     time.Now().Format(l.worker.timeFormat),
 		Module:   l.Options.Module,
-		Level:    InfoLevel,
+		Level:    TraceLevel,
 		Message:  msg,
 		Filename: file,
 		Line:     line,
@@ -264,29 +265,29 @@ func (l *Logger) Trace(name, file string, line int) {
 	defer l.timeLog(name)
 }
 
-// Panic is just like func l.Critical except that it is followed by a call to panic
+// Panic is just like func l.Fatal except that it is followed by a call to panic
 func (l *Logger) Panic(a ...interface{}) {
 	msg := fmt.Sprintf("%v", a...)
-	l.logInternal(CriticalLevel, 2, a...)
+	l.logInternal(ErrorLevel, 2, a...)
 	if l.Options.Testing {
 		return
 	}
 	panic(msg)
 }
 
-// PanicE logs a error at Criticallevel
+// PanicE logs a error at Fatallevel
 func (l *Logger) PanicE(err error) {
 	l.Panic(err.Error())
 }
 
-// Panicf is just like func l.CriticalF except that it is followed by a call to panic
+// Panicf is just like func l.FatalF except that it is followed by a call to panic
 func (l *Logger) Panicf(format string, a ...interface{}) {
 	l.Panic(fmt.Sprintf(format, a...))
 }
 
-// Fatal is just like func l.Critical logger except that it is followed by exit to program
+// Fatal is just like func l.Fatal logger except that it is followed by exit to program
 func (l *Logger) Fatal(a ...interface{}) {
-	l.logInternal(CriticalLevel, 2, a...)
+	l.logInternal(ErrorLevel, 2, a...)
 	if l.Options.Testing {
 		return
 	}
@@ -298,24 +299,9 @@ func (l *Logger) FatalE(err error) {
 	l.Fatal(err.Error())
 }
 
-// Fatalf is just like func l.CriticalF logger except that it is followed by exit to program
+// Fatalf is just like func l.FatalF logger except that it is followed by exit to program
 func (l *Logger) Fatalf(format string, a ...interface{}) {
 	l.Fatal(fmt.Sprintf(format, a...))
-}
-
-// Critical logs a message at a Critical Level
-func (l *Logger) Critical(a ...interface{}) {
-	l.logInternal(CriticalLevel, 2, a...)
-}
-
-// CriticalE logs a error at Criticallevel
-func (l *Logger) CriticalE(err error) {
-	l.logInternal(CriticalLevel, 2, err.Error())
-}
-
-// Criticalf logs a message at Critical level using the same syntax and options as fmt.Printf
-func (l *Logger) Criticalf(format string, a ...interface{}) {
-	l.logInternal(CriticalLevel, 2, fmt.Sprintf(format, a...))
 }
 
 // Error logs a customer message at Error level
@@ -424,13 +410,13 @@ func (l *Logger) StackAsError(message string) {
 	l.logInternal(ErrorLevel, 2, message+Stack())
 }
 
-// StackAsCritical Prints this goroutine's execution stack as critical with an optional message at the begining
-func (l *Logger) StackAsCritical(message string) {
+// StackAsFatal Prints this goroutine's execution stack as fatal with an optional message at the begining
+func (l *Logger) StackAsFatal(message string) {
 	if message == "" {
 		message = "Stack info"
 	}
 	message += "\n"
-	l.logInternal(CriticalLevel, 2, message+Stack())
+	l.logInternal(ErrorLevel, 2, message+Stack())
 }
 
 // Stack Returns a string with the execution stack for this goroutine

@@ -48,8 +48,8 @@ func main() {
     log.Trace(method, "main.go", 7)
     log.SetFunction(method)
 
-    // Critically log critical
-    log.Critical("This is Critical message!")
+    // Fatally log fatal
+    log.Fatal("This is Fatal message!")
     // Show the error
     log.Error("This is Error message!")
     // Show the success

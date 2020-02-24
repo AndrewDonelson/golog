@@ -161,7 +161,7 @@ func TestLoggerNew(t *testing.T) {
 
 	log.SetFunction("TestLoggerNew")
 	log.SetEnvironment(2)
-	log.Log(CriticalLevel, "Testing 123")
+	log.Log(ErrorLevel, "Testing 123")
 
 	// Test for invalid output passed in
 	_ = NewLogger(&Options{Module: "BadOut", Out: nil})
@@ -196,7 +196,6 @@ func TestNewLogger(t *testing.T) {
 	log.SetFunction("TestLoggerNew")
 	log.SetEnvironment(EnvDevelopment)
 
-	log.Critical("This is a critial message")
 	log.Fatal("This is a Fatal message")
 	log.Panic("This is a Panic message")
 	log.Error("This is a Error message")
@@ -208,7 +207,6 @@ func TestNewLogger(t *testing.T) {
 	log.Print("This is a plain RAW Message")
 	log.Trace("This is a trace message", "golog_test", 211)
 
-	log.Criticalf("This is %d %s message", 1, "critical")
 	log.Fatalf("This is %d %s message", 1, "fatal")
 	log.Panicf("This is %d %s message", 1, "panic")
 	log.Errorf("This is %d %s message", 1, "error")
@@ -221,17 +219,16 @@ func TestNewLogger(t *testing.T) {
 
 	testErr := fmt.Errorf("Test Error")
 	log.PanicE(testErr)
-	log.CriticalE(testErr)
 	log.FatalE(testErr)
 	log.ErrorE(testErr)
 	log.DebugE(testErr)
 	log.WarningE(testErr)
 
 	log.StackAsError("")
-	log.StackAsCritical("")
+	log.StackAsFatal("")
 
 	log.StackAsError("Stack as Error")
-	log.StackAsCritical("Stack as Critical")
+	log.StackAsFatal("Stack as Fatal")
 }
 
 func TestNewloggerCustom(t *testing.T) {
@@ -268,7 +265,6 @@ func TestPrettyPrint(t *testing.T) {
 	log.SetFunction("TestPrettyPrint")
 	log.SetEnvironment(EnvDevelopment)
 
-	log.Critical("Options", log.PrettyPrint(log.Options))
 	log.Fatal("Options", log.PrettyPrint(log.Options))
 	log.Panic("Options", log.PrettyPrint(log.Options))
 	log.Error("Options", log.PrettyPrint(log.Options))
@@ -310,10 +306,6 @@ func TestLogLevel(t *testing.T) {
 		message string
 	}{
 		{
-			CriticalLevel,
-			"Critical Logging",
-		},
-		{
 			ErrorLevel,
 			"Error logging",
 		},
@@ -349,13 +341,13 @@ func TestLogLevel(t *testing.T) {
 
 	for i, test := range tests {
 		log.SetLogLevel(test.level)
-		log.Critical("Log Critical")
 		log.Error("Log Error")
 		log.Warning("Log Warning")
 		log.Success("Log Success")
 		log.Notice("Log Notice")
 		log.Info("Log Info")
 		log.Debug("Log Debug")
+		//log.Trace("Log Trace", "golog_test", 348)
 
 		// Count output lines from logger
 		count := strings.Count(buf.String(), "\n")
@@ -417,8 +409,8 @@ func BenchmarkLoggerLog(b *testing.B) {
 		message string
 	}{
 		{
-			CriticalLevel,
-			"Critical Logging",
+			TraceLevel,
+			"Trace Logging",
 		},
 		{
 			ErrorLevel,
