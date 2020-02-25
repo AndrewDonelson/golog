@@ -34,10 +34,10 @@ func TestNewInfo(t *testing.T) {
 		Filename: filename,
 		Line:     line,
 	}
-	log.worker.Log(CriticalLevel, 2, info)
+	log.worker.Log(ErrorLevel, 2, info)
 
 	// "[35munknown 2019-10-15 19:20:51 INF - Hello World![0m"
-	want := fmt.Sprintf("[35m[unknown] #97 %s INFO Hello World![0m\n", time.Now().Format("2006-01-02 15:04:05"))
+	want := fmt.Sprintf("[31m[unknown] #80 %s INFO Hello World![0m\n", time.Now().Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)

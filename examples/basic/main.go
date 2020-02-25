@@ -9,20 +9,22 @@ func doLogs() {
 	golog.Log.Trace(method, "main.go", 7)
 	golog.Log.SetFunction(method)
 
-	// Critically log critical
-	golog.Log.Critical("This is Critical message!")
+	// Fatally log
+	golog.Log.Fatal("This is Fatal message!")
 	// Show the error
 	golog.Log.Error("This is Error message!")
-	// Show the success
-	golog.Log.Success("This is Success message!")
 	// Give the Warning
 	golog.Log.Warning("This is Warning message!")
+	// Show the success
+	golog.Log.Success("This is Success message!")
 	// Notice
 	golog.Log.Notice("This is Notice message!")
 	// Show the info
 	golog.Log.Info("This is Info message, Fatal & Panic skipped!")
 	// Debug
 	golog.Log.Debug("This is Debug message!")
+
+	golog.Log.Trace("This is Trace message!", "main.go", 13)
 }
 
 func main() {

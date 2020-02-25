@@ -55,13 +55,13 @@ func (r *Info) Output(format string) string {
 func (r *Info) logLevelString() string {
 	logLevels := [...]string{
 		"RAW",
-		"CRITICAL",
 		"ERROR",
-		"SUCCESS",
 		"WARNING",
+		"SUCCESS",
 		"NOTICE",
 		"INFO",
 		"DEBUG",
+		"TRACE",
 	}
 	return logLevels[r.Level-1]
 }
