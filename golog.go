@@ -79,12 +79,12 @@ const (
 const (
 	RawLevel     = iota + 1 // None
 	ErrorLevel              // Red 		31 - Fatal  & Error Levels are same
+	TraceLevel              // Magneta	35
 	WarningLevel            // Yellow 	33
 	SuccessLevel            // Green 	32
 	NoticeLevel             // Cyan 	36
 	InfoLevel               // White 	37
 	DebugLevel              // Blue 	34
-	TraceLevel              // Magneta	35
 )
 
 // Logger class that is an interface to user to log messages, Module is the module for which we are testing
