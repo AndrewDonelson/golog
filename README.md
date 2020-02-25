@@ -178,24 +178,26 @@ Invalid verbs (like ```%{inv-verb```) will be treated as plain text.
 ## Tests
 
 Run:
-
-  - `go test -v .` to run test on logger.
-  - `go test -bench .` for benchmarks.
+```sh
+go test -v .` to run test on logger.
+go test -bench .` for benchmarks.
+```
 
 ## Benchmarks
 
-```
+```text
 BenchmarkLoggerNew-12             500000              4557 ns/op
 BenchmarkLoggerNewLogger-12       500000              4323 ns/op
 ```
 
 ## Usage
-
-  - make           # everything
-  - make test      # just run tests
-  - make bencH     # just run benchmarks
-  - make build     # just build examples
-  - make run       # just run examples
+```sh
+make           # everything
+make test      # just run tests
+make bencH     # just run benchmarks
+make build     # just build examples
+make run       # just run examples
+```
 
 ## Thanks
 
@@ -204,9 +206,9 @@ I'd like to thank all out there which helped with go-logging.
 
 Following contributors have made major contributions to go-logger:
 
-- [@qioalice](https://github.com/qioalice)
-- [@gjvnq](https://github.com/gjvnq)
-- [@maezen](https://github.com/maezen)
+  - [@qioalice](https://github.com/qioalice)
+  - [@gjvnq](https://github.com/gjvnq)
+  - [@maezen](https://github.com/maezen)
 
 ## License
 
