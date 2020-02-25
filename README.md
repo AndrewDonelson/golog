@@ -206,9 +206,9 @@ I'd like to thank all out there which helped with go-logging.
 
 Following contributors have made major contributions to go-logger:
 
-  - [@qioalice](https://github.com/qioalice)
-  - [@gjvnq](https://github.com/gjvnq)
-  - [@maezen](https://github.com/maezen)
+[@qioalice](https://github.com/qioalice)
+[@gjvnq](https://github.com/gjvnq)
+[@maezen](https://github.com/maezen)
 
 ## License
 
