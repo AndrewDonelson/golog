@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"runtime"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -18,23 +17,33 @@ import (
 
 const (
 	// Default format of log message
-	// %[1] // %{id}
-	// %[2] // %{time[:fmt]}
-	// %[3] // %{module}
-	// %[4] // %{function}
-	// %[5] // %{filename}
-	// %[6] // %{line}
-	// %[7] // %{level}
-	// %[8] // %{message}
+	// "%{id}":         "%[1]d",
+	// "%{time}":       "%[2]s",
+	// "%{module}":     "%[3]s",
+	// "%{function}":   "%[4]s",
+	// "%{filename}":   "%[5]s",
+	// "%{file}":       "%[5]s",
+	// "%{line}":       "%[6]d",
+	// "%{level}":      "%[7]s",
+	// "%{lvl}":        "%.3[7]s",
+	// "%{message}":    "%[8]s",
+	// "%{duration}":   "%[9]s",
+	// "%{method}":     "%[10]s",
+	// "%{statuscode}": "%[11]d",
+	// "%{route}":      "%[12]s",
 
-	// FmtDefault is the default log format (QA)
-	FmtDefault = "[%.16[3]s] #%[1]d %.19[2]s %.4[7]s %[8]s"
+	// FmtDefault is the default log format
+	FmtDefault = "[%[1]d] [%.16[3]s] %.4[7]s %.19[2]s %[5]s#%[6]d-%[4]s : %[8]s"
+
 	// FmtProductionLog is the built-in production log format
-	FmtProductionLog = "[%.16[3]s] %.19[2]s %.4[7]s - %[8]s"
+	//FmtProductionLog = "[%.16[3]s] %.19[2]s %.4[7]s - %[8]s"
+	FmtProductionLog = FmtDefault
+
 	// FmtProductionJSON is the built-in production json format
 	FmtProductionJSON = "{\"%.16[3]s\",\"%[5]s\",\"%[6]d\",\"%[4]s\",\"%[1]d\",\"%.19[2]s\",\"%[7]s\",\"%[8]s\"}"
+
 	// FmtDevelopmentLog is the built-in development log format
-	FmtDevelopmentLog = "[%.16[3]s] %.4[7]s %.19[2]s %[5]s#%[6]d-%[4]s : %[8]s"
+	FmtDevelopmentLog = FmtDefault
 
 	// Error, Fatal, Fatal Format
 	//defErrorLogFmt = "\n%.8[7]s\nin %.16[3]s->%[4]s() file %[5]s on line %[6]d\n%[8]s\n"
@@ -149,7 +158,14 @@ func (l *Logger) timeLog(name string) {
 
 // logInternal ...
 func (l *Logger) logInternal(lvl LogLevel, pos int, a ...interface{}) {
-	_, filename, line, _ := runtime.Caller(pos)
+	var (
+		function, filename string
+		line               int
+	)
+
+	function, filename, line = GetCaller(pos)
+	//_, filename, line, _ := runtime.Caller(pos)
+
 	msg := fmt.Sprintf("%v", a...)
 	filename = path.Base(filename)
 	info := &Info{
@@ -160,6 +176,7 @@ func (l *Logger) logInternal(lvl LogLevel, pos int, a ...interface{}) {
 		Message:  msg,
 		Filename: filename,
 		Line:     line,
+		Function: function,
 		Duration: l.timeElapsed(l.timer),
 		//format:   formatString,
 	}
