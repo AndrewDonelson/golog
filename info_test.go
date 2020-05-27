@@ -37,7 +37,8 @@ func TestNewInfo(t *testing.T) {
 	log.worker.Log(ErrorLevel, 2, info)
 
 	// "[35munknown 2019-10-15 19:20:51 INF - Hello World![0m"
-	want := fmt.Sprintf("[31m[unknown] #80 %s INFO Hello World![0m\n", time.Now().Format("2006-01-02 15:04:05"))
+	//want := fmt.Sprintf("[31m[unknown] #80 %s INFO Hello World![0m\n", time.Now().Format("2006-01-02 15:04:05"))
+	want := fmt.Sprintf("[31m[000080] [unknown] INFO %s testing.go#909-testing.tRunner : Hello World![0m\n", time.Now().Format("2006-01-02 15:04:05"))
 	have := buf.String()
 	if have != want {
 		t.Errorf("\nWant: %sHave: %s", want, have)

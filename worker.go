@@ -30,6 +30,7 @@ func NewWorker(prefix string, flag int, color ColorMode, out io.Writer) *Worker 
 func (w *Worker) UseJSONForProduction() {
 	if w.environment == EnvProduction {
 		w.format = FmtProductionJSON
+		w.color = ClrDisabled
 	}
 }
 
@@ -59,7 +60,7 @@ func (w *Worker) SetEnvironment(env Environment) {
 	if env == EnvQuality {
 		// set for qa
 		w.level = InfoLevel
-		w.format = defFmt
+		w.format = FmtDefault
 		w.color = ClrAuto
 		return
 	} else if env == EnvDevelopment {
@@ -73,7 +74,7 @@ func (w *Worker) SetEnvironment(env Environment) {
 	// set for production
 	w.level = SuccessLevel
 	w.format = FmtProductionLog
-	w.color = ClrDisabled
+	w.color = ClrAuto
 }
 
 // SetOutput is used to manually set the output to send log data
@@ -83,6 +84,12 @@ func (w *Worker) SetOutput(out io.Writer) {
 
 // Log Function of Worker class to log a string based on level
 func (w *Worker) Log(level LogLevel, calldepth int, info *Info) {
+
+	// Make sure LogNumber is < 999,999, reset
+	if logNo > MaxLogID {
+		logNo = 1
+	}
+
 	// Support RawLevel on any environment
 	clr := w.color
 	if level != RawLevel {

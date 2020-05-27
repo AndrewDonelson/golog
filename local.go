@@ -3,8 +3,10 @@
 package golog
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 	"runtime"
 	"strings"
 )
@@ -129,7 +131,8 @@ func initFormatPlaceholders() {
 	}
 }
 
-func getCaller(skipLevels int) (function, file string, line int) {
+// GetCaller helper function to get the function name, filename and line number
+func GetCaller(skipLevels int) (function, file string, line int) {
 	fpcs := make([]uintptr, 1)
 	// Skip `skipLevels` levels to get the caller
 	n := runtime.Callers(skipLevels, fpcs)
@@ -142,4 +145,33 @@ func getCaller(skipLevels int) (function, file string, line int) {
 	}
 
 	return
+}
+
+// Stack Returns a string with the execution stack for this goroutine
+func Stack() string {
+	buf := make([]byte, 1000000)
+	runtime.Stack(buf, false)
+	return string(buf)
+}
+
+// PrettyPrint is used to display any type nicely in the log output
+func PrettyPrint(v interface{}) string {
+
+	name := GetType(v)
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return ""
+	}
+
+	return fmt.Sprintf("Dump of [%s]:\n%s\n", name, string(b))
+}
+
+// GetType will return the name of the provided interface using reflection
+func GetType(i interface{}) string {
+	t := reflect.TypeOf(i)
+	if t.Kind() == reflect.Ptr {
+		return "*" + t.Elem().Name()
+	}
+
+	return t.Name()
 }
