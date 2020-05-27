@@ -4,14 +4,12 @@ package golog
 
 // Import packages
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path"
-	"reflect"
 	"runtime"
 	"strings"
 	"sync/atomic"
@@ -169,7 +167,7 @@ func (l *Logger) logInternal(lvl LogLevel, pos int, a ...interface{}) {
 }
 
 func (l *Logger) traceInternal(pos int, a ...interface{}) {
-	function, file, line := getCaller(pos)
+	function, file, line := GetCaller(pos)
 	msg := fmt.Sprintf("%v", a...)
 	file = path.Base(file)
 	info := &Info{
@@ -408,33 +406,4 @@ func (l *Logger) StackAsFatal(message string) {
 	}
 	message += "\n"
 	l.logInternal(ErrorLevel, 2, message+Stack())
-}
-
-// Stack Returns a string with the execution stack for this goroutine
-func Stack() string {
-	buf := make([]byte, 1000000)
-	runtime.Stack(buf, false)
-	return string(buf)
-}
-
-// PrettyPrint is used to display any type nicely in the log output
-func PrettyPrint(v interface{}) string {
-
-	name := GetType(v)
-	b, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		return ""
-	}
-
-	return fmt.Sprintf("Dump of [%s]:\n%s\n", name, string(b))
-}
-
-// GetType will return the name of the provided interface using reflection
-func GetType(i interface{}) string {
-	t := reflect.TypeOf(i)
-	if t.Kind() == reflect.Ptr {
-		return "*" + t.Elem().Name()
-	}
-
-	return t.Name()
 }
