@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"reflect"
 	"runtime"
 	"strings"
 	"sync/atomic"
@@ -249,16 +250,6 @@ func (l *Logger) Log(lvl LogLevel, a ...interface{}) {
 	l.logInternal(lvl, 2, a...)
 }
 
-// PrettyPrint is used to display any type nicely in the log output
-func (l *Logger) PrettyPrint(v interface{}) string {
-	b, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		return ""
-	}
-
-	return fmt.Sprintf("\n%s\n", string(b))
-}
-
 // Trace is a basic timing function that will log InfoLevel duration of name
 func (l *Logger) Trace(name, file string, line int) {
 	l.timeReset()
@@ -424,4 +415,26 @@ func Stack() string {
 	buf := make([]byte, 1000000)
 	runtime.Stack(buf, false)
 	return string(buf)
+}
+
+// PrettyPrint is used to display any type nicely in the log output
+func PrettyPrint(v interface{}) string {
+
+	name := GetType(v)
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return ""
+	}
+
+	return fmt.Sprintf("Dump of [%s]:\n%s\n", name, string(b))
+}
+
+// GetType will return the name of the provided interface using reflection
+func GetType(i interface{}) string {
+	t := reflect.TypeOf(i)
+	if t.Kind() == reflect.Ptr {
+		return "*" + t.Elem().Name()
+	}
+
+	return t.Name()
 }
