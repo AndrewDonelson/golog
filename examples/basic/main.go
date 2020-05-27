@@ -33,10 +33,10 @@ func doLogs() {
 	// PrettyPrint log
 	golog.Log.Print(golog.PrettyPrint(golog.Log.Options))
 
+	golog.Log.Trace("This is Trace message!", "main.go", 13)
+
 	// Fatally log
 	golog.Log.Fatal("This is Fatal message!")
-
-	golog.Log.Trace("This is Trace message!", "main.go", 13)
 }
 
 func main() {
