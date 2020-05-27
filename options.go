@@ -17,11 +17,17 @@ type Environment int
 const (
 	// EnvAuto - No Environment set (initial) Will detect by looking for BUILD_ENV os variable
 	EnvAuto Environment = 0 + iota
+
 	// EnvDevelopment - All Log levels, color enabled and extra info on errors
+	// Log only these levels: All
 	EnvDevelopment
+
 	// EnvQuality - No debug level logging, color enabled, no extra info on errors
+	// Log only these levels: Info, Notice, Success, Warning, Error and RAW
 	EnvQuality
+
 	// EnvProduction - Error level & higher, no color, minimum information
+	// Log only these levels: Warning, Error and RAW
 	EnvProduction
 )
 
