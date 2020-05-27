@@ -4,14 +4,12 @@ package golog
 
 // Import packages
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path"
-	"runtime"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -19,26 +17,39 @@ import (
 
 const (
 	// Default format of log message
-	// %[1] // %{id}
-	// %[2] // %{time[:fmt]}
-	// %[3] // %{module}
-	// %[4] // %{function}
-	// %[5] // %{filename}
-	// %[6] // %{line}
-	// %[7] // %{level}
-	// %[8] // %{message}
+	// "%{id}":         "%[1]d",
+	// "%{time}":       "%[2]s",
+	// "%{module}":     "%[3]s",
+	// "%{function}":   "%[4]s",
+	// "%{filename}":   "%[5]s",
+	// "%{file}":       "%[5]s",
+	// "%{line}":       "%[6]d",
+	// "%{level}":      "%[7]s",
+	// "%{lvl}":        "%.3[7]s",
+	// "%{message}":    "%[8]s",
+	// "%{duration}":   "%[9]s",
+	// "%{method}":     "%[10]s",
+	// "%{statuscode}": "%[11]d",
+	// "%{route}":      "%[12]s",
 
-	// FmtDefault is the default log format (QA)
-	FmtDefault = "[%.16[3]s] #%[1]d %.19[2]s %.4[7]s %[8]s"
+	// FmtDefault is the default log format
+	FmtDefault = "[%.6[1]d] [%.16[3]s] %.4[7]s %.19[2]s %[5]s#%[6]d-%[4]s : %[8]s"
+
 	// FmtProductionLog is the built-in production log format
-	FmtProductionLog = "[%.16[3]s] %.19[2]s %.4[7]s - %[8]s"
+	//FmtProductionLog = "[%.16[3]s] %.19[2]s %.4[7]s - %[8]s"
+	FmtProductionLog = FmtDefault
+
 	// FmtProductionJSON is the built-in production json format
 	FmtProductionJSON = "{\"%.16[3]s\",\"%[5]s\",\"%[6]d\",\"%[4]s\",\"%[1]d\",\"%.19[2]s\",\"%[7]s\",\"%[8]s\"}"
+
 	// FmtDevelopmentLog is the built-in development log format
-	FmtDevelopmentLog = "[%.16[3]s] %.4[7]s %.19[2]s %[5]s#%[6]d-%[4]s : %[8]s"
+	FmtDevelopmentLog = FmtDefault
 
 	// Error, Fatal, Fatal Format
 	//defErrorLogFmt = "\n%.8[7]s\nin %.16[3]s->%[4]s() file %[5]s on line %[6]d\n%[8]s\n"
+
+	// MaxLogID is the maximum number for log event ids before resetting to 1
+	MaxLogID = 999999
 )
 
 var (
@@ -150,7 +161,14 @@ func (l *Logger) timeLog(name string) {
 
 // logInternal ...
 func (l *Logger) logInternal(lvl LogLevel, pos int, a ...interface{}) {
-	_, filename, line, _ := runtime.Caller(pos)
+	var (
+		function, filename string
+		line               int
+	)
+
+	function, filename, line = GetCaller(pos)
+	//_, filename, line, _ := runtime.Caller(pos)
+
 	msg := fmt.Sprintf("%v", a...)
 	filename = path.Base(filename)
 	info := &Info{
@@ -161,6 +179,7 @@ func (l *Logger) logInternal(lvl LogLevel, pos int, a ...interface{}) {
 		Message:  msg,
 		Filename: filename,
 		Line:     line,
+		Function: function,
 		Duration: l.timeElapsed(l.timer),
 		//format:   formatString,
 	}
@@ -168,7 +187,7 @@ func (l *Logger) logInternal(lvl LogLevel, pos int, a ...interface{}) {
 }
 
 func (l *Logger) traceInternal(pos int, a ...interface{}) {
-	function, file, line := getCaller(pos)
+	function, file, line := GetCaller(pos)
 	msg := fmt.Sprintf("%v", a...)
 	file = path.Base(file)
 	info := &Info{
@@ -247,16 +266,6 @@ func (l *Logger) UseJSONForProduction() {
 // is the info user wants to log
 func (l *Logger) Log(lvl LogLevel, a ...interface{}) {
 	l.logInternal(lvl, 2, a...)
-}
-
-// PrettyPrint is used to display any type nicely in the log output
-func (l *Logger) PrettyPrint(v interface{}) string {
-	b, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		return ""
-	}
-
-	return fmt.Sprintf("\n%s\n", string(b))
 }
 
 // Trace is a basic timing function that will log InfoLevel duration of name
@@ -417,11 +426,4 @@ func (l *Logger) StackAsFatal(message string) {
 	}
 	message += "\n"
 	l.logInternal(ErrorLevel, 2, message+Stack())
-}
-
-// Stack Returns a string with the execution stack for this goroutine
-func Stack() string {
-	buf := make([]byte, 1000000)
-	runtime.Stack(buf, false)
-	return string(buf)
 }

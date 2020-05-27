@@ -15,7 +15,10 @@ If you would like to help, please do so. Besides the obvious performance tweaks 
 
 ## Preview
 
-[![Example Output](examples/basic/basic.png)](examples/basic/main.go)
+[![Example Output (Development)](examples/basic/basic-dev.png)](examples/basic/main.go)
+[![Example Output (Quality Assurance)](examples/basic/basic-qa.png)](examples/basic/main.go)
+[![Example Output (Production)](examples/basic/basic-prod.png)](examples/basic/main.go)
+[![Example Output (JSON)](examples/basic/basic-json.png)](examples/basic/main.go)
 
 ## Install
 
@@ -48,20 +51,31 @@ func main() {
     log.Trace(method, "main.go", 7)
     log.SetFunction(method)
 
-    // Fatally log fatal
-    log.Fatal("This is Fatal message!")
-    // Show the error
-    log.Error("This is Error message!")
-    // Show the success
-    log.Success("This is Success message!")
-    // Give the Warning
-    log.Warning("This is Warning message!")
-    // Notice
-    log.Notice("This is Notice message!")
-    // Show the info
-    log.Info("This is Info message, Fatal & Panic skipped!")
-    // Debug
-    log.Debug("This is Debug message!")
+	// Debug
+	golog.Log.Debug("This is Debug message!")
+
+	// Show the info
+	golog.Log.Info("This is Info message, Fatal & Panic skipped!")
+
+	// Notice
+	golog.Log.Notice("This is Notice message!")
+
+	// Show the success
+	golog.Log.Success("This is Success message!")
+
+	// Give the Warning
+	golog.Log.Warning("This is Warning message!")
+
+	// Show the error
+	golog.Log.Error("This is Error message!")
+
+	// RAW log
+	golog.Log.Print("This is RAW message!")
+
+	// PrettyPrint log
+	golog.Log.Print(golog.PrettyPrint(golog.Log.Options))
+
+	golog.Log.Trace("This is Trace message!", "main.go", 13)
 }
 ```
 

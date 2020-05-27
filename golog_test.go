@@ -37,9 +37,9 @@ func TestAdvancedFormat(t *testing.T) {
 		"text123 1 "+ //SET TO 1 for running this test alone and SET TO 11 for running as package test
 			"!@#$%% %s "+
 			"a{b pkgname "+
-			"a}b golog_test.go "+
-			"%%%% golog_test.go "+ // it's printf, escaping %, don't forget
-			"%%{34 "+
+			"a}b golog.go "+
+			"%%%% golog.go "+ // it's printf, escaping %, don't forget
+			"%%{169 "+
 			" ERR "+
 			"%%{incorr_verb ERROR "+
 			" [This is Error!]\n",
@@ -160,7 +160,7 @@ func TestLoggerNew(t *testing.T) {
 	}
 
 	log.SetFunction("TestLoggerNew")
-	log.SetEnvironment(2)
+	log.SetEnvironment(EnvQuality)
 	log.Log(ErrorLevel, "Testing 123")
 
 	// Test for invalid output passed in
@@ -265,15 +265,15 @@ func TestPrettyPrint(t *testing.T) {
 	log.SetFunction("TestPrettyPrint")
 	log.SetEnvironment(EnvDevelopment)
 
-	log.Fatal("Options", log.PrettyPrint(log.Options))
-	log.Panic("Options", log.PrettyPrint(log.Options))
-	log.Error("Options", log.PrettyPrint(log.Options))
-	log.Success("Options", log.PrettyPrint(log.Options))
-	log.Warning("Options", log.PrettyPrint(log.Options))
-	log.Notice("Options", log.PrettyPrint(log.Options))
-	log.Info("Options", log.PrettyPrint(log.Options))
-	log.Debug("Options", log.PrettyPrint(log.Options))
-	log.Print("Options", log.PrettyPrint(log.Options))
+	log.Fatal("Options", PrettyPrint(log.Options))
+	log.Panic("Options", PrettyPrint(log.Options))
+	log.Error("Options", PrettyPrint(log.Options))
+	log.Success("Options", PrettyPrint(log.Options))
+	log.Warning("Options", PrettyPrint(log.Options))
+	log.Notice("Options", PrettyPrint(log.Options))
+	log.Info("Options", PrettyPrint(log.Options))
+	log.Debug("Options", PrettyPrint(log.Options))
+	log.Print("Options", PrettyPrint(log.Options))
 }
 
 func TestColorString(t *testing.T) {
