@@ -37,9 +37,9 @@ func TestAdvancedFormat(t *testing.T) {
 		"text123 1 "+ //SET TO 1 for running this test alone and SET TO 11 for running as package test
 			"!@#$%% %s "+
 			"a{b pkgname "+
-			"a}b golog_test.go "+
-			"%%%% golog_test.go "+ // it's printf, escaping %, don't forget
-			"%%{34 "+
+			"a}b golog.go "+
+			"%%%% golog.go "+ // it's printf, escaping %, don't forget
+			"%%{169 "+
 			" ERR "+
 			"%%{incorr_verb ERROR "+
 			" [This is Error!]\n",
@@ -160,7 +160,7 @@ func TestLoggerNew(t *testing.T) {
 	}
 
 	log.SetFunction("TestLoggerNew")
-	log.SetEnvironment(2)
+	log.SetEnvironment(EnvQuality)
 	log.Log(ErrorLevel, "Testing 123")
 
 	// Test for invalid output passed in
