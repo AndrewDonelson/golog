@@ -33,7 +33,7 @@ const (
 	// "%{route}":      "%[12]s",
 
 	// FmtDefault is the default log format
-	FmtDefault = "[%[1]d] [%.16[3]s] %.4[7]s %.19[2]s %[5]s#%[6]d-%[4]s : %[8]s"
+	FmtDefault = "[%.6[1]d] [%.16[3]s] %.4[7]s %.19[2]s %[5]s#%[6]d-%[4]s : %[8]s"
 
 	// FmtProductionLog is the built-in production log format
 	//FmtProductionLog = "[%.16[3]s] %.19[2]s %.4[7]s - %[8]s"
@@ -47,6 +47,9 @@ const (
 
 	// Error, Fatal, Fatal Format
 	//defErrorLogFmt = "\n%.8[7]s\nin %.16[3]s->%[4]s() file %[5]s on line %[6]d\n%[8]s\n"
+
+	// MaxLogID is the maximum number for log event ids before resetting to 1
+	MaxLogID = 999999
 )
 
 var (
