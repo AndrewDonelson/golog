@@ -9,20 +9,32 @@ func doLogs() {
 	golog.Log.Trace(method, "main.go", 7)
 	golog.Log.SetFunction(method)
 
-	// Fatally log
-	golog.Log.Fatal("This is Fatal message!")
-	// Show the error
-	golog.Log.Error("This is Error message!")
-	// Give the Warning
-	golog.Log.Warning("This is Warning message!")
-	// Show the success
-	golog.Log.Success("This is Success message!")
-	// Notice
-	golog.Log.Notice("This is Notice message!")
-	// Show the info
-	golog.Log.Info("This is Info message, Fatal & Panic skipped!")
 	// Debug
 	golog.Log.Debug("This is Debug message!")
+
+	// Show the info
+	golog.Log.Info("This is Info message, Fatal & Panic skipped!")
+
+	// Notice
+	golog.Log.Notice("This is Notice message!")
+
+	// Show the success
+	golog.Log.Success("This is Success message!")
+
+	// Give the Warning
+	golog.Log.Warning("This is Warning message!")
+
+	// Show the error
+	golog.Log.Error("This is Error message!")
+
+	// RAW log
+	golog.Log.Print("This is RAW message!")
+
+	// PrettyPrint log
+	golog.Log.Print(golog.PrettyPrint(golog.Log.Options))
+
+	// Fatally log
+	golog.Log.Fatal("This is Fatal message!")
 
 	golog.Log.Trace("This is Trace message!", "main.go", 13)
 }
