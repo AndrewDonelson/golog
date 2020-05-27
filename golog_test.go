@@ -265,15 +265,15 @@ func TestPrettyPrint(t *testing.T) {
 	log.SetFunction("TestPrettyPrint")
 	log.SetEnvironment(EnvDevelopment)
 
-	log.Fatal("Options", log.PrettyPrint(log.Options))
-	log.Panic("Options", log.PrettyPrint(log.Options))
-	log.Error("Options", log.PrettyPrint(log.Options))
-	log.Success("Options", log.PrettyPrint(log.Options))
-	log.Warning("Options", log.PrettyPrint(log.Options))
-	log.Notice("Options", log.PrettyPrint(log.Options))
-	log.Info("Options", log.PrettyPrint(log.Options))
-	log.Debug("Options", log.PrettyPrint(log.Options))
-	log.Print("Options", log.PrettyPrint(log.Options))
+	log.Fatal("Options", PrettyPrint(log.Options))
+	log.Panic("Options", PrettyPrint(log.Options))
+	log.Error("Options", PrettyPrint(log.Options))
+	log.Success("Options", PrettyPrint(log.Options))
+	log.Warning("Options", PrettyPrint(log.Options))
+	log.Notice("Options", PrettyPrint(log.Options))
+	log.Info("Options", PrettyPrint(log.Options))
+	log.Debug("Options", PrettyPrint(log.Options))
+	log.Print("Options", PrettyPrint(log.Options))
 }
 
 func TestColorString(t *testing.T) {
