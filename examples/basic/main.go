@@ -35,20 +35,17 @@ func doLogs() {
 
 	golog.Log.Trace("This is Trace message!", "main.go", 13)
 
-	// Fatally log
-	golog.Log.Fatal("This is Fatal message!")
+	// Fatally log (skip) halting progam
+	// golog.Log.Fatal("This is Fatal message!")
 }
 
 func main() {
 	// Get the instance for logger class
 	// Third option is optional and is instance of type io.Writer, defaults to os.Stderr
-	println("\nProduction Output: as Log")
-	golog.Log.SetModuleName("prod-example")
-	golog.Log.SetEnvironment(golog.EnvProduction)
-	doLogs()
 
-	println("\nProduction Output: as JSON")
-	golog.Log.UseJSONForProduction()
+	println("\nDevelopment Output:")
+	golog.Log.SetModuleName("dev-example")
+	golog.Log.SetEnvironment(golog.EnvDevelopment)
 	doLogs()
 
 	println("\nTest/QA Output:")
@@ -56,8 +53,12 @@ func main() {
 	golog.Log.SetEnvironment(golog.EnvQuality)
 	doLogs()
 
-	println("\nDevelopment Output:")
-	golog.Log.SetModuleName("dev-example")
-	golog.Log.SetEnvironment(golog.EnvDevelopment)
+	println("\nProduction Output: as Log")
+	golog.Log.SetModuleName("prod-example")
+	golog.Log.SetEnvironment(golog.EnvProduction)
+	doLogs()
+
+	println("\nProduction Output: as JSON")
+	golog.Log.UseJSONForProduction()
 	doLogs()
 }
