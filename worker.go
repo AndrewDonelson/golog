@@ -59,7 +59,7 @@ func (w *Worker) SetEnvironment(env Environment) {
 	if env == EnvQuality {
 		// set for qa
 		w.level = InfoLevel
-		w.format = defFmt
+		w.format = FmtDefault
 		w.color = ClrAuto
 		return
 	} else if env == EnvDevelopment {
@@ -73,7 +73,7 @@ func (w *Worker) SetEnvironment(env Environment) {
 	// set for production
 	w.level = SuccessLevel
 	w.format = FmtProductionLog
-	w.color = ClrDisabled
+	w.color = ClrAuto
 }
 
 // SetOutput is used to manually set the output to send log data
