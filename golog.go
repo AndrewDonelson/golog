@@ -156,7 +156,7 @@ func (l *Logger) timeElapsed(start time.Time) time.Duration {
 }
 
 func (l *Logger) timeLog(name string) {
-	l.logInternal(InfoLevel, 2, fmt.Sprintf("%s took %v", name, l.timeElapsed(l.timer)))
+	l.logInternal(InfoLevel, 4, fmt.Sprintf("%s took %v", name, l.timeElapsed(l.timer)))
 }
 
 // logInternal ...
@@ -167,7 +167,6 @@ func (l *Logger) logInternal(lvl LogLevel, pos int, a ...interface{}) {
 	)
 
 	function, filename, line = GetCaller(pos)
-	//_, filename, line, _ := runtime.Caller(pos)
 
 	msg := fmt.Sprintf("%v", a...)
 	filename = path.Base(filename)
@@ -202,7 +201,7 @@ func (l *Logger) traceInternal(pos int, a ...interface{}) {
 		Duration: l.timeElapsed(l.timer),
 		//format:   formatString,
 	}
-	l.worker.Log(info.Level, 2, info)
+	l.worker.Log(info.Level, pos, info)
 }
 
 // SetModuleName sets the name of the module being logged
@@ -265,7 +264,7 @@ func (l *Logger) UseJSONForProduction() {
 // lvl specifies the degree of the message the user wants to log, message
 // is the info user wants to log
 func (l *Logger) Log(lvl LogLevel, a ...interface{}) {
-	l.logInternal(lvl, 2, a...)
+	l.logInternal(lvl, 4, a...)
 }
 
 // Trace is a basic timing function that will log InfoLevel duration of name
@@ -277,7 +276,7 @@ func (l *Logger) Trace(name, file string, line int) {
 // Panic is just like func l.Fatal except that it is followed by a call to panic
 func (l *Logger) Panic(a ...interface{}) {
 	msg := fmt.Sprintf("%v", a...)
-	l.logInternal(ErrorLevel, 2, a...)
+	l.logInternal(ErrorLevel, 4, a...)
 	if l.Options.Testing {
 		return
 	}
@@ -296,7 +295,7 @@ func (l *Logger) Panicf(format string, a ...interface{}) {
 
 // Fatal is just like func l.Fatal logger except that it is followed by exit to program
 func (l *Logger) Fatal(a ...interface{}) {
-	l.logInternal(ErrorLevel, 2, a...)
+	l.logInternal(ErrorLevel, 4, a...)
 	if l.Options.Testing {
 		return
 	}
@@ -315,22 +314,22 @@ func (l *Logger) Fatalf(format string, a ...interface{}) {
 
 // Error logs a customer message at Error level
 func (l *Logger) Error(a ...interface{}) {
-	l.logInternal(ErrorLevel, 2, a...)
+	l.logInternal(ErrorLevel, 4, a...)
 }
 
 // ErrorE logs a error at Error level
 func (l *Logger) ErrorE(err error) {
-	l.logInternal(ErrorLevel, 2, err.Error())
+	l.logInternal(ErrorLevel, 4, err.Error())
 }
 
 // Errorf logs a message at Error level using the same syntax and options as fmt.Printf
 func (l *Logger) Errorf(format string, a ...interface{}) {
-	l.logInternal(ErrorLevel, 2, fmt.Sprintf(format, a...))
+	l.logInternal(ErrorLevel, 4, fmt.Sprintf(format, a...))
 }
 
 // Warning logs a message at Warning level
 func (l *Logger) Warning(a ...interface{}) {
-	l.logInternal(WarningLevel, 2, a...)
+	l.logInternal(WarningLevel, 4, a...)
 }
 
 // WarningE logs a error at Warning level
@@ -340,42 +339,42 @@ func (l *Logger) WarningE(err error) {
 
 // Warningf logs a message at Warning level using the same syntax and options as fmt.Printf
 func (l *Logger) Warningf(format string, a ...interface{}) {
-	l.logInternal(WarningLevel, 2, fmt.Sprintf(format, a...))
+	l.logInternal(WarningLevel, 4, fmt.Sprintf(format, a...))
 }
 
 // Success logs a message at Success level
 func (l *Logger) Success(a ...interface{}) {
-	l.logInternal(SuccessLevel, 2, a...)
+	l.logInternal(SuccessLevel, 4, a...)
 }
 
 // Successf logs a message at Success level using the same syntax and options as fmt.Printf
 func (l *Logger) Successf(format string, a ...interface{}) {
-	l.logInternal(SuccessLevel, 2, fmt.Sprintf(format, a...))
+	l.logInternal(SuccessLevel, 4, fmt.Sprintf(format, a...))
 }
 
 // Notice logs a message at Notice level
 func (l *Logger) Notice(a ...interface{}) {
-	l.logInternal(NoticeLevel, 2, a...)
+	l.logInternal(NoticeLevel, 4, a...)
 }
 
 // Noticef logs a message at Notice level using the same syntax and options as fmt.Printf
 func (l *Logger) Noticef(format string, a ...interface{}) {
-	l.logInternal(NoticeLevel, 2, fmt.Sprintf(format, a...))
+	l.logInternal(NoticeLevel, 4, fmt.Sprintf(format, a...))
 }
 
 // Info logs a message at Info level
 func (l *Logger) Info(a ...interface{}) {
-	l.logInternal(InfoLevel, 2, a...)
+	l.logInternal(InfoLevel, 4, a...)
 }
 
 // Infof logs a message at Info level using the same syntax and options as fmt.Printf
 func (l *Logger) Infof(format string, a ...interface{}) {
-	l.logInternal(InfoLevel, 2, fmt.Sprintf(format, a...))
+	l.logInternal(InfoLevel, 4, fmt.Sprintf(format, a...))
 }
 
 // Debug logs a message at Debug level
 func (l *Logger) Debug(a ...interface{}) {
-	l.logInternal(DebugLevel, 2, a...)
+	l.logInternal(DebugLevel, 4, a...)
 }
 
 // DebugE logs a error at Debug level
@@ -385,7 +384,7 @@ func (l *Logger) DebugE(err error) {
 
 // Debugf logs a message at Debug level using the same syntax and options as fmt.Printf
 func (l *Logger) Debugf(format string, a ...interface{}) {
-	l.logInternal(DebugLevel, 2, fmt.Sprintf(format, a...))
+	l.logInternal(DebugLevel, 4, fmt.Sprintf(format, a...))
 }
 
 // HandlerLog Traces & logs a message at Debug level for a REST handler
@@ -397,17 +396,17 @@ func (l *Logger) HandlerLog(w http.ResponseWriter, r *http.Request) {
 // HandlerLogf logs a message at Debug level using the same syntax and options as fmt.Printf
 func (l *Logger) HandlerLogf(w http.ResponseWriter, r *http.Request, format string, a ...interface{}) {
 	l.timeReset()
-	defer l.logInternal(DebugLevel, 2, fmt.Sprintf(format, a...))
+	defer l.logInternal(DebugLevel, 4, fmt.Sprintf(format, a...))
 }
 
 // Print logs a message at directly with no level (RAW)
 func (l *Logger) Print(a ...interface{}) {
-	l.logInternal(RawLevel, 2, a...)
+	l.logInternal(RawLevel, 4, a...)
 }
 
 // Printf logs a message at Info level using the same syntax and options as fmt.Printf
 func (l *Logger) Printf(format string, a ...interface{}) {
-	l.logInternal(RawLevel, 2, fmt.Sprintf(format, a...))
+	l.logInternal(RawLevel, 4, fmt.Sprintf(format, a...))
 }
 
 // StackAsError Prints this goroutine's execution stack as an error with an optional message at the begining
@@ -425,5 +424,5 @@ func (l *Logger) StackAsFatal(message string) {
 		message = "Stack info"
 	}
 	message += "\n"
-	l.logInternal(ErrorLevel, 2, message+Stack())
+	l.logInternal(ErrorLevel, 4, message+Stack())
 }
