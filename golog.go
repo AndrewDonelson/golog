@@ -33,7 +33,8 @@ const (
 	// "%{route}":      "%[12]s",
 
 	// FmtDefault is the default log format
-	FmtDefault = "[%.6[1]d] [%.16[3]s] %.4[7]s %.19[2]s %[5]s#%[6]d-%[4]s : %[8]s"
+	//FmtDefault = "[%.6[1]d] [%.16[3]s] %.4[7]s %.19[2]s %[5]s#%[6]d-%[4]s : %[8]s"
+	FmtDefault = "[%.6[1]d] [%.16[3]s] %.4[7]s %.19[2]s %[5]s#%[6]d : %[8]s"
 
 	// FmtProductionLog is the built-in production log format
 	//FmtProductionLog = "[%.16[3]s] %.19[2]s %.4[7]s - %[8]s"
@@ -74,28 +75,16 @@ var (
 // LogLevel type
 type LogLevel int
 
-// Color numbers for stdout
+// colors.
 const (
-	Black = (iota + 30)
-	Red
-	Green
-	Yellow
-	Blue
-	Magenta
-	Cyan
-	White
-)
-
-// Log Level. Panic is not included as a level.
-const (
-	RawLevel     = iota + 1 // None
-	ErrorLevel              // Red 		31 - Fatal  & Error Levels are same
-	TraceLevel              // Magneta	35
-	WarningLevel            // Yellow 	33
-	SuccessLevel            // Green 	32
-	NoticeLevel             // Cyan 	36
-	InfoLevel               // White 	37
-	DebugLevel              // Blue 	34
+	none    = 0
+	red     = 31
+	green   = 32
+	yellow  = 33
+	blue    = 34
+	magneta = 35
+	cyan    = 36
+	white   = 37
 )
 
 // Logger class that is an interface to user to log messages, Module is the module for which we are testing
@@ -105,6 +94,8 @@ type Logger struct {
 	started time.Time // Set once on initialization
 	timer   time.Time // reset on each call to timeElapsed()
 	worker  *Worker
+	Handler Handler
+	Level   Level
 }
 
 func init() {
@@ -145,6 +136,44 @@ func (l *Logger) init() {
 	l.started = l.timer
 	initColors()
 	initFormatPlaceholders()
+}
+
+// The HandlerFunc type is an adapter to allow the use of ordinary functions as
+// log handlers. If f is a function with the appropriate signature,
+// HandlerFunc(f) is a Handler object that calls f.
+type HandlerFunc func(*Entry) error
+
+// HandleLog calls f(e).
+func (f HandlerFunc) HandleLog(e *Entry) error {
+	return f(e)
+}
+
+// Handler is used to handle log events, outputting them to
+// stdio or sending them to remote services. See the "handlers"
+// directory for implementations.
+//
+// It is left up to Handlers to implement thread-safety.
+type Handler interface {
+	HandleLog(*Entry) error
+}
+
+// WithFields returns a new entry with `fields` set.
+func (l *Logger) WithFields(fields Fielder) *Entry {
+	return NewEntry(l).WithFields(fields.Fields())
+}
+
+// WithField returns a new entry with the `key` and `value` set.
+//
+// Note that the `key` should not have spaces in it - use camel
+// case or underscores
+func (l *Logger) WithField(key string, value interface{}) *Entry {
+	return NewEntry(l).WithField(key, value)
+}
+
+// WithDuration returns a new entry with the "duration" field set
+// to the given duration in milliseconds.
+func (l *Logger) WithDuration(d time.Duration) *Entry {
+	return NewEntry(l).WithDuration(d)
 }
 
 func (l *Logger) timeReset() {
