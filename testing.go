@@ -77,7 +77,7 @@ func (api *API) ConsumeV0AuthWLEndpoint(endpoint, sessionID string) ([]byte, err
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Authorization", "Basic YXNoaXNoOmEyNkIpbl5BPyU2V2YhQXNKdw==")
+	req.Header.Add("Authorization", "Basic {SET_YOUR_OWN_JWT}")
 	req.Header.Add("Cookie", sessionID)
 
 	start := time.Now()
@@ -112,7 +112,7 @@ func (api *API) ConsumeV0OAuthEndpoint(endpoint, oAuthUser string) ([]byte, erro
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Authorization", "Basic YXNoaXNoOmEyNkIpbl5BPyU2V2YhQXNKdw==")
+	req.Header.Add("Authorization", "Basic {SET_YOUR_OWN_JWT}")
 	req.Header.Add("Oauth", oAuthUser)
 
 	start := time.Now()
