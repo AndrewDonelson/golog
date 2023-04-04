@@ -12,6 +12,9 @@ import (
 	"time"
 )
 
+//	util.SetGoLogBuildEnv(data.Settings.ServerName, data.Settings.Version, data.Settings.DbCredentialsFile)
+//	golog.Log.SetEnvironment(golog.EnvProduction)
+
 func TestAdvancedFormat(t *testing.T) {
 	var buf bytes.Buffer
 	log := NewLogger(nil)
@@ -82,12 +85,12 @@ func TestAdvancedFormat(t *testing.T) {
 // 	log.Debug("Test")
 // 	//log.SetLogLevel(InfoLevel)
 
-// 	want := fmt.Sprintf("[34m[pkgname] %s DEB - golog_test.go#86-TestLogger_SetFormat - Test[0m\n", time.Now().Format("2006-01-02 15:04:05"))
-// 	have := buf.String()
-// 	if have != want {
-// 		t.Errorf("\nWant: %sHave: %s", want, have)
-// 	}
-// }
+//		want := fmt.Sprintf("[34m[pkgname] %s DEB - golog_test.go#86-TestLogger_SetFormat - Test[0m\n", time.Now().Format("2006-01-02 15:04:05"))
+//		have := buf.String()
+//		if have != want {
+//			t.Errorf("\nWant: %sHave: %s", want, have)
+//		}
+//	}
 func TestBuildEnvironments(t *testing.T) {
 	os.Setenv("BUILD_ENV", "dev")
 	if detectEnvironment() != EnvDevelopment {
