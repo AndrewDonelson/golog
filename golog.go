@@ -32,21 +32,19 @@ const (
 	// "%{statuscode}": "%[11]d",
 	// "%{route}":      "%[12]s",
 
-	// FmtDefault is the default log format
-	FmtDefault = "[%.6[1]d] [%.16[3]s] %.4[7]s %.19[2]s %[5]s#%[6]d-%[4]s : %[8]s"
-
 	// FmtProductionLog is the built-in production log format
-	//FmtProductionLog = "[%.16[3]s] %.19[2]s %.4[7]s - %[8]s"
-	FmtProductionLog = FmtDefault
+	// [000001] [gwfnode] RAW 2023-04-29 07:33:37 golog.go#232 : gwfnode Server [Version 2023.04.28f1.0] (EnvProduction)
+	FmtProductionLog = "[%.6[1]d] [%.16[3]s] %.4[7]s %.19[2]s %[5]s#%[6]d : %[8]s"
 
 	// FmtProductionJSON is the built-in production json format
 	FmtProductionJSON = "{\"%.16[3]s\",\"%[5]s\",\"%[6]d\",\"%[4]s\",\"%[1]d\",\"%.19[2]s\",\"%[7]s\",\"%[8]s\"}"
 
 	// FmtDevelopmentLog is the built-in development log format
-	FmtDevelopmentLog = FmtDefault
+	// [000001] [gwfnode] RAW 2023-04-29 07:33:37 golog.go#232-github.com/NlaakStudiosLLC/io.gwf/sdk/pkgs/util.SetGoLogBuildEnv : gwfnode Server [Version 2023.04.28f1.0] (EnvDevelopment)
+	FmtDevelopmentLog = "[%.6[1]d] [%.16[3]s] %.4[7]s %.19[2]s %[5]s#%[6]d-%[4]s : %[8]s"
 
-	// Error, Fatal, Fatal Format
-	//defErrorLogFmt = "\n%.8[7]s\nin %.16[3]s->%[4]s() file %[5]s on line %[6]d\n%[8]s\n"
+	// FmtDefault is the default log format
+	FmtDefault = FmtProductionLog
 
 	// MaxLogID is the maximum number for log event ids before resetting to 1
 	MaxLogID = 999999

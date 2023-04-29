@@ -60,7 +60,7 @@ func (w *Worker) SetEnvironment(env Environment) {
 	if env == EnvQuality {
 		// set for qa
 		w.level = InfoLevel
-		w.format = FmtDefault
+		w.format = FmtProductionLog
 		w.color = ClrAuto
 		return
 	} else if env == EnvDevelopment {
